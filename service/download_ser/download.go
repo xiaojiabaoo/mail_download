@@ -60,9 +60,13 @@ func Download(param request_model.DownloadParam) error {
 		fmt.Println("获取邮件箱出现错误：" + err.Error())
 		return customErr.New(customErr.SYSTEM_ERROR, "")
 	}
-	seqset.AddRange(1, mbox.Messages)
-	done = make(chan error, mbox.Messages)
-	messages := make(chan *imap.Message, mbox.Messages)
+	lens := mbox.Messages
+	if param.Count > 0 {
+		lens = param.Count
+	}
+	seqset.AddRange(1, lens)
+	done = make(chan error, lens)
+	messages := make(chan *imap.Message, lens)
 	go func() {
 		done <- clients.Fetch(seqset, items, messages)
 	}()
@@ -143,7 +147,6 @@ func body(messages chan *imap.Message, param request_model.DownloadParam, now ti
 							if err != nil {
 								fmt.Println("读取邮件中的附件出现错误，邮件发送日期：" + date.Format("2006-01-02 15:04:05") + "；邮件主题：" + subject + "；附件名称：" + filename + "；错误信息：" + err.Error())
 							} else {
-
 								if strings.Contains(subject, "#") {
 									split := strings.Split(subject, "#")
 									filename = split[1]
@@ -186,7 +189,16 @@ func writeFile(filename string, param request_model.DownloadParam, content []byt
 		err  error
 		now  = time.Now()
 	)
-	param.Url = param.Url + "\\" + date.Format("2006-01-02")
+	switch param.Classify {
+	case "year":
+		param.Url = param.Url + "\\" + fmt.Sprintf(`%d年`, date.Year())
+	case "month":
+		param.Url = param.Url + "\\" + fmt.Sprintf(`%d年`, date.Year()) + "\\" + fmt.Sprintf(`%d月`, date.Month())
+	case "day":
+		param.Url = param.Url + "\\" + fmt.Sprintf(`%d年`, date.Year()) + "\\" + fmt.Sprintf(`%d月`, date.Month()) + "\\" + fmt.Sprintf(`%d日`, date.Day())
+	default:
+		return customErr.New(customErr.FILE_DOWNLOAD_CLASSIFY_ERROR, "")
+	}
 	//检测目录是否存在
 	if !tools.Exists(param.Url) {
 		//创建目录
@@ -257,6 +269,9 @@ func checkParam(param *request_model.DownloadParam) error {
 	}
 	if param.Type != "cover" && param.Type != "jump" && param.Type != "all_reserved" {
 		return customErr.New(customErr.FILE_TYPE_EMPTY_ERROR, "")
+	}
+	if param.Classify != "year" && param.Classify != "month" && param.Classify != "day" {
+		return customErr.New(customErr.FILE_DOWNLOAD_CLASSIFY_ERROR, "")
 	}
 	if param.Url == "" {
 		param.Url = "C:\\mail_file_download"
