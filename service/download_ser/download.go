@@ -7,6 +7,7 @@ import (
 	"github.com/emersion/go-imap/client"
 	"github.com/emersion/go-message/charset"
 	"github.com/emersion/go-message/mail"
+	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"mail_download/model/request_model"
@@ -159,7 +160,7 @@ func body(messages chan *imap.Message, param request_model.DownloadParam, now ti
 								}
 								err = writeFile(filename, param, content, date)
 								if err != nil {
-									errorMsg = append(errorMsg, err.Error())
+									errorMsg = append(errorMsg, "发送日期："+date.Format("2006-01-02 15:04:05")+"；邮件主题："+subject+"；附件名称："+filename+"；错误信息："+err.Error())
 									continue
 									//return err
 								}
@@ -203,8 +204,7 @@ func writeFile(filename string, param request_model.DownloadParam, content []byt
 		//创建目录
 		err = os.MkdirAll(param.Url, os.ModePerm)
 		if err != nil {
-			fmt.Println("创建目录出现错误：" + err.Error())
-			return customErr.New(customErr.SYSTEM_ERROR, "")
+			return errors.New("创建目录出现错误：" + err.Error())
 		}
 	}
 	//如果这个文件存在了，不在保存该同名文件
@@ -218,12 +218,11 @@ func writeFile(filename string, param request_model.DownloadParam, content []byt
 	}
 	file, err = os.Create(files)
 	if err != nil {
-		fmt.Println("创建文件出现错误：" + err.Error())
-		return customErr.New(customErr.SYSTEM_ERROR, "")
+		return errors.New("创建文件出现错误：" + err.Error())
 	}
 	_, err = io.WriteString(file, string(content)) //写入文件(字符串)
 	if err != nil {
-		fmt.Println("写入文件出错：" + err.Error())
+		return errors.New("写入文件出错：" + err.Error())
 	}
 	return nil
 }
