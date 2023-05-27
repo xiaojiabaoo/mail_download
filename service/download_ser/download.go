@@ -21,14 +21,14 @@ import (
 
 func Download(param request_model.DownloadParam) error {
 	var (
-		err      error
-		done     = make(chan error, 1)
-		seqset   = new(imap.SeqSet)
-		clients  = &client.Client{}
-		messages = make(chan *imap.Message, 10)
-		section  = imap.BodySectionName{}
-		items    = []imap.FetchItem{section.FetchItem()}
-		mbox     = &imap.MailboxStatus{}
+		err     error
+		done    = make(chan error, 1)
+		seqset  = new(imap.SeqSet)
+		clients = &client.Client{}
+		section = imap.BodySectionName{}
+		items   = []imap.FetchItem{section.FetchItem()}
+		mbox    = &imap.MailboxStatus{}
+		now     = time.Now()
 	)
 	//校验参数
 	err = checkParam(&param)
@@ -61,16 +61,23 @@ func Download(param request_model.DownloadParam) error {
 		return customErr.New(customErr.SYSTEM_ERROR, "")
 	}
 	seqset.AddRange(1, mbox.Messages)
-	done = make(chan error, 1)
+	done = make(chan error, mbox.Messages)
+	messages := make(chan *imap.Message, mbox.Messages)
 	go func() {
 		done <- clients.Fetch(seqset, items, messages)
 	}()
 	imap.CharsetReader = charset.Reader
-	return body(messages, param.Url, param.Time)
+	return body(messages, param, now)
 }
 
-func body(messages chan *imap.Message, url, times string) error {
-	var index = 1
+func body(messages chan *imap.Message, param request_model.DownloadParam, now time.Time) error {
+	var (
+		index    = 1
+		errorMsg []string
+		texts    string
+		minute   float64
+	)
+	fmt.Println("正在解析加载中，请稍后........")
 	for msg := range messages {
 		var (
 			err     error
@@ -84,26 +91,33 @@ func body(messages chan *imap.Message, url, times string) error {
 			mr, err = mail.CreateReader(text)
 			if err != nil {
 				fmt.Println("创建邮件内容信息对象错误：" + err.Error())
-				return customErr.New(customErr.SYSTEM_ERROR, "")
+				errorMsg = append(errorMsg, "创建邮件内容信息对象出现错误："+err.Error()+"；上一封邮件信息："+texts)
+				continue
+				//return customErr.New(customErr.SYSTEM_ERROR, "")
 			}
 			date, _ = mr.Header.Date()
+			loc, _ := time.LoadLocation("Asia/Shanghai")
+			date = date.In(loc)
 			subject, _ = mr.Header.Subject()
-			if !strings.Contains(subject, "INVOICE") || strings.Contains(subject, "回复") {
+			if !strings.Contains(subject, "INVOICE") || strings.Contains(subject, "回复") ||
+				strings.Contains(subject, "RE:") || strings.Contains(subject, "Re: ") {
 				continue
 			}
 			if !strings.Contains(subject, "#") && !strings.Contains(subject, "/") {
 				continue
 			}
-			if times != "" {
-				dateTime := tools.StrToDateTime(times)
+			if param.Time != "" {
+				dateTime := tools.StrToDateTime(param.Time)
 				unix := dateTime.Unix()
 				if date.Unix() < unix {
 					continue
 				}
 			}
-			fmt.Println(fmt.Sprintf(`%d--发送日期：%s，--主题：%s`, index, date.Format("2006-01-02 15:04:05"), subject))
+			texts = fmt.Sprintf(`%d--发送日期：%s，--主题：%s`, index, date.Format("2006-01-02 15:04:05"), subject)
+			fmt.Println(texts)
 			index++
 			// 处理邮件正文
+			var fileNum uint
 			for {
 				var (
 					part     *mail.Part
@@ -121,10 +135,15 @@ func body(messages chan *imap.Message, url, times string) error {
 					case *mail.AttachmentHeader: // 附件
 						filename, err = header.Filename()
 						if err == nil && filename != "" {
+							fileNum++
+							if fileNum >= 2 {
+								continue
+							}
 							content, err = ioutil.ReadAll(part.Body)
 							if err != nil {
 								fmt.Println("读取邮件中的附件出现错误，邮件发送日期：" + date.Format("2006-01-02 15:04:05") + "；邮件主题：" + subject + "；附件名称：" + filename + "；错误信息：" + err.Error())
 							} else {
+
 								if strings.Contains(subject, "#") {
 									split := strings.Split(subject, "#")
 									filename = split[1]
@@ -136,9 +155,11 @@ func body(messages chan *imap.Message, url, times string) error {
 								if filename == "" {
 									filename = tools.CreateUuid()
 								}
-								err = writeFile(filename+".pdf", url, content, date)
+								err = writeFile(filename, param, content, date)
 								if err != nil {
-									return err
+									errorMsg = append(errorMsg, err.Error())
+									continue
+									//return err
 								}
 							}
 						}
@@ -147,30 +168,44 @@ func body(messages chan *imap.Message, url, times string) error {
 			}
 		}
 	}
-	fmt.Println("------------------------------------所有邮件下载完成------------------------------------")
+	minute = (float64(time.Now().Unix()) - float64(now.Unix())) / 60
+	fmt.Println(fmt.Sprintf(`------------------------------------所有邮件下载完成，总耗时：%v分钟------------------------------------`, minute))
+	if len(errorMsg) >= 1 {
+		fmt.Println("------------------------------------以下是下载附件时记录的报错信息-开始------------------------------------")
+		for k, v := range errorMsg {
+			fmt.Println(fmt.Sprintf("--%d:", k+1) + v)
+		}
+		fmt.Println("------------------------------------以上是下载附件时记录的报错信息-结束------------------------------------")
+	}
 	return nil
 }
 
-func writeFile(filename, url string, content []byte, date time.Time) error {
+func writeFile(filename string, param request_model.DownloadParam, content []byte, date time.Time) error {
 	var (
 		file = &os.File{}
 		err  error
+		now  = time.Now()
 	)
-	url = url + "\\" + date.Format("2006-01-02")
+	param.Url = param.Url + "\\" + date.Format("2006-01-02")
 	//检测目录是否存在
-	if !tools.Exists(url) {
+	if !tools.Exists(param.Url) {
 		//创建目录
-		err = os.MkdirAll(url, os.ModePerm)
+		err = os.MkdirAll(param.Url, os.ModePerm)
 		if err != nil {
 			fmt.Println("创建目录出现错误：" + err.Error())
 			return customErr.New(customErr.SYSTEM_ERROR, "")
 		}
 	}
 	//如果这个文件存在了，不在保存该同名文件
-	if tools.Exists(url + "\\" + filename) {
-		return nil
+	files := param.Url + "\\" + filename + ".pdf"
+	if tools.Exists(files) {
+		if param.Type == "jump" {
+			return nil
+		} else if param.Type == "all_reserved" {
+			files = fmt.Sprintf(`%s_%d.pdf`, param.Url+"\\"+filename+"-副本", now.Unix())
+		}
 	}
-	file, err = os.Create(url + "\\" + filename)
+	file, err = os.Create(files)
 	if err != nil {
 		fmt.Println("创建文件出现错误：" + err.Error())
 		return customErr.New(customErr.SYSTEM_ERROR, "")
@@ -219,6 +254,9 @@ func checkParam(param *request_model.DownloadParam) error {
 	}
 	if param.Password == "" {
 		return customErr.New(customErr.EMAIL_PASSWORD_ERROR, "")
+	}
+	if param.Type != "cover" && param.Type != "jump" && param.Type != "all_reserved" {
+		return customErr.New(customErr.FILE_TYPE_EMPTY_ERROR, "")
 	}
 	if param.Url == "" {
 		param.Url = "C:\\mail_file_download"

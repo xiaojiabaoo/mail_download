@@ -36,6 +36,8 @@ const (
 	EMAIL_LOGIN_ERROR        = 30006
 	DOWNLOAD_URL_ERROR       = 30007
 	DOWNLOAD_TIME_ERROR      = 30008
+	EMAIL_EMPTY_ERROR        = 30009
+	FILE_TYPE_EMPTY_ERROR    = 30010
 )
 
 var ErrText = map[int64]string{
@@ -55,6 +57,8 @@ var ErrText = map[int64]string{
 	EMAIL_LOGIN_ERROR:        "邮箱登录出错！请检查网络是否连接或邮箱信息是否填写正确无误",
 	DOWNLOAD_URL_ERROR:       "检测到当前附件的下载路径是文件，请改为目录",
 	DOWNLOAD_TIME_ERROR:      "下载邮件的时间格式错误",
+	EMAIL_EMPTY_ERROR:        "邮件箱中未获取到邮件信息",
+	FILE_TYPE_EMPTY_ERROR:    "请选择若附件存在同名文件时的操作",
 }
 
 func GetErrMsg(code int64) string {
