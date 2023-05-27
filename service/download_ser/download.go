@@ -87,13 +87,12 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 	imap.CharsetReader = charset.Reader
 	for msg := range messages {
 		var (
-			err     error
-			mr      *mail.Reader
-			subject string
-			date    time.Time
-			section = imap.BodySectionName{}
+			mr       *mail.Reader
+			subject  string
+			date     time.Time
+			sections = imap.BodySectionName{}
 		)
-		text := msg.GetBody(&section)
+		text := msg.GetBody(&sections)
 		if text != nil {
 			mr, err = mail.CreateReader(text)
 			if err != nil {
