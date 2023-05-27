@@ -148,11 +148,11 @@ func body(messages chan *imap.Message, param request_model.DownloadParam, now ti
 								errorMsg = append(errorMsg, "读取邮件中的附件出现错误，邮件发送日期："+date.Format("2006-01-02 15:04:05")+"；邮件主题："+subject+"；附件名称："+filename+"；错误信息："+err.Error())
 							} else {
 								if strings.Contains(subject, "#") {
-									split := strings.Split(subject, "#")
-									filename = split[1]
+									i := strings.Index(subject, "#")
+									filename = strings.ReplaceAll(subject[i+1:], "/", "和")
 								} else if strings.Contains(subject, "/") {
-									split := strings.Split(subject, "/")
-									filename = split[1]
+									i := strings.Index(subject, "/")
+									filename = strings.ReplaceAll(subject[i+1:], "/", "和")
 								}
 								filename = strings.TrimSpace(filename)
 								if filename == "" {
