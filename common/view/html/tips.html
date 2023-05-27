@@ -28,23 +28,26 @@
 <div class="parent">
     <div class="child">
         <div style="margin-top: 30px;"></div>
-        <div style="margin-left: 30px;color: orange;line-height: 22px;">
+        <div style="margin-left: 30px;color: orange;line-height: 25px;">
             <span>
                 1.怎样看程序是否跑完/附件是否下载完：<br>
-                       程序控制台（启动的那个黑板板）会提示：所有邮件下载完成，总耗时：x分钟；<br>
-                       只要有这句话显示，就表示程序已经正常执行完毕，所有附件已经下载完成，并且还显示下载附件总共消耗时间<br>
+                       程序控制台（启动的那个黑板板）会提示文字：所有邮件下载完成，总耗时：xxx分钟；<br>
+                       如果是显示“正在解析加载中”或是一直在刷新程序控制台的信息，即表示程序正在解析下载附件中<br>
+                       只要有这句话显示，就表示程序已经正常执行完毕，所有附件已经下载完成，并且还会显示下载附件总共消耗时间<br>
                2.附件下载中途遇到错误会怎样提示：<br>
-                       附件途中遇到错误会跳过，继续下载后面的附件，具体的错误信息会在正常执行完毕后统一提示<br>
+                       附件途中遇到错误会跳过，继续下载后面的附件，具体的错误信息会在正常执行完毕后统一提示：<br>
+                       错误记录从以“以下是下载附件时记录的报错信息-开始”开始
+                       到以“以上是下载附件时记录的报错信息-结束”结束<br>
                 3.附件全部下载完成需要多久：<br>
                        具体根据邮箱内的所有邮件数量和网络决定，网络越快下载速度也会越快<br>
                        正常网络下，一个附件下载平均速度为0.5秒<br>
-                       8000个附件的下载时间大约是87分钟<br>
+                       下载8000个附件的时间大约是87分钟<br>
             </span>
         </div>
         <div class="layui-form-item" style="margin-top: 20px;margin-left: 20px;">
             <label class="layui-form-label" style="width: 100px;">邮箱服务地址：</label>
             <div class="layui-input-inline">
-                <input style="width: 300px" type="text" name="title" lay-verify="title" autocomplete="off"
+                <input style="width: 300px" type="text" name="server" lay-verify="server" autocomplete="off"
                        placeholder="请填写邮箱服务地址" class="layui-input">
             </div>
             <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;">aliyun服务器地址：imap.qiye.aliyun.com:993或imap.mxhichina.com:993</div>
@@ -52,21 +55,21 @@
         <div class="layui-form-item" style="margin-left: 20px;">
             <label class="layui-form-label" style="width: 100px;">邮箱登录账号：</label>
             <div class="layui-input-block">
-                <input style="width: 300px" type="text" name="title" lay-verify="title" autocomplete="off"
+                <input style="width: 300px" type="text" name="account" lay-verify="account" autocomplete="off"
                        placeholder="请填写邮箱登录账号" class="layui-input">
             </div>
         </div>
         <div class="layui-form-item" style="margin-left: 20px;">
             <label class="layui-form-label" style="width: 100px;">邮箱登录密码：</label>
             <div class="layui-input-block">
-                <input style="width: 300px" type="password" name="title" lay-verify="title" autocomplete="off"
+                <input style="width: 300px" type="password" name="password" lay-verify="password" autocomplete="off"
                        placeholder="请填写邮箱登录密码" class="layui-input">
             </div>
         </div>
         <div class="layui-form-item" style="margin-left: 20px;">
             <label class="layui-form-label" style="width: 100px;">附件下载目录：</label>
             <div class="layui-input-inline">
-                <input style="width: 300px" type="text" name="title" lay-verify="title" autocomplete="off"
+                <input style="width: 300px" type="text" name="url" autocomplete="off"
                        placeholder="请填写附件下载的所在目录" class="layui-input">
             </div>
             <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;">  如果填写的目录不存在，程序会自动创建；如果未填写目录，下载的附件将在C盘根目录下名为mail_file_download的文件夹中</div>
@@ -74,7 +77,7 @@
         <div class="layui-form-item" style="margin-left: 20px;">
             <label class="layui-form-label" style="width: 100px;">下载邮件数量：</label>
             <div class="layui-input-inline">
-                <input style="width: 300px" type="text" name="title" lay-verify="title" autocomplete="off"
+                <input style="width: 300px" type="text" name="count" lay-verify="count" autocomplete="off"
                        placeholder="请输入下载邮件数量" class="layui-input">
             </div>
             <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;">  下载最新的邮件的数量；比如：10.表示下载最新的十封邮件，和下载邮件时间不能同时使用</div>
@@ -82,7 +85,7 @@
         <div class="layui-form-item" style="margin-left: 20px;">
             <label class="layui-form-label" style="width: 100px;">下载邮件时间：</label>
             <div class="layui-input-inline">
-                <input style="width: 300px" type="text" class="layui-input" id="test1">
+                <input style="width: 300px" type="text" name="time" placeholder="请填写下载邮件时间范围" lay-verify="time" class="layui-input" id="time">
             </div>
             <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;">  下载这个时间（>=这个时间）到当前时间的所有邮件附件，下载邮件数量不能同时使用</div>
         </div>
@@ -124,7 +127,7 @@
         </div>
         <div class="layui-form-item">
             <div class="layui-input-block" style="margin-left: 400px;">
-                <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">开始下载</button>
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="submit">开始下载</button>
                 <button type="reset" class="layui-btn layui-btn-primary">重置</button>
             </div>
         </div>
@@ -142,9 +145,49 @@
         let util = layui.util;
         let laydate = layui.laydate;
         laydate.render({
-            elem: '#test1',
+            elem: '#time',
             type: 'datetime'
         });
+
+        //自定义验证规则
+        form.verify({
+            server: function(value){
+                if(value.length == 0){
+                    return '邮箱服务地址不能是空的噢';
+                }
+            },
+            account:function(value) {
+                if(value.length == 0){
+                    return '邮箱登录账号不能是空的噢';
+                }
+            },
+            password:function(value) {
+                if(value.length == 0){
+                    return '邮箱登录密码不能是空的噢';
+                }
+            },
+            content: function(value){
+                layedit.sync(editIndex);
+            }
+        });
+
+        form.on('submit(submit)', function(data){
+            let result = sendApi("/mail/download",JSON.stringify(data.field),"GET");
+            if (result.ret != 0) {
+                layer.msg(result.msg, {anim: 6});
+            } else {
+                //配置一个透明的询问框
+                layer.msg('操作成功！附件正在下载中，过程可能会消耗较长时间，<br>建议您可以关闭此页面，继续您的其他工作！不会影响附件的下载噢', {
+                    time: 0, //20s后自动关闭
+                    btn: ['知道了'],
+                    btn2: function(index, layero){
+                        layer.close()
+                    }
+                });
+            }
+            return false;
+        });
+
         form.render();
     });
 </script>

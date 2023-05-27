@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"mail_download/controller/download"
 	"net/http"
 )
 
@@ -25,15 +26,15 @@ func Cors() gin.HandlerFunc {
 func Run(addr string) {
 	router := gin.Default()
 	router.Use(Cors())
-	/*mailGroup := router.Group("/mail")
+	mailGroup := router.Group("/mail")
 	{
 		mailGroup.GET("/download", download.Download)
-	}*/
+	}
 
 	router.Static("/static/css", "./common/view/css")
 	router.Static("/static/js", "./common/view/js")
 	router.LoadHTMLFiles("./common/view/html/tips.html")
-	router.GET("/mail/download", func(c *gin.Context) {
+	router.GET("/download", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "tips.html", gin.H{})
 	})
 
