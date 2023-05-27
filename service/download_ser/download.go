@@ -23,12 +23,7 @@ import (
 func Download(param request_model.DownloadParam) error {
 	var (
 		err     error
-		done    = make(chan error, 1)
-		seqset  = new(imap.SeqSet)
 		clients = &client.Client{}
-		section = imap.BodySectionName{}
-		items   = []imap.FetchItem{section.FetchItem()}
-		mbox    = &imap.MailboxStatus{}
 		now     = time.Now()
 	)
 	//校验参数
@@ -48,6 +43,23 @@ func Download(param request_model.DownloadParam) error {
 		fmt.Println("登录邮箱出错：" + err.Error())
 		return customErr.New(customErr.EMAIL_LOGIN_ERROR, "")
 	}
+	go body(clients, param, now)
+	return nil
+}
+
+func body(clients *client.Client, param request_model.DownloadParam, now time.Time) error {
+	var (
+		index    = 1
+		errorMsg []string
+		texts    string
+		minute   float64
+		done     = make(chan error, 1)
+		seqset   = new(imap.SeqSet)
+		section  = imap.BodySectionName{}
+		items    = []imap.FetchItem{section.FetchItem()}
+		mbox     = &imap.MailboxStatus{}
+		err      error
+	)
 	newClient := goImapId.NewClient(clients)
 	newClient.ID(
 		goImapId.ID{
@@ -58,9 +70,10 @@ func Download(param request_model.DownloadParam) error {
 	defer clients.Close()
 	mbox, err = clients.Select("INBOX", false)
 	if err != nil {
-		fmt.Println("获取邮件箱出现错误：" + err.Error())
+		fmt.Println("程序已终止，获取邮件箱出现错误：" + err.Error())
 		return customErr.New(customErr.SYSTEM_ERROR, "")
 	}
+	fmt.Println("正在解析加载中，过程可能会消耗较长的时间，建议您最小化当前页面，继续您的其他工作！（不影响本程序执行）")
 	lens := mbox.Messages
 	if param.Count > 0 {
 		lens = param.Count
@@ -72,17 +85,6 @@ func Download(param request_model.DownloadParam) error {
 		done <- clients.Fetch(seqset, items, messages)
 	}()
 	imap.CharsetReader = charset.Reader
-	return body(messages, param, now)
-}
-
-func body(messages chan *imap.Message, param request_model.DownloadParam, now time.Time) error {
-	var (
-		index    = 1
-		errorMsg []string
-		texts    string
-		minute   float64
-	)
-	fmt.Println("正在解析加载中，过程可能会消耗较长的时间，建议您最小化当前页面，继续您的其他工作！（不影响本程序执行）")
 	for msg := range messages {
 		var (
 			err     error
