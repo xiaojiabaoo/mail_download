@@ -81,7 +81,7 @@ func body(messages chan *imap.Message, param request_model.DownloadParam, now ti
 		texts    string
 		minute   float64
 	)
-	fmt.Println("正在解析加载中，请稍后........")
+	fmt.Println("正在解析加载中，过程可能会消耗较长的时间，建议您最小化当前页面，继续您的其他工作！（不影响本程序执行）")
 	for msg := range messages {
 		var (
 			err     error
@@ -94,7 +94,6 @@ func body(messages chan *imap.Message, param request_model.DownloadParam, now ti
 		if text != nil {
 			mr, err = mail.CreateReader(text)
 			if err != nil {
-				fmt.Println("创建邮件内容信息对象错误：" + err.Error())
 				errorMsg = append(errorMsg, "创建邮件内容信息对象出现错误："+err.Error()+"；上一封邮件信息："+texts)
 				continue
 				//return customErr.New(customErr.SYSTEM_ERROR, "")
@@ -132,7 +131,7 @@ func body(messages chan *imap.Message, param request_model.DownloadParam, now ti
 				if err == io.EOF {
 					break
 				} else if err != nil {
-					fmt.Println("获取邮件部分正文出现错误，错误信息：" + err.Error())
+					errorMsg = append(errorMsg, "获取邮件部分正文出现错误，错误信息："+err.Error()+"；上一封邮件信息："+texts)
 				}
 				if part != nil {
 					switch header := part.Header.(type) {
@@ -145,7 +144,7 @@ func body(messages chan *imap.Message, param request_model.DownloadParam, now ti
 							}
 							content, err = ioutil.ReadAll(part.Body)
 							if err != nil {
-								fmt.Println("读取邮件中的附件出现错误，邮件发送日期：" + date.Format("2006-01-02 15:04:05") + "；邮件主题：" + subject + "；附件名称：" + filename + "；错误信息：" + err.Error())
+								errorMsg = append(errorMsg, "读取邮件中的附件出现错误，邮件发送日期："+date.Format("2006-01-02 15:04:05")+"；邮件主题："+subject+"；附件名称："+filename+"；错误信息："+err.Error())
 							} else {
 								if strings.Contains(subject, "#") {
 									split := strings.Split(subject, "#")
