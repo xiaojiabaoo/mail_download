@@ -15,16 +15,19 @@
             background-color: #FAFAFA;
             width: 1000px;
             height: 1320px;
-            border-radius:5px;
+            border-radius: 5px;
         }
+
         .parent {
             text-align: center;
             margin-top: 30px;
             margin-bottom: 30px;
         }
-        .layui-form-radio:hover *, .layui-form-radioed, .layui-form-radioed>i {
+
+        .layui-form-radio:hover *, .layui-form-radioed, .layui-form-radioed > i {
             color: #1E9FFF !important;
         }
+
         .layui-laydate .layui-this {
             background-color: #1E9FFF !important;
             color: #fff !important;
@@ -33,9 +36,9 @@
 </head>
 <body>
 <form class="layui-form" action="">
-<div class="parent">
-    <div class="child">
-        <div class="tips" style="margin-top: 30px;margin-left: 30px;color: orange;line-height: 25px;">
+    <div class="parent">
+        <div class="child">
+            <div class="tips" style="margin-top: 30px;margin-left: 30px;color: orange;line-height: 25px;">
             <span>
                 1.怎样看程序是否跑完/附件是否下载完：<br>
                        程序控制台（启动的那个黑板板）会提示文字：所有邮件下载完成，总耗时：xxx分钟；<br>
@@ -51,96 +54,109 @@
                        正常网络下，一个附件下载平均速度为0.5秒<br>
                        提示：经测试，下载8000个附件的时间大约是87分钟（数据仅供参考）<br>
             </span>
-        </div>
-        <div class="layui-form-item" style="margin-top: 20px;margin-left: 20px;">
-            <label class="layui-form-label" style="width: 100px;">邮箱服务地址：</label>
-            <div class="layui-input-inline">
-                <input style="width: 300px" type="text" name="server" lay-verify="server" autocomplete="off"
-                       placeholder="请填写邮箱服务地址" class="layui-input">
             </div>
-            <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;">aliyun服务器地址：imap.qiye.aliyun.com:993或imap.mxhichina.com:993</div>
-        </div>
-        <div class="layui-form-item" style="margin-left: 20px;">
-            <label class="layui-form-label" style="width: 100px;">邮箱登录账号：</label>
-            <div class="layui-input-block">
-                <input style="width: 300px" type="text" name="account" lay-verify="email" autocomplete="off"
-                       placeholder="请填写邮箱登录账号" class="layui-input">
+            <div class="layui-form-item" style="margin-top: 20px;margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">邮箱服务地址：</label>
+                <div class="layui-input-inline">
+                    <input style="width: 300px" type="text" name="server" lay-verify="server" autocomplete="off"
+                           placeholder="请填写邮箱服务器地址" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;">
+                    aliyun服务器地址：imap.qiye.aliyun.com:993或imap.mxhichina.com:993
+                </div>
             </div>
-        </div>
-        <div class="layui-form-item" style="margin-left: 20px;">
-            <label class="layui-form-label" style="width: 100px;">邮箱登录密码：</label>
-            <div class="layui-input-block">
-                <input style="width: 300px" type="password" name="password" lay-verify="password" autocomplete="off"
-                       placeholder="请填写邮箱登录密码" class="layui-input">
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">邮箱登录账号：</label>
+                <div class="layui-input-block">
+                    <input style="width: 300px" type="text" name="account" lay-verify="email" autocomplete="off"
+                           placeholder="请填写邮箱登录账号" class="layui-input">
+                </div>
             </div>
-        </div>
-        <div class="layui-form-item" style="margin-left: 20px;">
-            <label class="layui-form-label" style="width: 100px;">附件下载目录：</label>
-            <div class="layui-input-inline">
-                <input style="width: 300px" type="text" name="url" autocomplete="off"
-                       placeholder="请填写附件下载的所在目录" class="layui-input">
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">邮箱登录密码：</label>
+                <div class="layui-input-block">
+                    <input style="width: 300px" type="password" name="password" lay-verify="password" autocomplete="off"
+                           placeholder="请填写邮箱登录密码" class="layui-input">
+                </div>
             </div>
-            <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;">  如果填写的目录不存在，程序会自动创建；如果未填写目录，下载的附件将在C盘根目录下名为mail_file_download的文件夹中</div>
-        </div>
-        <div class="layui-form-item" style="margin-left: 20px;">
-            <label class="layui-form-label" style="width: 100px;">下载邮件数量：</label>
-            <div class="layui-input-inline">
-                <input style="width: 300px" type="text" name="count" lay-verify="count" autocomplete="off"
-                       placeholder="请输入下载邮件数量" class="layui-input">
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">附件下载目录：</label>
+                <div class="layui-input-inline">
+                    <input style="width: 300px" type="text" name="url" autocomplete="off"
+                           placeholder="请填写附件下载的所在目录" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;"> 
+                    如果填写的目录不存在，程序会自动创建；如果未填写目录，下载的附件将在C盘根目录下名为mail_file_download的文件夹中
+                </div>
             </div>
-            <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;">  下载最新的邮件的数量；比如：10.表示下载最新的十封邮件，和下载邮件时间不能同时使用</div>
-        </div>
-        <div class="layui-form-item" style="margin-left: 20px;">
-            <label class="layui-form-label" style="width: 100px;">下载邮件时间：</label>
-            <div class="layui-input-inline">
-                <input style="width: 300px" type="text" name="time" placeholder="请填写下载邮件时间范围" lay-verify="time" class="layui-input" id="time">
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">下载邮件数量：</label>
+                <div class="layui-input-inline">
+                    <input style="width: 300px" type="text" name="count" lay-verify="count" autocomplete="off"
+                           placeholder="请输入下载邮件数量" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;"> 
+                    下载最新的邮件的数量；比如：10.表示下载最新的十封邮件，和下载邮件时间不能同时使用
+                </div>
             </div>
-            <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;">  下载这个时间（>=这个时间）到当前时间的所有邮件附件，下载邮件数量不能同时使用</div>
-        </div>
-        <div class="layui-form-item" style="margin-left: 20px;">
-            <label class="layui-form-label" style="width: 100px;">目录划分级别：</label>
-            <div class="layui-input-block">
-                <input type="radio" name="classify" value="year" title="年份">
-                <input type="radio" name="classify" value="month" title="年份+月份" checked="">
-                <input type="radio" name="classify" value="day" title="年份+月份+日期">
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">下载邮件时间：</label>
+                <div class="layui-input-inline">
+                    <input style="width: 300px" type="text" name="time" placeholder="请填写下载邮件时间范围"
+                           lay-verify="time" class="layui-input" id="time" readonly>
+                </div>
+                <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;"> 
+                    下载这个时间（>=这个时间）到当前时间的所有邮件附件，下载邮件数量不能同时使用
+                </div>
             </div>
-            <div style="color: #999;margin-left: 130px;line-height: 22px;">
-                1.如果选择的是年份，那么邮件附件是按年份的目录存放<br>
-                2.如果选择的是年份+月份，那么邮件附件是按年份+月份的目录存放<br>
-                3.如果选择的是年份+月份+日期，那么邮件附件是按年份+月份+天的目录存放<br>
-                4.举个栗子，比如：<br>
-                   4.1 如果我选择的是年份，下载好后当我点开2023年的文件夹后里面就是这一年的附件<br>
-                   4.2 如果我选择的是年份+月份，下载好后当我点开2023年文件夹后，里面还具体细分了月份，点开具体月份后就是当月的所<br>      有附件<br>
-                   4.3 如果我选择的是年份+月份+日期，下载好后当我点开2023年文件夹后，里面细分了月份，点开具体月份后还细分了日期，<br>
-                      点开具体日期就是当日的所有附件
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">目录划分级别：</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="classify" value="year" title="年份">
+                    <input type="radio" name="classify" value="month" title="年份+月份" checked="">
+                    <input type="radio" name="classify" value="day" title="年份+月份+日期">
+                </div>
+                <div style="color: #999;margin-left: 130px;line-height: 22px;">
+                    1.如果选择的是年份，那么邮件附件是按年份的目录存放<br>
+                    2.如果选择的是年份+月份，那么邮件附件是按年份+月份的目录存放<br>
+                    3.如果选择的是年份+月份+日期，那么邮件附件是按年份+月份+天的目录存放<br>
+                    4.举个栗子，比如：<br>
+                       4.1 如果我选择的是年份，下载好后当我点开2023年的文件夹后里面就是这一年的附件<br>
+                       4.2 如果我选择的是年份+月份，下载好后当我点开2023年文件夹后，里面还具体细分了月份，点开具体月份后就是当月的所<br>  
+                       有附件<br>
+                       4.3 如果我选择的是年份+月份+日期，下载好后当我点开2023年文件夹后，里面细分了月份，点开具体月份后还细分了日期，<br>
+                          点开具体日期就是当日的所有附件
+                </div>
             </div>
-        </div>
-        <div class="layui-form-item" style="margin-left: 20px;">
-            <label class="layui-form-label" style="width: 100px;">文件操作类型：</label>
-            <div class="layui-input-block">
-                <input type="radio" name="type" value="cover" title="存在同名文件时覆盖">
-                <input type="radio" name="type" value="jump" title="存在同名文件时跳过" checked="">
-                <input type="radio" name="type" value="all_reserved" title="存在同名文件时，保留旧文件并添加新的副本文件">
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">文件操作类型：</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="type" value="cover" title="存在同名文件时覆盖">
+                    <input type="radio" name="type" value="jump" title="存在同名文件时跳过" checked="">
+                    <input type="radio" name="type" value="all_reserved"
+                           title="存在同名文件时，保留旧文件并添加新的副本文件">
+                </div>
+                <div style="color: #999;margin-left: 130px;line-height: 22px;">
+                    注意：<br>
+                       如果是目录划分级别为年份，表示操作的是在一年内的同名文件；<br>
+                       如果是目录划分级别为年份+月份，表示操作的是在一年下的同一个月内的同名文件；<br>
+                       如果是目录划分级别为年份+月份+日期，表示操作的是在一年下的同一个月的同一天内的同名文件；<br>
+                    举个栗子，比如：<br>
+                       选择的是覆盖，在遇到同名文件夹时，旧的文件会被新的文件替换；<br>
+                       选择的是跳过，遇到同名文件时会跳过该文件，继续执行下一文件直到结束；<br>
+                       选择的是保留，遇到同名文件时，新旧文件都会被保留，但是新文件会以”-副本+时间戳“结尾<br>
+                </div>
             </div>
-            <div style="color: #999;margin-left: 130px;line-height: 22px;">
-                注意：<br>
-                   如果是目录划分级别为年份，表示操作的是在一年内的同名文件；<br>
-                   如果是目录划分级别为年份+月份，表示操作的是在一年下的同一个月内的同名文件；<br>
-                   如果是目录划分级别为年份+月份+日期，表示操作的是在一年下的同一个月的同一天内的同名文件；<br>
-                举个栗子，比如：<br>
-                   选择的是覆盖，在遇到同名文件夹时，旧的文件会被新的文件替换；<br>
-                   选择的是跳过，遇到同名文件时会跳过该文件，继续执行下一文件直到结束；<br>
-                   选择的是保留，遇到同名文件时，新旧文件都会被保留，但是新文件会以”-副本+时间戳“结尾<br>
-            </div>
-        </div>
-        <div class="layui-form-item">
-            <div class="layui-input-block" style="margin-left: 150px;width: 700px;">
-                <button type="submit" class="layui-btn layui-btn-primary layui-border-blue layui-btn-fluid" lay-submit="" lay-filter="submit">开始下载附件<i class="layui-icon layui-icon-download-circle"></i></button>
-                <!--<button type="reset" class="layui-btn layui-btn-primary layui-border-black">重置<i class="layui-icon layui-icon-fonts-clear"></i></button>-->
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left: 150px;width: 700px;">
+                    <button type="submit" class="layui-btn layui-btn-primary layui-border-blue layui-btn-fluid"
+                            lay-submit="" lay-filter="submit">开始下载附件<i
+                            class="layui-icon layui-icon-download-circle"></i></button>
+                    <!--<button type="reset" class="layui-btn layui-btn-primary layui-border-black">重置<i class="layui-icon layui-icon-fonts-clear"></i></button>-->
+                </div>
             </div>
         </div>
     </div>
-</div>
 </form>
 <script src="/static/js/layui-v2.6.8/layui.js"></script>
 <script type="text/javascript" src="/static/js/jquery-2.1.3.js"></script>
@@ -152,11 +168,11 @@
         let laydate = layui.laydate;
         let date = new Date();
         if (date.getHours() >= 18 || date.getHours() <= 6) {
-            $("body").css("background-color","#111")
-            $(".child").css("background-color","#222").css("color","#f2f2f2")
-            $("input").css("background-color","#333")
-            $("input").css("border","none")
-            $("input").css("color","#f2f2f2")
+            $("body").css("background-color", "#111")
+            $(".child").css("background-color", "#222").css("color", "#f2f2f2")
+            $("input").css("background-color", "#333")
+            $("input").css("border", "none")
+            $("input").css("color", "#f2f2f2")
             form.render();
         }
         laydate.render({
@@ -164,35 +180,43 @@
             type: 'datetime'
         });
         form.verify({
-            server: function(value){
-                if(value.length == 0){
+            server: function (value) {
+                if (value.length == 0) {
                     return '邮箱服务地址不能是空的噢';
                 }
             },
-            account:function(value) {
-                if(value.length == 0){
+            account: function (value) {
+                if (value.length == 0) {
                     return '邮箱登录账号不能是空的噢';
                 }
             },
-            password:function(value) {
-                if(value.length == 0){
+            password: function (value) {
+                if (value.length == 0) {
                     return '邮箱登录密码不能是空的噢';
                 }
             },
-            content: function(value){
+            count: function (value) {
+                if (value.length > 0) {
+                    let reg = /^[0-9]*$/
+                    if (!reg.test(value)) {
+                        return '下载邮件的数量只能填写数字';
+                    }
+                }
+            },
+            content: function (value) {
                 layedit.sync(editIndex);
             }
         });
-        form.on('submit(submit)', function(data){
-            let result = sendApi("/mail/download",JSON.stringify(data.field),"GET");
+        form.on('submit(submit)', function (data) {
+            let result = sendApi("/mail/download", JSON.stringify(data.field), "GET");
             if (result.ret != 0) {
-                layer.msg(result.msg, {icon: 2,anim: 6});
+                layer.msg(result.msg, {icon: 2, anim: 6});
             } else {
                 //配置一个透明的询问框
                 layer.msg('操作成功！附件正在下载中，过程可能会消耗较长时间，<br>建议您可以关闭此页面，继续您的其他工作！不会影响附件的下载噢', {
                     time: 0, //20s后自动关闭
                     btn: ['知道了'],
-                    btn2: function(index, layero){
+                    btn2: function (index, layero) {
                         layer.close()
                     }
                 });

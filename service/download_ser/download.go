@@ -101,8 +101,7 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 				//return customErr.New(customErr.SYSTEM_ERROR, "")
 			}
 			date, _ = mr.Header.Date()
-			loc, _ := time.LoadLocation("Asia/Shanghai")
-			date = date.In(loc)
+			date = date.In(time.FixedZone("CST", 8*3600))
 			subject, _ = mr.Header.Subject()
 			if !strings.Contains(subject, "INVOICE") || strings.Contains(subject, "回复") ||
 				strings.Contains(subject, "RE:") || strings.Contains(subject, "Re: ") {
