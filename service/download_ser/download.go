@@ -74,11 +74,15 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 		return customErr.New(customErr.SYSTEM_ERROR, "")
 	}
 	fmt.Println("正在解析加载中，过程可能会消耗较长的时间，建议您最小化当前页面，继续您的其他工作！（不影响本程序执行）")
-	lens := mbox.Messages
+	var lens = mbox.Messages
+	var start uint32 = 1
 	if param.Count > 0 {
-		lens = param.Count
+		if param.Count < mbox.Messages {
+			start = mbox.Messages - param.Count
+			lens = param.Count
+		}
 	}
-	seqset.AddRange(1, lens)
+	seqset.AddRange(start, mbox.Messages)
 	done = make(chan error, lens)
 	messages := make(chan *imap.Message, lens)
 	go func() {
@@ -98,10 +102,11 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 			if err != nil {
 				errorMsg = append(errorMsg, "创建邮件内容信息对象出现错误："+err.Error()+"；上一封邮件信息："+texts)
 				continue
-				//return customErr.New(customErr.SYSTEM_ERROR, "")
 			}
-			date, _ = mr.Header.Date()
-			date = date.In(time.FixedZone("CST", 8*3600))
+			date, err = mr.Header.Date()
+			if err == nil {
+				date = tools.StrToDateTime(date.Format("2006-01-02 15:04:05"))
+			}
 			subject, _ = mr.Header.Subject()
 			if !strings.Contains(subject, "INVOICE") || strings.Contains(subject, "回复") ||
 				strings.Contains(subject, "RE:") || strings.Contains(subject, "Re: ") {
@@ -162,7 +167,6 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 								if err != nil {
 									errorMsg = append(errorMsg, "发送日期："+date.Format("2006-01-02 15:04:05")+"；邮件主题："+subject+"；附件名称："+filename+"；错误信息："+err.Error())
 									continue
-									//return err
 								}
 							}
 						}
