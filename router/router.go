@@ -38,6 +38,7 @@ func Run(addr string) {
 	}
 	router.Static("/static/css", "./common/view/css")
 	router.Static("/static/js", "./common/view/js")
+	router.Static("/static/image", "./common/view/image")
 	router.LoadHTMLFiles("./common/view/html/tips.html")
 	router.GET("/download", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "tips.html", gin.H{})
