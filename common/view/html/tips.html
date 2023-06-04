@@ -105,7 +105,7 @@
                 <label class="layui-form-label" style="width: 100px;">下载邮件数量：</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="count" lay-verify="count" autocomplete="off"
-                           placeholder="请输入下载邮件数量" class="layui-input">
+                           placeholder="请填写下载邮件数量" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;"> 
                     下载最新的邮件的数量；比如：10.表示下载最新的十封邮件，和下载邮件时间不能同时使用；建议下载附件较多时使用
@@ -172,7 +172,6 @@
         let layer = layui.layer;
         let laydate = layui.laydate;
         let date = new Date();
-        let colors = ''
         if (date.getHours() >= 18 || date.getHours() <= 6) {
             $("body").css("background-color", "#111")
             $(".child").css("background-color", "#222").css("color", "#f2f2f2")
@@ -182,19 +181,23 @@
             $("#tips").removeClass("tips-day")
             $("#tips").addClass("tips-night")
             form.render();
-            colors = '#DCDCDC'
         } else {
             $("#tips").removeClass("tips-night")
             $("#tips").addClass("tips-day")
-            colors = '#696969'
         }
 
-        layer.msg('如果您是第一次使用本服务或是还不清楚本服务的使用方式，请先仔细阅读下载页提供的相关教程和提示', {
-            time: 0, //20s后自动关闭
+        layer.open({
+            type: 1,
+            title: false, //不显示标题栏
+            closeBtn: false,
+            area: '300px;',
+            shade: 0.8,
+            id: 'LAY_layuipro', //设定一个id，防止重复弹出
             btn: ['好的'],
-            shade: [0.8, colors],
-            btn2: function (index, layero) {
-                layer.close()
+            btnAlign: 'c',
+            moveType: 1, //拖拽模式，0或者1
+            content: '<div style="padding: 50px; line-height: 22px; background-color: #393D49; color: #fff; font-weight: 300;">如果你是第一次使用本服务或是<br>还不清楚本服务的使用方式<br>请先仔细阅读下载页提供的相关教程和提示 </div>',
+            success: function(layero){
             }
         });
 
@@ -238,7 +241,7 @@
             } else {
                 //配置一个透明的询问框
                 layer.msg('操作成功！附件正在下载中，过程可能会消耗较长时间，<br>建议您可以关闭此页面，继续您的其他工作！不会影响附件的下载噢', {
-                    time: 0, //20s后自动关闭
+                    time: 0,
                     btn: ['知道了'],
                     btn2: function (index, layero) {
                         layer.close()
