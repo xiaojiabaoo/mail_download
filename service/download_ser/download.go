@@ -81,6 +81,8 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 			start = mbox.Messages - param.Count
 			lens = param.Count
 		}
+	} else {
+		start, lens = checkMailCount(clients, lens, lens, param.Time)
 	}
 	seqset.AddRange(start, mbox.Messages)
 	done = make(chan error, lens)
@@ -89,6 +91,7 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 		done <- clients.Fetch(seqset, items, messages)
 	}()
 	imap.CharsetReader = charset.Reader
+	fmt.Println("已获取到邮件，正在按条件筛选合适的附件中......")
 	for msg := range messages {
 		var (
 			mr       *mail.Reader
@@ -119,7 +122,7 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 					continue
 				}
 			}
-			texts = fmt.Sprintf(`%d--发送日期：%s，--主题：%s`, index, date.Format("2006-01-02 15:04:05"), subject)
+			texts = fmt.Sprintf(`正在下载第%d封邮件附件，发送日期：%s，主题：%s`, index, date.Format("2006-01-02 15:04:05"), subject)
 			fmt.Println(texts)
 			index++
 			// 处理邮件正文
@@ -182,6 +185,56 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 		fmt.Println("------------------------------------以上是下载附件时记录的报错信息-结束------------------------------------")
 	}
 	return nil
+}
+
+func checkMailCount(clients *client.Client, start, count uint32, time string) (uint32, uint32) {
+	var (
+		stop    uint32
+		seqset  = new(imap.SeqSet)
+		done    = make(chan error, 1)
+		section = imap.BodySectionName{}
+		items   = []imap.FetchItem{section.FetchItem()}
+		goOn    bool
+		index   int
+	)
+	if start > 200 {
+		start = start - 200
+		stop = count - start
+	}
+	seqset.AddRange(start, count)
+	done = make(chan error, stop)
+	messages := make(chan *imap.Message, stop)
+	go func() {
+		done <- clients.Fetch(seqset, items, messages)
+	}()
+	imap.CharsetReader = charset.Reader
+	for msg := range messages {
+		var (
+			sections = imap.BodySectionName{}
+		)
+		if index >= 1 {
+			break
+		}
+		index++
+		text := msg.GetBody(&sections)
+		if text == nil {
+			continue
+		}
+		mr, err := mail.CreateReader(text)
+		if err != nil {
+			continue
+		}
+		date, _ := mr.Header.Date()
+		unix := tools.StrToDateTime(time).Unix()
+		if date.Unix() >= unix {
+			goOn = true
+		}
+	}
+	//递归
+	if goOn {
+		start, stop = checkMailCount(clients, start, count, time)
+	}
+	return start, stop
 }
 
 func writeFile(filename string, param request_model.DownloadParam, content []byte, date time.Time) error {

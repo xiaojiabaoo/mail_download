@@ -14,7 +14,7 @@
             text-align: left;
             background-color: #FAFAFA;
             width: 1000px;
-            height: 1460px;
+            height: 1360px;
             border-radius: 5px;
         }
 
@@ -53,18 +53,18 @@
             <div id="tips" class="" style="margin-top: 30px;margin-left: 30px;line-height: 27px;">
             <span>
                 <h3>怎样看程序是否跑完/附件是否下载完：</h3>
-                <p>   程序控制台（启动的那个黑板板）会提示文字：所有邮件下载完成，总耗时：xxx分钟；</p>
-                    <p>   只要有这句话显示，就表示程序已经正常执行完毕，所有附件已经下载完成，并且还会显示下载附件总共消耗时间</p>
-                    <p>   如果是显示“正在解析加载中”或是一直在刷新程序控制台的信息，即表示程序正在解析下载附件中</p>
+                    <p>   程序控制台（启动的那个黑板板）会提示文字：所有邮件下载完成，总耗时：xxx分钟；</p>
+                    <p>   只要有上面这句话显示，即表示程序已经正常执行完毕，所有附件已经下载完成，并附带显示下载附件总共消耗的时间</p>
+                    <p>   如果是显示“正在解析加载中”或是“已获取到邮件”或是一直在刷新程序控制台的信息，即表示程序正在解析下载附件中，请耐心等待</p>
                <h3>附件下载中途遇到错误会怎样提示：</h3>
-                    <p>   附件途中遇到错误会跳过，继续下载后面的附件，具体的错误信息会在正常执行完毕后统一提示：</p>
-                    <p>   错误记录从以“以下是下载附件时记录的报错信息-开始”开始</p>
-                    <p>   到以“以上是下载附件时记录的报错信息-结束”结束</p>
+                    <p>   下载附件途中如遇到错误，服务会记录该错误信息并继续下载后面的附件，待所有附件下载完成后会在控制台末尾显示错误信息</p>
+                    <p>   错误记录从以 “以下是下载附件时记录的报错信息-开始” 开始到以 “以上是下载附件时记录的报错信息-结束” 结束</p>
+                    <p>   如果在控制台未显示该字样，表示附件下载中途没有错误信息</p>
                 <h3>附件全部下载完成需要多久：</h3>
-                    <p>   如果是根据时间下载，时间消耗会较多，因为程序不知道你需要下载的附件是哪些，只能把邮箱内的所有邮件都获取到，再一一去筛选合适的邮件附件</p>
-                    <p>   如果是根据最新的邮件数量下载，消耗时间会快很多，因为程序只要从最新的一封邮件数到填写的数量，并且把这范围内附件的下载</p>
-                    <p>   正常网络下，一个附件下载平均速度为0.5秒</p>
-                    <p>   提示：经测试，下载8000个附件的时间大约是87分钟（数据仅供参考）</p>
+                    <p>   下载时间由下载的邮件数量、附件内容的大小和网络而决定</p>
+                    <p>   正常网络下，一个附件下载平均速度为0.5秒；经测试，下载8000个附件的时间大约是87分钟（数据仅供参考）</p>
+                    <p>   建议 如果是第一次下载（需要下载的附件较多），使用数量方式下载会比较快</p>
+                    <p>   建议 如果是增量下载（只需要下载的较少的附件），使用时间方式下载会比较快</p>
             </span>
             </div>
             <div class="layui-form-item" style="margin-top: 20px;margin-left: 20px;">
@@ -98,7 +98,7 @@
                            placeholder="请填写附件下载的所在目录" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;"> 
-                    如果填写的目录不存在，程序会自动创建；如果未填写目录，下载的附件将在C盘根目录下名为mail_file_download的文件夹中
+                    如果填写的目录不存在，程序会自动创建该目标；如果未填写目录，下载的附件默认会存放在C:\mail_file_download中
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
@@ -108,7 +108,7 @@
                            placeholder="请输入下载邮件数量" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;"> 
-                    下载最新的邮件的数量；比如：10.表示下载最新的十封邮件，和下载邮件时间不能同时使用
+                    下载最新的邮件的数量；比如：10.表示下载最新的十封邮件，和下载邮件时间不能同时使用；建议下载附件较多时使用
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
@@ -118,7 +118,7 @@
                            lay-verify="time" class="layui-input" id="time" readonly>
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="margin-left: 120px;"> 
-                    下载这个时间（>=这个时间）到当前时间的所有邮件附件，下载邮件数量不能同时使用
+                    下载这个时间（>=这个时间）到当前时间的所有邮件附件，和下载邮件数量不能同时使用；建议下载附件较少时使用
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
@@ -172,6 +172,7 @@
         let layer = layui.layer;
         let laydate = layui.laydate;
         let date = new Date();
+        let colors = ''
         if (date.getHours() >= 18 || date.getHours() <= 6) {
             $("body").css("background-color", "#111")
             $(".child").css("background-color", "#222").css("color", "#f2f2f2")
@@ -181,14 +182,27 @@
             $("#tips").removeClass("tips-day")
             $("#tips").addClass("tips-night")
             form.render();
+            colors = '#DCDCDC'
         } else {
             $("#tips").removeClass("tips-night")
             $("#tips").addClass("tips-day")
+            colors = '#696969'
         }
+
+        layer.msg('如果您是第一次使用本服务或是还不清楚本服务的使用方式，请先仔细阅读下载页提供的相关教程和提示', {
+            time: 0, //20s后自动关闭
+            btn: ['好的'],
+            shade: [0.8, colors],
+            btn2: function (index, layero) {
+                layer.close()
+            }
+        });
+
         laydate.render({
             elem: '#time',
             type: 'datetime'
         });
+
         form.verify({
             server: function (value) {
                 if (value.length == 0) {
