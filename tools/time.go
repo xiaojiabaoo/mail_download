@@ -70,9 +70,11 @@ func GetTimeArr(start, end string) int64 {
 
 func StrToDateTime(t string) time.Time {
 	timeLayout := "2006-01-02 15:04:05"
-	loc, _ := time.LoadLocation("Asia/Shanghai")
+	/*loc, _ := time.LoadLocation("Asia/Shanghai")
 	ymd, _ := time.ParseInLocation(timeLayout, t, loc)
-	return ymd
+	return ymd*/
+	date, _ := time.Parse(timeLayout, t)
+	return date
 }
 
 func SubMonth(t1, t2 time.Time) (month int) {

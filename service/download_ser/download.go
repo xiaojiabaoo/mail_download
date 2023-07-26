@@ -184,6 +184,42 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 		}
 		fmt.Println("------------------------------------以上是下载附件时记录的报错信息-结束------------------------------------")
 	}
+	//邮件通知
+	if param.Inform == "on" {
+		fmt.Println("准备发送通知邮件，准备数据中......")
+		var (
+			subject, mailBody string
+			account           = param.Account
+		)
+		if param.InformAccount != "" {
+			account = param.InformAccount
+		}
+		if index > 1 {
+			index = index - 1
+		}
+		switch {
+		case len(errorMsg) == index || (index == 1 && len(errorMsg) > 0):
+			subject = "全部下载出错"
+		case len(errorMsg) > 0 && index > 1:
+			subject = "部分下载出错"
+		case len(errorMsg) == 0:
+			subject = "全部下载成功"
+		}
+		mailBody = fmt.Sprintf(`本次共下载了%d个附件，错误%d个；`, index, len(errorMsg))
+		for k, v := range errorMsg {
+			if k == 0 {
+				mailBody += fmt.Sprintf("未下载成功的错误邮件：\n")
+			}
+			mailBody += v + "\n"
+		}
+
+		err = tools.SendMail([]string{account}, mailBody, subject)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("发送通知邮件失败，发送账号：%s，失败原因：%s", account, err.Error()))
+		} else {
+			fmt.Println(fmt.Sprintf("发送通知邮件完成，发送账号：%s，请前往邮箱中查看", account))
+		}
+	}
 	return nil
 }
 

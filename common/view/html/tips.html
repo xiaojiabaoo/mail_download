@@ -14,7 +14,7 @@
             text-align: left;
             background-color: #FAFAFA;
             width: 1000px;
-            height: 1360px;
+            height: 1450px;
             border-radius: 5px;
         }
 
@@ -198,6 +198,25 @@
                     <p>   选择的是保留，遇到同名文件时，新旧文件都会被保留，但是新文件会以”-副本+时间戳“结尾</p>
                 </div>
             </div>
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">是否需要通知</label>
+                <div class="layui-input-block">
+                    <input lay-filter="inform" type="radio" name="inform" value="on" title="下载结果通知我">
+                    <input lay-filter="inform" type="radio" name="inform" value="off" title="下载结果无需通知我" checked="">
+                </div>
+                <div style="color: #C0C0C0;margin-left: 130px;line-height: 27px;">
+                    <p>下载结果（完成或是失败）使用邮件方式通知，若选择需要通知，系统会在附件下载程序执行完成后邮件消息内通知你</p>
+                    <p id="inform-p1" style="display: none;">你可以在下面的输入框中填写你的个人邮箱账号，填写后系统就会按照这个邮箱来通知你</p>
+                    <p id="inform-p2" style="display: none;">如果你不想填写，系统会默认使用你上面登录的邮箱来通知</p>
+                </div>
+            </div>
+            <div class="layui-form-item" id="inform-input" style="margin-left: 20px;display: none;">
+                <label class="layui-form-label" style="width: 100px;">通知邮箱账号</label>
+                <div class="layui-input-block">
+                    <input style="width: 300px" type="text" name="inform_account" autocomplete="off"
+                           placeholder="请填写通知邮箱账号（选填）" class="layui-input">
+                </div>
+            </div>
             <div class="layui-form-item">
                 <div class="layui-input-block" style="margin-left: 150px;width: 700px;">
                     <button type="submit" class="layui-btn layui-btn-primary layui-border layui-btn-fluid"
@@ -304,6 +323,21 @@
             read = data.elem.checked
         });
 
+        form.on('radio(inform)', function (data) {
+            let value = data.value;
+            if (value == "on") {
+                $("#inform-p1").css("display", "")
+                $("#inform-p2").css("display", "")
+                $("#inform-input").css("display", "")
+                $(".child").css("height", "1550px")
+            } else {
+                $("#inform-p1").css("display", "none")
+                $("#inform-p2").css("display", "none")
+                $("#inform-input").css("display", "none")
+                $(".child").css("height", "1450px")
+            }
+        });
+
         laydate.render({
             elem: '#time',
             type: 'datetime'
@@ -344,7 +378,7 @@
                 layer.msg(result.msg, {icon: 5, anim: 6});
             } else {
                 //配置一个透明的询问框
-                layer.msg('操作成功！附件正在下载中，过程可能会消耗较长时间，<br>建议您可以关闭此页面，继续您的其他工作！不会影响附件的下载噢', {
+                layer.msg('操作成功！附件正在下载中，过程可能会消耗较长时间，<br>建议可以关闭此页面，继续你的其他工作！不会影响附件的下载', {
                     time: 0,
                     btn: ['知道了'],
                     btn2: function () {
