@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"mail_download/controller/download"
+	"mail_download/controller/system"
 	"mail_download/tools"
 	"net/http"
 	"runtime"
@@ -36,12 +37,20 @@ func Run(addr string) {
 	{
 		mailGroup.GET("/download", download.Download)
 	}
+	systemGroup := router.Group("/system")
+	{
+		systemGroup.GET("/list", system.List)
+	}
 	router.Static("/static/css", "./common/view/css")
 	router.Static("/static/js", "./common/view/js")
 	router.Static("/static/image", "./common/view/image")
-	router.LoadHTMLFiles("./common/view/html/tips.html")
+	router.Static("/static/html", "./common/view/image")
+	router.LoadHTMLFiles("./common/view/html/tips.html", "./common/view/html/catalogue.html")
 	router.GET("/download", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "tips.html", gin.H{})
+	})
+	router.GET("/catalogue", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "catalogue.html", gin.H{})
 	})
 	if err := router.Run(addr); err != nil {
 		panic(err)

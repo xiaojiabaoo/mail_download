@@ -137,6 +137,9 @@
                     <input style="width: 300px" type="text" name="url" autocomplete="off"
                            placeholder="请填写附件需要下载到哪个位置" class="layui-input">
                 </div>
+                <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;padding: 5px 0!important;">
+                    <button type="button" id="select" class="layui-btn layui-btn-sm layui-btn-primary">选择目录</button>
+                </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
                     如果填写的目录不存在，程序会自动创建该目标；如果未填写目录，下载的附件默认会存放在C:\mail_file_download中
                 </div>
@@ -237,7 +240,7 @@
         let layer = layui.layer;
         let laydate = layui.laydate;
         let date = new Date();
-        let times = 61
+        let times = 11
         let read = false
         if (date.getHours() >= 18 || date.getHours() <= 6) {
             $("body").css("background-color", "#111")
@@ -389,6 +392,15 @@
             return false;
         });
         form.render();
+
+        $("#select").click(function(){
+            let result = sendApi("/system/list", '{"path":""}', "GET");
+            layer.open({
+                type: 2,
+                area: ['300px', '400px'],
+                content: '/catalogue'
+            });
+        });
     });
 </script>
 </body>

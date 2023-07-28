@@ -39,6 +39,7 @@ const (
 	EMAIL_EMPTY_ERROR            = 30009
 	FILE_TYPE_EMPTY_ERROR        = 30010
 	FILE_DOWNLOAD_CLASSIFY_ERROR = 30011
+	GET_SYSTEM_PATH_ERROR        = 30012
 )
 
 var ErrText = map[int64]string{
@@ -61,6 +62,7 @@ var ErrText = map[int64]string{
 	EMAIL_EMPTY_ERROR:            "邮件箱中未获取到邮件信息",
 	FILE_TYPE_EMPTY_ERROR:        "请选择若附件存在同名文件时的操作",
 	FILE_DOWNLOAD_CLASSIFY_ERROR: "请选择下载目录划分级别",
+	GET_SYSTEM_PATH_ERROR:        "获取系统路径出现错误",
 }
 
 func GetErrMsg(code int64) string {
