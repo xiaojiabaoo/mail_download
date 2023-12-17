@@ -213,7 +213,7 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 			mailBody += v + "\n"
 		}
 
-		err = tools.SendMail([]string{account}, mailBody, subject)
+		err = tools.SendMail([]string{account}, mailBody, "附件下载结果："+subject)
 		if err != nil {
 			fmt.Println(fmt.Sprintf("发送通知邮件失败，发送账号：%s，失败原因：%s", account, err.Error()))
 		} else {

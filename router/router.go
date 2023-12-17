@@ -1,15 +1,11 @@
 package router
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/gin-gonic/gin"
-	"io/ioutil"
+	"mail_download/controller/cll"
 	"mail_download/controller/download"
 	"mail_download/controller/system"
-	"mail_download/tools"
 	"net/http"
-	"runtime"
 )
 
 func Cors() gin.HandlerFunc {
@@ -31,12 +27,13 @@ func Cors() gin.HandlerFunc {
 
 func Run(addr string) {
 	router := gin.Default()
-	//router.Use(Cors())
-	router.Use(Recover)
+	router.Use(Cors())
 	mailGroup := router.Group("/mail")
 	{
 		mailGroup.GET("/download", download.Download)
+		mailGroup.POST("/ccl", ccl.CCL)
 	}
+
 	systemGroup := router.Group("/system")
 	{
 		systemGroup.GET("/list", system.List)
@@ -45,9 +42,16 @@ func Run(addr string) {
 	router.Static("/static/js", "./common/view/js")
 	router.Static("/static/image", "./common/view/image")
 	router.Static("/static/html", "./common/view/image")
-	router.LoadHTMLFiles("./common/view/html/tips.html", "./common/view/html/catalogue.html")
+	router.LoadHTMLFiles("./common/view/html/tips.html", "./common/view/html/catalogue.html",
+		"./common/view/html/tab.html", "./common/view/html/cll.html")
 	router.GET("/download", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "tips.html", gin.H{})
+	})
+	router.GET("/index", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "tab.html", gin.H{})
+	})
+	router.GET("/cll", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "cll.html", gin.H{})
 	})
 	router.GET("/catalogue", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "catalogue.html", gin.H{})
@@ -55,85 +59,4 @@ func Run(addr string) {
 	if err := router.Run(addr); err != nil {
 		panic(err)
 	}
-}
-
-func Recover(c *gin.Context) {
-	defer func() {
-		if err := recover(); err != nil {
-			stack := Stack(3)
-			tools.Logger.Error(fmt.Sprintf("api 发生panic：%v,stack:%s", err, string(stack)))
-			c.JSON(500, "服务器发生错误,请稍后再试")
-			c.Abort()
-		}
-	}()
-	c.Next()
-}
-
-func Stack(skip int) []byte {
-	buf := new(bytes.Buffer) // the returned data
-	// As we loop, we open files and read them. These variables record the currently
-	// loaded file.
-	var lines [][]byte
-	var lastFile string
-	for i := skip; ; i++ { // Skip the expected number of frames
-		pc, file, line, ok := runtime.Caller(i)
-		if !ok {
-			break
-		}
-		// Print this much at least.  If we can't find the source, it won't show.
-		fmt.Fprintf(buf, "%s:%d (0x%x)\n", file, line, pc)
-		if file != lastFile {
-			data, err := ioutil.ReadFile(file)
-			if err != nil {
-				continue
-			}
-			lines = bytes.Split(data, []byte{'\n'})
-			lastFile = file
-		}
-		fmt.Fprintf(buf, "\t%s: %s\n", function(pc), source(lines, line))
-	}
-	return buf.Bytes()
-}
-
-var (
-	dunno     = []byte("???")
-	centerDot = []byte("·")
-	dot       = []byte(".")
-	slash     = []byte("/")
-
-	reset = "\033[0m"
-)
-
-// source returns a space-trimmed slice of the n'th line.
-func source(lines [][]byte, n int) []byte {
-	n-- // in stack trace, lines are 1-indexed but our array is 0-indexed
-	if n < 0 || n >= len(lines) {
-		return dunno
-	}
-	return bytes.TrimSpace(lines[n])
-}
-
-// function returns, if possible, the name of the function containing the PC.
-func function(pc uintptr) []byte {
-	fn := runtime.FuncForPC(pc)
-	if fn == nil {
-		return dunno
-	}
-	name := []byte(fn.Name())
-	// The name includes the path name to the package, which is unnecessary
-	// since the file name is already included.  Plus, it has center dots.
-	// That is, we see
-	//	runtime/debug.*T·ptrmethod
-	// and want
-	//	*T.ptrmethod
-	// Also the package path might contains dot (e.g. code.google.com/...),
-	// so first eliminate the path prefix
-	if lastSlash := bytes.LastIndex(name, slash); lastSlash >= 0 {
-		name = name[lastSlash+1:]
-	}
-	if period := bytes.Index(name, dot); period >= 0 {
-		name = name[period+1:]
-	}
-	name = bytes.Replace(name, centerDot, dot, -1)
-	return name
 }

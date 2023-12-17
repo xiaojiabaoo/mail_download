@@ -104,6 +104,13 @@ func StringToFloat64(s string) float64 {
 	return value
 }
 
+func AnyToString(data any) string {
+	if data != nil {
+		return data.(string)
+	}
+	return ""
+}
+
 // 字符串转int,失败返回默认值,没有默认值返回）
 func Int2Str(i int) string {
 	return strconv.Itoa(i)
@@ -407,10 +414,13 @@ func CreateUuid() string {
 	return uuid.NewV4().String()
 }
 
-func VerifyEmail(email string) bool {
-	pattern := `\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*` //匹配电子邮箱
-	reg := regexp.MustCompile(pattern)
-	return reg.MatchString(email)
+func ValidEmail(email string) bool {
+	// 定义邮箱地址的正则表达式
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+
+	// 使用正则表达式匹配邮箱地址
+	match, _ := regexp.MatchString(emailRegex, email)
+	return match
 }
 
 // 并发安全对象

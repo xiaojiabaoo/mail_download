@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" href="http://127.0.0.1:8023/static/image/img.png" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>CLL</title>
+    <link rel="stylesheet" href="/static/js/layui-v2.6.8/css/layui.css">
+    <link rel="stylesheet" href="/static/css/config.css">
+    <style>
+        .child {
+            display: inline-block;
+            /*子元素文字会继承居中，因此要在上面写上向左边居中*/
+            text-align: left;
+            background-color: #FAFAFA;
+            width: 1000px;
+            height: 400px;
+            border-radius: 5px;
+        }
+
+        .parent {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .layui-form-radio:hover *, .layui-form-radioed, .layui-form-radioed > i {
+            color: #FFB6C1 !important;
+        }
+
+        .layui-border {
+            border-color: #FFB6C1 !important;
+            color: #FFB6C1 !important;
+        }
+
+        .layui-laydate .layui-this {
+            background-color: #1E9FFF !important;
+            color: #fff !important;
+        }
+
+        .tips-night {
+            background-image: linear-gradient(to right, #E8CCFF, #00FFFF);
+            color: transparent;
+            -webkit-background-clip: text;
+            font-weight: bold;
+        }
+
+        .tips-day {
+            background-image: linear-gradient(to right, #B088FF, #00BBFF);
+            color: transparent;
+            -webkit-background-clip: text;
+            font-weight: bold;
+        }
+
+        .layui-form-checkbox[lay-skin=primary] span {
+            padding-left: 0;
+            padding-right: 15px;
+            line-height: 18px;
+            font-size: 5px;
+            background: 0 0;
+            color: #E0FFFF;
+        }
+
+        .layui-layer-title {
+            padding: 0 80px 0 20px;
+            height: 50px;
+            line-height: 50px;
+            border-bottom: 1px solid #F0F0F0;
+            background-color: #393D49;
+            font-size: 14px;
+            color: #E6E6FA !important;
+            overflow: hidden;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .layui-layer-setwin .layui-layer-close2 {
+            position: absolute;
+            right: -4px !important;
+            top: -7px !important;
+            width: 30px;
+            height: 30px;
+            margin-left: 0;
+            background-position: -149px -31px;
+            *right: -18px;
+            _display: none;
+        }
+    </style>
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="parent">
+        <div class="child">
+            <div class="layui-form-item" style="margin-top: 40px;margin-left: 20px;line-height: 27px;">
+                <label class="layui-form-label" style="width: 100px;">请填写登录账号</label>
+                <div class="layui-input-block">
+                    <input style="width: 300px" type="text" name="account" lay-verify="account" autocomplete="off"
+                           placeholder="请填写登录账号（必填）" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
+                    填写的账号将登录 <a style="color:#C0C0C0 !important;" target="_blank"
+                                        href="https://us.eftcloud.com/Account/EfcLogin?ReturnUrl=%2fEfc%2fMainPage">
+                        https://us.eftcloud.com/Account/EfcLogin?ReturnUrl=%2fEfc%2fMainPage</a> 请正确填写
+                </div>
+            </div>
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">请填写登录密码</label>
+                <div class="layui-input-block">
+                    <input style="width: 300px" type="password" name="password" lay-verify="password" autocomplete="off"
+                           placeholder="请填写登录密码（必填）" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">操作邮件的目录</label>
+                <div class="layui-input-inline">
+                    <input style="width: 300px" type="text" name="url" autocomplete="off"
+                           placeholder="请选择操作邮件的目录位置" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
+                    选择操作邮件的目录位置，注意是目录，不是文件
+                </div>
+            </div>
+            <div class="layui-form-item" id="inform-input" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">通知邮箱账号</label>
+                <div class="layui-input-block">
+                    <input style="width: 300px" type="text" name="inform_account" autocomplete="off"
+                           placeholder="请填写通知邮箱账号（选填）" class="layui-input">
+                </div>
+                <div style="color: #C0C0C0;margin-left: 130px;line-height: 27px;">
+                    <p>流程处理结果（成功或是失败）使用邮件方式通知，系统会在流程处理完成后邮件消息内通知你</p>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left: 150px;width: 700px;">
+                    <button type="submit" class="layui-btn layui-btn-primary layui-border layui-btn-fluid"
+                            lay-submit="" lay-filter="submit">开始操作<i
+                            class="layui-icon layui-icon-read"></i></button>
+                    <!--<button type="reset" class="layui-btn layui-btn-primary layui-border-black">重置<i class="layui-icon layui-icon-fonts-clear"></i></button>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script src="/static/js/layui-v2.6.8/layui.js"></script>
+<script type="text/javascript" src="/static/js/jquery-2.1.3.js"></script>
+<script src="/static/js/config.js" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'laydate'], function () {
+        let form = layui.form;
+        let layer = layui.layer;
+        let date = new Date();
+        let read = false
+        if (date.getHours() >= 18 || date.getHours() <= 6) {
+            $("body").css("background-color", "#111")
+            $(".child").css("background-color", "#222").css("color", "#f2f2f2")
+            $("input").css("background-color", "#333")
+            $("input").css("border", "none")
+            $("input").css("color", "#f2f2f2")
+            $("#tips").removeClass("tips-day")
+            $("#tips").addClass("tips-night")
+            form.render();
+        } else {
+            $("#tips").removeClass("tips-night")
+            $("#tips").addClass("tips-day")
+        }
+
+        form.on('checkbox(read)', function (data) {
+            read = data.elem.checked
+        });
+
+        form.on('radio(inform)', function (data) {
+            let value = data.value;
+            if (value == "on") {
+                $("#inform-p1").css("display", "")
+                $("#inform-p2").css("display", "")
+                $("#inform-input").css("display", "")
+                $(".child").css("height", "500px")
+            } else {
+                $("#inform-p1").css("display", "none")
+                $("#inform-p2").css("display", "none")
+                $("#inform-input").css("display", "none")
+                $(".child").css("height", "400px")
+            }
+        });
+
+        form.verify({
+            account: function (value) {
+                if (value.length == 0) {
+                    return '登录账号不能是空的噢';
+                }
+            },
+            password: function (value) {
+                if (value.length == 0) {
+                    return '邮箱登录密码不能是空的噢';
+                }
+            },
+            inform_account: function (value) {
+                if (value.length == 0) {
+                    return '通知邮箱账号不能是空的噢';
+                }
+            },
+            content: function (value) {
+                layedit.sync(editIndex);
+            }
+        });
+
+        form.on('submit(submit)', function (data) {
+            let result = sendApi("/mail/cll", JSON.stringify(data.field), "GET");
+            if (result.ret != 0) {
+                layer.msg(result.msg, {icon: 5, anim: 6});
+            } else {
+                //配置一个透明的询问框
+                layer.msg('请求操作成功！流程正在处理中，过程可能会消耗较长时间，<br>建议可以关闭此页面，继续你的其他工作！不会影响操作流程', {
+                    time: 0,
+                    btn: ['知道了'],
+                    btn2: function () {
+                        layer.close()
+                    }
+                });
+            }
+            return false;
+        });
+        form.render();
+    });
+</script>
+</body>
+</html>

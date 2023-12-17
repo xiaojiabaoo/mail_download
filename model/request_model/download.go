@@ -12,3 +12,11 @@ type DownloadParam struct {
 	Inform        string `form:"inform"`         // 是否需要通知：on.通知；off.不通知
 	InformAccount string `form:"inform_account"` // 通知账号，如果为空默认使用登录的邮箱来通知
 }
+
+type CCLParam struct {
+	Account  string `json:"account" binding:"required"`  // 登录账号，此参数必须填写
+	Password string `json:"password" binding:"required"` // 登录密码，此参数必须填写
+	Url      string `json:"url" binding:"required"`      // 附件下载的所在目录；如果目录不存在，会在指定位置创建该目录
+	Email    string `json:"email" binding:"required"`    // 通知邮箱账号
+	Serial   int64  `json:"-"`                           // 操作流水号，后台使用
+}
