@@ -73,7 +73,7 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 			switch {
 			case strings.Index(no, "-") < 0:
 				//==========海运单号===========
-				err = shipping.Shipping(order)
+				types, err = shipping.Shipping(order, param)
 			case strings.Index(no, "-") >= 0:
 				//==========空运单号===========
 				types, err = air_transport.AirTransport(order, param)

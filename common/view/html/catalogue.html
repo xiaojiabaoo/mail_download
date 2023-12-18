@@ -33,7 +33,7 @@
             for (let i = 0; i < data.length; i++) {
                 let path = data[i].path;
                 path = path.replaceAll(":","")
-                path = path.replaceAll("\\","")
+                path = path.replaceAll("\\",'\'')
                 str += '<p><div id="wiew-list" onclick="" value="'+data[i].full_path+'">' +
                     '<img src="/static/image/file.png" width="17px" height="17px"' +
                     '<span> '+path+'</span>' +
