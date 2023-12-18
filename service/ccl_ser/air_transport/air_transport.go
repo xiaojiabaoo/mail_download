@@ -68,7 +68,7 @@ func AirTransport(order model.OrderParam, param request_model.CCLParam) (int64, 
 	}
 	tools.Logger(param.Serial, "检测完成，未生成AP数据", "")
 	//-------------------请求GetAimHbls数据-------------------
-	tools.Logger(param.Serial, "模拟点击”List HAWBs“，跳转至”List HAWBs“页面", "")
+	tools.Logger(param.Serial, "前往”List HAWBs“页面", "")
 	hbls, err = request_http.GetAimHbls(master.Rows[0].AimMasterId, order.Login)
 	if err != nil {
 		return types, err

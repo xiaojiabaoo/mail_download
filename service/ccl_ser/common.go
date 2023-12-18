@@ -24,21 +24,30 @@ func CLL(param request_model.CCLParam) error {
 	if !tools.ValidEmail(param.Email) {
 		return customErr.New(customErr.EMAIL_FORMAT_ERROR, "")
 	}
+	_, ok := tools.ProcessMap.Load(param.Account)
+	if ok {
+		return customErr.New(customErr.ACCOUNT_TWO_PROCESSES_ERROR, "")
+	}
+	tools.ProcessMap.Store(param.Account, param.Serial) // 添加本次操作表示
 	tools.Logger(param.Serial, fmt.Sprintf(`-----------------------分隔符-开始准备工作------------------------`), "")
 	tools.Logger(param.Serial, fmt.Sprintf(`客户端发出CCL操作流程指令，开始执行指令；请求信息：%+v`, param), "")
 	fileMap, err = ReadPdfGroup(param.Url) //获取指定目录下的所有PDF文件
 	if err != nil {
+		tools.ProcessMap.Delete(param.Account)
 		return err
 	}
 	if len(fileMap) > 500 {
+		tools.ProcessMap.Delete(param.Account)
 		return customErr.New(customErr.TOO_MANY_FILES, "")
 	}
 	tools.Logger(param.Serial, "开始模拟登录CCL系统", "")
 	login, err = Login(param.Account, param.Password) //模拟登录系统，检测账号密码是否正确
 	if err != nil {
+		tools.ProcessMap.Delete(param.Account)
 		return err
 	}
 	if login.Message != "系统验证处理中，请稍侯......." {
+		tools.ProcessMap.Delete(param.Account)
 		return customErr.New(customErr.CLL_LOGIN_ERROR, "")
 	}
 	tools.Logger(param.Serial, fmt.Sprintf(`模拟登录CCL系统成功，系统登录响应结果：%+v`, login), "")
@@ -59,6 +68,7 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 	tools.Logger(param.Serial, "开始模拟点击Query MAWB/Query Master功能", "")
 	queryInfo, err = request_http.GetQueryInfo(login) // 模拟查询信息
 	if err != nil {
+		tools.ProcessMap.Delete(param.Account)
 		go tools.MailAttachment(param.Email, tools.CCL_RESULT_FAIL, param.Serial)
 		return err
 	}
@@ -66,7 +76,7 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 	for file, pdf := range fileMap {
 		log = fmt.Sprintf(`-----------------------分隔符-开始操作第%d个文件，共%d个，文件名：%s------------------------`, fileNumber, len(fileMap), file)
 		tools.Logger(param.Serial, log, "")
-		log = fmt.Sprintf(`检测出 Amount：%v，Invoice No：%s，主单号（Master No/MAWB No）：%v`, pdf.Amount, pdf.InvoiceNo, pdf.MasterMawbNo)
+		log = fmt.Sprintf(`在当前文件中检测出 Amount：%v，Invoice No：%s，主单号（Master No/MAWB No）：%v`, pdf.Amount, pdf.InvoiceNo, pdf.MasterMawbNo)
 		tools.Logger(param.Serial, log, "")
 		for _, no := range pdf.MasterMawbNo {
 			order := model.OrderParam{FileName: file, MasterMawbNo: no, QueryInfo: queryInfo, PdfData: pdf, Login: login}
@@ -77,15 +87,16 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 			case strings.Index(no, "-") >= 0:
 				//==========空运单号===========
 				types, err = air_transport.AirTransport(order, param)
-				count, ok := typesMap[types]
-				if ok {
-					count++
-				}
-				typesMap[types] = count
 			default:
 				tools.Logger(param.Serial, fmt.Sprintf(`%s未检测出是海运单号还是空运单号，请人工核实`, file), tools.LOG_LEVEL_ERROR)
 			}
+			count, ok := typesMap[types]
+			if ok {
+				count++
+			}
+			typesMap[types] = count
 			if err != nil {
+				tools.ProcessMap.Delete(param.Account)
 				go tools.MailAttachment(param.Email, tools.CCL_RESULT_FAIL, param.Serial)
 				return err
 			}
@@ -111,5 +122,6 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 		}
 	}
 	go tools.MailAttachment(param.Email, result, param.Serial)
+	tools.ProcessMap.Delete(param.Account)
 	return nil
 }

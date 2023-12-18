@@ -42,14 +42,15 @@ const (
 	FILE_DOWNLOAD_CLASSIFY_ERROR = 30011
 	GET_SYSTEM_PATH_ERROR        = 30012
 
-	CLL_LOGIN_ERROR       = 40001
-	INVOICENO_EMPTY_ERROR = 40002
-	INVOICENO_ERROR       = 40003
-	DIRECTORY_FILE_ERROR  = 40004
-	READING_FILE_ERROR    = 40005
-	OPEN_FILE_ERROR       = 40006
-	EMAIL_FORMAT_ERROR    = 40007
-	TOO_MANY_FILES        = 40008
+	CLL_LOGIN_ERROR             = 40001
+	INVOICENO_EMPTY_ERROR       = 40002
+	INVOICENO_ERROR             = 40003
+	DIRECTORY_FILE_ERROR        = 40004
+	READING_FILE_ERROR          = 40005
+	OPEN_FILE_ERROR             = 40006
+	EMAIL_FORMAT_ERROR          = 40007
+	TOO_MANY_FILES              = 40008
+	ACCOUNT_TWO_PROCESSES_ERROR = 40009
 )
 
 var ErrText = map[int64]string{
@@ -75,14 +76,15 @@ var ErrText = map[int64]string{
 	FILE_DOWNLOAD_CLASSIFY_ERROR: "请选择下载目录划分级别",
 	GET_SYSTEM_PATH_ERROR:        "获取系统路径出现错误",
 
-	CLL_LOGIN_ERROR:       "账号或密码错误，请重新填写",
-	INVOICENO_EMPTY_ERROR: "未识别到单号或是单号错误",
-	INVOICENO_ERROR:       "单号无法识别为空运或是海运",
-	DIRECTORY_FILE_ERROR:  "请确保该目录下只含有pdf文件",
-	READING_FILE_ERROR:    "读取目录文件失败，请检查目录地址是否填写正确",
-	OPEN_FILE_ERROR:       "打开%s文件失败，请检查文件是否被顺坏",
-	EMAIL_FORMAT_ERROR:    "请填写正确的邮箱格式",
-	TOO_MANY_FILES:        "单次操作的PDF数量不能超过500个，请减少文件数量为<=500",
+	CLL_LOGIN_ERROR:             "账号或密码错误，请重新填写",
+	INVOICENO_EMPTY_ERROR:       "未识别到单号或是单号错误",
+	INVOICENO_ERROR:             "单号无法识别为空运或是海运",
+	DIRECTORY_FILE_ERROR:        "请确保该目录下只含有pdf文件",
+	READING_FILE_ERROR:          "读取目录文件失败，请检查目录地址是否填写正确",
+	OPEN_FILE_ERROR:             "打开%s文件失败，请检查文件是否被顺坏",
+	EMAIL_FORMAT_ERROR:          "请填写正确的邮箱格式",
+	TOO_MANY_FILES:              "单次操作的PDF数量不能超过500个，请减少文件数量为<=500",
+	ACCOUNT_TWO_PROCESSES_ERROR: "一个账号不能同时操作多个流程，请等待当前流程操作完成",
 }
 
 func GetErrMsg(code int64) string {

@@ -1,5 +1,7 @@
 package tools
 
+import "sync"
+
 var (
 	LOG_LEVEL_INFO         = "INFO"         // 日志信息等级类型，日志存储级别：INFO
 	LOG_LEVEL_SYSTEM_ERROR = "SYSTEM_ERROR" // 日志信息等级类型，日志存储级别：系统ERROR
@@ -13,4 +15,8 @@ const (
 	CCL_RESULT_PART_SUCCESS = "部分成功"
 	CCL_RESULT_PART_FAIL    = "部分失败"
 	CCL_RESULT_FAIL         = "失败"
+)
+
+var (
+	ProcessMap = sync.Map{}
 )
