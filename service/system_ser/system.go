@@ -31,12 +31,13 @@ func List(param request_model.SysListParam) ([]response_model.SystemList, error)
 		return nil, customErr.New(customErr.GET_SYSTEM_PATH_ERROR, "")
 	}
 	for _, v := range files {
-		if v.IsDir() {
-			data = append(data, response_model.SystemList{
-				Path: param.Path + `\` + v.Name(),
-				Name: v.Name(),
-			})
+		if !v.IsDir() {
+			continue
 		}
+		data = append(data, response_model.SystemList{
+			Path: param.Path + `\` + v.Name(),
+			Name: v.Name(),
+		})
 	}
 	return data, nil
 }

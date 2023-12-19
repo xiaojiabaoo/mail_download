@@ -40,13 +40,13 @@
 
         .tips-night {
             background-image: linear-gradient(to right, #E8CCFF, #00FFFF);
-            color: transparent;
+            /*color: transparent;*/
             -webkit-background-clip: text;
             font-weight: bold;
         }
 
         .tips-day {
-            background-image: linear-gradient(to right, #B088FF, #00BBFF);
+            background-image: linear-gradient(to right, #E8CCFF, #00FFFF);
            /* color: transparent;*/
             -webkit-background-clip: text;
             font-weight: bold;
@@ -60,30 +60,6 @@
             background: 0 0;
             color: #E0FFFF;
         }
-
-        .layui-layer-title {
-            padding: 0 80px 0 20px;
-            height: 50px;
-            line-height: 50px;
-            border-bottom: 1px solid #F0F0F0;
-            background-color: #393D49;
-            font-size: 14px;
-            color: #E6E6FA !important;
-            overflow: hidden;
-            border-radius: 2px 2px 0 0;
-        }
-
-        .layui-layer-setwin .layui-layer-close2 {
-            position: absolute;
-            right: -4px !important;
-            top: -7px !important;
-            width: 30px;
-            height: 30px;
-            margin-left: 0;
-            background-position: -149px -31px;
-            *right: -18px;
-            _display: none;
-        }
     </style>
 </head>
 <body>
@@ -92,14 +68,14 @@
         <div class="child">
             <div id="tips" class="" style="margin-top: 40px;margin-left: 50px;line-height: 27px;">
                 <span>
-                    <h3>怎样看程序是否跑完/附件是否下载完：</h3>
-                        <p>   程序控制台（启动的那个黑板板）会提示文字：所有邮件下载完成，总耗时：xxx分钟；</p>
+                    <h3>如何知道我的邮件是否下载完成或是该程序是否执行完成：</h3>
+                        <p>   第一种：下面选择需要邮件通知并填写你的邮箱信息，系统会在下载完成后自动给你发送邮件通知</p>
+                        <p>   第二种：程序控制台（启动的那个黑板板）会提示文字：所有邮件下载完成，总耗时：xxx分钟；</p>
                         <p>   只要有上面这句话显示，即表示程序已经正常执行完毕，所有附件已经下载完成，并附带显示下载附件总共消耗的时间</p>
-                        <p>   如果是显示“正在解析加载中”或是“已获取到邮件”或是一直在刷新程序控制台的信息，即表示程序正在解析下载附件中，请耐心等待</p>
-                   <h3>附件下载中途遇到错误会怎样提示：</h3>
-                        <p>   下载附件途中如遇到错误，服务会记录该错误信息并继续下载后面的附件，待所有附件下载完成后会在控制台末尾显示错误信息</p>
-                        <p>   错误记录从以 “以下是下载附件时记录的报错信息-开始” 开始到以 “以上是下载附件时记录的报错信息-结束” 结束</p>
-                        <p>   如果在控制台未显示该字样，表示附件下载中途没有错误信息</p>
+                    <h3>附件下载中途遇到错误会怎样操作或提示：</h3>
+                        <p>   下载附件途中如遇到错误，服务会记录该本次错误信息并继续下载后面的附件</p>
+                        <p>   如果选择的是上面的第一种方式：错误信息会在通知邮件的附件中</p>
+                        <p>   如果选择的是上面的第二种方式：错误信息会在程序控制台输出</p>
                     <h3>附件全部下载完成需要多久：</h3>
                         <p>   下载时间由下载的邮件数量、附件内容的大小和网络而决定</p>
                         <p>   正常网络下，一个附件下载平均速度为0.5秒；经测试，下载8000个附件的时间大约是87分钟（数据仅供参考）</p>
@@ -137,31 +113,43 @@
                     <input style="width: 300px" type="text" name="url" autocomplete="off"
                            placeholder="请填写附件需要下载到哪个位置" class="layui-input">
                 </div>
-                <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;padding: 5px 0!important;">
+                <!--<div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;padding: 5px 0!important;">
                     <button type="button" id="select" class="layui-btn layui-btn-sm layui-btn-primary">选择目录</button>
-                </div>
+                </div>-->
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
                     如果填写的目录不存在，程序会自动创建该目标；如果未填写目录，下载的附件默认会存放在C:\mail_file_download中
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">附件下载方式</label>
+                <div class="layui-input-block">
+                    <input lay-filter="download_type" type="radio" name="download_type" value="time" title="根据时间范围下载" checked="">
+                    <input lay-filter="download_type" type="radio" name="download_type" value="count" title="根据指定数量下载" >
+                </div>
+                <div style="color: #C0C0C0;margin-left: 130px;line-height: 27px;">
+                    <p>该选项用于控制下载的方式：</p>
+                    <p>   如果选择的“根据时间范围下载”；填写的时间必须是小于现在的时间，系统会下载从填写的时间到现在为止所有邮件的附件文件</p>
+                    <p>   如果选择的“根据指定数量下载”；填写具体的数量，系统会根据数量下载最近对应数量的邮件的附件文件</p>
+                </div>
+            </div>
+            <div class="layui-form-item" id="type_count" style="margin-left: 20px;display: none;">
                 <label class="layui-form-label" style="width: 100px;">下载邮件数量</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="count" lay-verify="count" autocomplete="off"
                            placeholder="请填写下载邮件数量" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
-                    下载最新的邮件的数量；比如：10.表示下载最新的十封邮件，和下载邮件时间不能同时使用；建议下载附件较多时使用
+                    下载最新的邮件的数量；比如：10.表示下载最新的十封邮件
                 </div>
             </div>
-            <div class="layui-form-item" style="margin-left: 20px;">
+            <div class="layui-form-item" id="type_time" style="margin-left: 20px;">
                 <label class="layui-form-label" style="width: 100px;">下载邮件时间</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="time" placeholder="请填写下载邮件时间范围"
                            lay-verify="time" class="layui-input" id="time" readonly>
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color: #C0C0C0 !important;margin-left: 120px;"> 
-                    下载这个时间（>=这个时间）到当前时间的所有邮件附件，和下载邮件数量不能同时使用；建议下载附件较少时使用
+                    填写下载开始时间，从开始时间到现在时间的所有邮件附件
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
@@ -240,8 +228,6 @@
         let layer = layui.layer;
         let laydate = layui.laydate;
         let date = new Date();
-        let times = 11
-        let read = false
         if (date.getHours() >= 18 || date.getHours() <= 6) {
             $("body").css("background-color", "#111")
             $(".child").css("background-color", "#222").css("color", "#f2f2f2")
@@ -256,76 +242,6 @@
             $("#tips").addClass("tips-day")
         }
 
-        let interval = setInterval(function () {
-            if (times > 0) {
-                times--;
-                $("#tip-time").text(times)
-            } else {
-                $("#tip-last-time").text("")
-                clearInterval(interval);
-            }
-        }, 1000);
-
-        let item = localStorage.getItem("mail-download-read");
-        if (item == "" || item == null || item == undefined) {
-            let open = layer.open({
-                type: 1,
-                title: '<h2>使用前请先仔细阅读以下介绍</h2>',
-                //closeBtn: false,
-                area: ['30%', '80%'],
-                shade: 0.8,
-                id: 'LAY_layuipro', //设定一个id，防止重复弹出
-                //btn: ['好的'],
-                btnAlign: 'c',
-                moveType: 1, //拖拽模式，0或者1
-                content: '<div style="padding: 50px; background-color: #393D49; color: #E6E6FA;line-height: 25px;">' +
-                    /*'<h2>使用前请先仔细阅读以下介绍</h2><br>' +*/
-                    '<p><span style="font-weight: bold;color:#FFDAB9;">1.怎样看程序是否跑完/附件是否下载完</span></p>' +
-                    '<p>- 程序控制台（启动的那个黑板板）会提示文字：所有邮件下载完成，总耗时：xxx分钟；</p>' +
-                    '<p>- 只要有上面这句话显示，即表示程序已经正常执行完毕，所有附件已经下载完成，并附带显示下载附件总共消耗的时间</p>' +
-                    '<p>- 如果是显示“正在解析加载中”或是“已获取到邮件”或是一直在刷新程序控制台的信息，即表示程序正在解析下载附件中，请耐心等待</p>' +
-                    '<p><span style="font-weight: bold;color:#FFDAB9;">2.附件下载中途遇到错误会怎样提示</span></p>' +
-                    '<p>- 下载附件途中如遇到错误，服务会记录该错误信息并继续下载后面的附件，待所有附件下载完成后会在控制台末尾显示错误信息</p>' +
-                    '<p>- 错误记录从以 “以下是下载附件时记录的报错信息-开始” 开始到以 “以是上下载附件时记录的报错信息-结束” 结束</p>' +
-                    '<p>- 如果在控制台未显示该字样，表示附件下载中途没有错误信息</p>' +
-                    '<p><span style="font-weight: bold;color:#FFDAB9;">3.附件全部下载完成需要多久</span></p>' +
-                    '<p>- 下载时间由下载的邮件数量、附件内容的大小和网络而决定</p>' +
-                    '<p>- 正常网络下，一个附件下载平均速度为0.5秒；经测试，下载8000个附件的时间大约是87分钟（数据仅供参考）</p>' +
-                    '<p>- 建议 如果是第一次下载（需要下载的附件较多），使用数量方式下载会比较快</p>' +
-                    '<p>- 建议 如果是增量下载（只需要下载的较少的附件），使用时间方式下载会比较快</p>' +
-                    '<span style="font-weight: bold;color:#FFDAB9;">4.邮箱服务器地址为必填项，常见邮箱类型服务地址请参考</span>（其它未提供的非常见邮箱地址请自行搜索查询）<br>' +
-                    '      <a style="color: #00BBFF" href="https://www.youqiyi.net/article260/detail276.html" target="_blank">https://www.youqiyi.net/article260/detail276.html</a><br>' +
-                    '<br>' +
-                    '以上为常见且重要的信息提示，更多其它的提示信息请仔细阅读下载页的内容<br>' +
-                    '<form class="layui-form">' +
-                    '<input type="checkbox" name="read" value="1" lay-skin="primary" lay-filter="read" title="我已仔细阅读并知晓以上重要提示，且下次不再提醒我">' +
-                    '<span id="tip-last-time" style="font-size: 5px;">浏览剩余时间：<span id="tip-time">40</span>秒</span>' +
-                    '</form>' +
-                    '</div>',
-                cancel: function () {
-                    if (times > 0) {
-                        layer.msg('<span style="color: #90EE90;">以上重要信息提示还需要' + times + '秒的阅读时间，请仔细阅读以上提示</span>', {
-                            time: 3000
-                        });
-                        return false
-                    } else {
-                        if (!read) {
-                            layer.msg('<span style="color: #90EE90;">请勾选“我已仔细阅读并知晓以上重要提示”！</span>', {
-                                time: 3000
-                            });
-                            return false
-                        } else {
-                            localStorage.setItem("mail-download-read", "true");
-                        }
-                    }
-                }
-            });
-        }
-
-        form.on('checkbox(read)', function (data) {
-            read = data.elem.checked
-        });
-
         form.on('radio(inform)', function (data) {
             let value = data.value;
             if (value == "on") {
@@ -338,6 +254,19 @@
                 $("#inform-p2").css("display", "none")
                 $("#inform-input").css("display", "none")
                 $(".child").css("height", "1450px")
+            }
+        });
+
+        form.on('radio(download_type)', function (data) {
+            let value = data.value;
+            if (value == "time") {
+                $("#type_time").css("display", "")
+                $("#type_count").css("display", "none")
+                $("input[name='count']").val("")
+            } else {
+                $("#type_time").css("display", "none")
+                $("#type_count").css("display", "")
+                $("input[name='time']").val("")
             }
         });
 
@@ -376,25 +305,46 @@
         });
 
         form.on('submit(submit)', function (data) {
-            let result = sendApi("/mail/download", JSON.stringify(data.field), "GET");
-            if (result.ret != 0) {
-                layer.msg(result.msg, {icon: 5, anim: 6});
-            } else {
-                //配置一个透明的询问框
-                layer.msg('操作成功！附件正在下载中，过程可能会消耗较长时间，<br>建议可以关闭此页面，继续你的其他工作！不会影响附件的下载', {
-                    time: 0,
-                    btn: ['知道了'],
-                    btn2: function () {
-                        layer.close()
+            let param = '{"server":"'+data.field.server+'","account":"'+data.field.account+'","password":"'+data.field.password+'",' +
+                '"time":"'+data.field.time+'","count":'+data.field.count+',"url":"'+data.field.url+'","classify":"'+data.field.classify+'",' +
+                '"type":"'+data.field.type+'","inform":"'+data.field.inform+'","inform_account":"'+data.field.inform_account+'"}'
+            show_loading()
+            $.ajax({
+                url: '/mail/download',
+                method: 'POST',
+                data: param,
+                contentType: 'application/json; charset=utf-8',
+                success: function(result) {
+                    if (result.ret != 0) {
+                        layer.msg(result.msg, {icon: 5, anim: 6});
+                    } else {
+                        //配置一个透明的询问框
+                        let str = '<div style="text-align: left;font-weight: bold;">请求操作成功！，操作流水号：<span style="color: #FFB6C1;">'+result.data+'</span> 妥善保管；可用于查找操作记录' +
+                            '<br/>附件已开始下载。请耐心等待；处理结果请查看记录日志文件或留意您的邮箱（如有填写）' +
+                            '<br>如果不想等待，关闭此页面继续你的其他工作！不影响操作流程</div>'
+                        layer.msg(str, {
+                            time: 0,
+                            btn: ['知道了'],
+                            btn2: function () {
+                                layer.close()
+                            }
+                        });
                     }
-                });
-            }
+                },
+                error: function(xhr, status, error) {
+                    // 处理错误情况
+                    layer.msg("服务器内部错误", {icon: 5, anim: 6});
+                },
+                complete: function() {
+                    // 请求完成后隐藏加载中动画
+                    hide_loading()
+                }
+            });
             return false;
         });
         form.render();
 
         $("#select").click(function(){
-            let result = sendApi("/system/list", '{"path":""}', "GET");
             layer.open({
                 type: 2,
                 area: ['300px', '400px'],

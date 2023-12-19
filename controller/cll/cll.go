@@ -21,5 +21,5 @@ func CCL(ctx *gin.Context) {
 	}
 	param.Serial = now.Unix()
 	err = ccl_ser.CLL(param)
-	response.ResponseData(ctx, err, param.Serial, nil)
+	response.ResponseData(ctx, err, param.Serial, param.Serial)
 }

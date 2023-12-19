@@ -24,19 +24,18 @@
 <script src="/static/js/config.js" charset="utf-8"></script>
 <script>
     layui.use(['layer'], function () {
-        let result = sendApi("/system/list", '{"path":""}', "GET");
+        let result = sendPostApi("/system/list", '{"path":""}', "GET");
         if (result.ret != 0) {
             layer.msg(result.msg, {icon: 5, anim: 6});
         } else {
             let data = result.data;
             let str = '<div style="margin-left: 30px;margin-top: 15px;line-height: 30px;font-weight: bold;">'
             for (let i = 0; i < data.length; i++) {
-                let path = data[i].path;
-                path = path.replaceAll(":","")
-                path = path.replaceAll("\\",'\'')
-                str += '<p><div id="wiew-list" onclick="" value="'+data[i].full_path+'">' +
+                let name = data[i].name;
+                name = name.replaceAll(":","")
+                str += '<p><div class="wiew-list" data-value="'+data[i].path+'">' +
                     '<img src="/static/image/file.png" width="17px" height="17px"' +
-                    '<span> '+path+'</span>' +
+                    '<span> '+name+'</span>' +
                     '<img src="/static/image/jiantou.png" width="17px" height="17px"' +
                     '</div></p>'
             }
@@ -44,10 +43,10 @@
             $("#text").html(str)
         }
 
-
-        function wiewList() {
-            let val = $(this).val();
-            let result = sendApi("/system/list", '{"path":"'+val+'"}', "GET");
+        $(".wiew-list").click(function (data) {
+            let val = $(this).data("value");
+            let result = sendGetApi("/system/list?path="+val, 'json', "GET");
+            console.log(result)
             if (result.ret != 0) {
                 layer.msg(result.msg, {icon: 5, anim: 6});
             } else {
@@ -55,11 +54,9 @@
                 let str = '<div style="margin-left: 30px;margin-top: 15px;line-height: 30px;font-weight: bold;">'
                 for (let i = 0; i < data.length; i++) {
                     let path = data[i].path;
-                    path = path.replaceAll(":","")
-                    path = path.replaceAll("\\","")
-                    str += '<p><div id="wiew-list" value="'+data[i].full_path+'">' +
+                    str += '<p><div id="wiew-list" value="'+data[i].path+'">' +
                         '<img src="/static/image/file.png" width="17px" height="17px"' +
-                        '<span> '+path+'</span>' +
+                        '<span> '+data[i].name+'</span>' +
                         '<img src="/static/image/jiantou.png" width="17px" height="17px"' +
                         '</div></p>'
                 }
@@ -67,7 +64,7 @@
                 $("#text").html("")
                 $("#text").html(str)
             }
-        }
+        })
     });
 </script>
 </body>

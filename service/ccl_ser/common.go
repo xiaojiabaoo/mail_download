@@ -21,7 +21,7 @@ func CLL(param request_model.CCLParam) error {
 		login   response_model.LoginResp
 		fileMap = map[string]response_model.ReadPdf{}
 	)
-	if !tools.ValidEmail(param.Email) {
+	if param.Email != "" && !tools.ValidEmail(param.Email) {
 		return customErr.New(customErr.EMAIL_FORMAT_ERROR, "")
 	}
 	_, ok := tools.ProcessMap.Load(param.Account)
@@ -90,16 +90,17 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 			default:
 				tools.Logger(param.Serial, fmt.Sprintf(`%s未检测出是海运单号还是空运单号，请人工核实`, file), tools.LOG_LEVEL_ERROR)
 			}
+			if err != nil {
+				tools.ProcessMap.Delete(param.Account)
+				tools.Logger(param.Serial, fmt.Sprintf(`服务器错误导致流程中断，请联系技术人员，错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+				go tools.MailAttachment(param.Email, tools.CCL_RESULT_FAIL, param.Serial)
+				return err
+			}
 			count, ok := typesMap[types]
 			if ok {
 				count++
 			}
 			typesMap[types] = count
-			if err != nil {
-				tools.ProcessMap.Delete(param.Account)
-				go tools.MailAttachment(param.Email, tools.CCL_RESULT_FAIL, param.Serial)
-				return err
-			}
 		}
 		fileNumber++
 	}

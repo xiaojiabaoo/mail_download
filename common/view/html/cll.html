@@ -14,7 +14,7 @@
             text-align: left;
             background-color: #FAFAFA;
             width: 1000px;
-            height: 400px;
+            height: 640px;
             border-radius: 5px;
         }
 
@@ -40,14 +40,14 @@
 
         .tips-night {
             background-image: linear-gradient(to right, #E8CCFF, #00FFFF);
-            color: transparent;
+            /*color: transparent;*/
             -webkit-background-clip: text;
             font-weight: bold;
         }
 
         .tips-day {
             background-image: linear-gradient(to right, #B088FF, #00BBFF);
-            color: transparent;
+            /*color: transparent;*/
             -webkit-background-clip: text;
             font-weight: bold;
         }
@@ -90,16 +90,26 @@
 <form class="layui-form" action="">
     <div class="parent">
         <div class="child">
-            <div class="layui-form-item" style="margin-top: 40px;margin-left: 20px;line-height: 27px;">
+            <div id="tips" class="" style="margin-top: 40px;margin-left: 50px;line-height: 27px;">
+                <span>
+                    <h3>如何知道我的CCL流程是否操作完成或是该程序是否执行完成：</h3>
+                        <p>   在程序存放处的根目录下会有一个名为“logs”的目录，该目录用于存放操作记录日志文件，文件名是流水号，查看对应的记录可根据流水号查询</p>
+                        <p>   如果在下面的“通知邮箱账号”中填写了邮箱信息，系统会在操作完成后自动给该邮箱发送通知</p>
+                        <p>   发送的邮件中也会有本次操作的流水号信息，与记录日志文件的流水号对应；邮件内容中也会带有附件，附件来源“logs”目录，本次操作的记录</p>
+                   <h3>附件下载中途遇到错误会怎样操作或提示：</h3>
+                        <p>   下载附件途中如遇到错误，系统会在记录日志文件中将该本次错误信息保存并继续操作后面的流程</p>
+                </span>
+            </div>
+            <div class="layui-form-item" style="margin-top: 20px;margin-left: 20px;">
                 <label class="layui-form-label" style="width: 100px;">请填写登录账号</label>
                 <div class="layui-input-block">
                     <input style="width: 300px" type="text" name="account" lay-verify="account" autocomplete="off"
                            placeholder="请填写登录账号（必填）" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
-                    填写的账号将登录 <a style="color:#C0C0C0 !important;" target="_blank"
+                    填写的账号密码将前往 <a style="color:#C0C0C0 !important;" target="_blank"
                                         href="https://us.eftcloud.com/Account/EfcLogin?ReturnUrl=%2fEfc%2fMainPage">
-                        https://us.eftcloud.com/Account/EfcLogin?ReturnUrl=%2fEfc%2fMainPage</a> 请正确填写
+                        https://us.eftcloud.com/Account/EfcLogin?ReturnUrl=%2fEfc%2fMainPage</a> 系统进行登录；请规范填写！
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
@@ -110,23 +120,24 @@
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
-                <label class="layui-form-label" style="width: 100px;">操作邮件的目录</label>
+                <label class="layui-form-label" style="width: 100px;">操作文件的目录</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="url" autocomplete="off"
-                           placeholder="请选择操作邮件的目录位置" class="layui-input">
+                           placeholder="请选择操作文件的目录（必填）" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
-                    选择操作邮件的目录位置，注意是目录，不是文件
+                    选择操作文件的目录所在地址；注意：必须是目录而不是文件，且该目录下必须只有pdf文件，否则该操作会被终止
                 </div>
             </div>
             <div class="layui-form-item" id="inform-input" style="margin-left: 20px;">
                 <label class="layui-form-label" style="width: 100px;">通知邮箱账号</label>
                 <div class="layui-input-block">
-                    <input style="width: 300px" type="text" name="inform_account" autocomplete="off"
+                    <input style="width: 300px" type="text" name="email" autocomplete="off"
                            placeholder="请填写通知邮箱账号（选填）" class="layui-input">
                 </div>
                 <div style="color: #C0C0C0;margin-left: 130px;line-height: 27px;">
-                    <p>流程处理结果（成功或是失败）使用邮件方式通知，系统会在流程处理完成后邮件消息内通知你</p>
+                    <p>流程处理的结果（成功或失败）使用邮件方式通知，系统会在流程处理完成后发送消息至该邮件地址</p>
+                    <p>如果不填写，流程处理的结果需要到程序所在根目录的“logs”目录下，选择到具体流水号的文件查看</p>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -204,19 +215,38 @@
         });
 
         form.on('submit(submit)', function (data) {
-            let result = sendApi("/mail/cll", JSON.stringify(data.field), "GET");
-            if (result.ret != 0) {
-                layer.msg(result.msg, {icon: 5, anim: 6});
-            } else {
-                //配置一个透明的询问框
-                layer.msg('请求操作成功！流程正在处理中，过程可能会消耗较长时间，<br>建议可以关闭此页面，继续你的其他工作！不会影响操作流程', {
-                    time: 0,
-                    btn: ['知道了'],
-                    btn2: function () {
-                        layer.close()
+            show_loading()
+            $.ajax({
+                url: '/mail/ccl',
+                method: 'POST',
+                data:JSON.stringify(data.field),
+                contentType: 'application/json; charset=utf-8',
+                success: function(result) {
+                    if (result.ret != 0) {
+                        layer.msg(result.msg, {icon: 5, anim: 6});
+                    } else {
+                        //配置一个透明的询问框
+                        let str = '<div style="text-align: left;font-weight: bold;">请求操作成功！，操作流水号：<span style="color: #FFB6C1;">'+result.data+'</span> 妥善保管；可用于查找操作记录' +
+                            '<br/>流程已开始处理。请耐心等待；处理结果请查看记录日志文件或留意您的邮箱（如有填写）' +
+                            '<br>如果不想等待，关闭此页面继续你的其他工作！不影响操作流程</div>'
+                        layer.msg(str, {
+                            time: 0,
+                            btn: ['知道了'],
+                            btn2: function () {
+                                layer.close()
+                            }
+                        });
                     }
-                });
-            }
+                },
+                error: function(xhr, status, error) {
+                    // 处理错误情况
+                    layer.msg("服务器内部错误", {icon: 5, anim: 6});
+                },
+                complete: function() {
+                    // 请求完成后隐藏加载中动画
+                    hide_loading()
+                }
+            });
             return false;
         });
         form.render();

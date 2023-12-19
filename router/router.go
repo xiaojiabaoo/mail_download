@@ -30,7 +30,7 @@ func Run(addr string) {
 	router.Use(Cors())
 	mailGroup := router.Group("/mail")
 	{
-		mailGroup.GET("/download", download.Download)
+		mailGroup.POST("/download", download.Download)
 		mailGroup.POST("/ccl", ccl.CCL)
 	}
 
