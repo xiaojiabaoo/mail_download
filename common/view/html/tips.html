@@ -39,15 +39,13 @@
         }
 
         .tips-night {
-            background-image: linear-gradient(to right, #E8CCFF, #00FFFF);
-            /*color: transparent;*/
+            color: #EAECEE;
             -webkit-background-clip: text;
             font-weight: bold;
         }
 
         .tips-day {
-            background-image: linear-gradient(to right, #E8CCFF, #00FFFF);
-           /* color: transparent;*/
+            color: #1B2631;
             -webkit-background-clip: text;
             font-weight: bold;
         }
@@ -262,7 +260,7 @@
             if (value == "time") {
                 $("#type_time").css("display", "")
                 $("#type_count").css("display", "none")
-                $("input[name='count']").val("")
+                $("input[name='count']").val("0")
             } else {
                 $("#type_time").css("display", "none")
                 $("#type_count").css("display", "")
@@ -305,8 +303,12 @@
         });
 
         form.on('submit(submit)', function (data) {
+            let count = data.field.count
+            if (count == 0 || count == undefined || count == null) {
+                count = 0
+            }
             let param = '{"server":"'+data.field.server+'","account":"'+data.field.account+'","password":"'+data.field.password+'",' +
-                '"time":"'+data.field.time+'","count":'+data.field.count+',"url":"'+data.field.url+'","classify":"'+data.field.classify+'",' +
+                '"time":"'+data.field.time+'","count":'+count+',"url":"'+data.field.url+'","classify":"'+data.field.classify+'",' +
                 '"type":"'+data.field.type+'","inform":"'+data.field.inform+'","inform_account":"'+data.field.inform_account+'"}'
             show_loading()
             $.ajax({

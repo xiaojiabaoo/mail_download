@@ -57,13 +57,19 @@ func CLL(param request_model.CCLParam) error {
 
 func Operate(fileMap map[string]response_model.ReadPdf, login response_model.LoginResp, param request_model.CCLParam) error {
 	var (
-		err         error
-		log, result string
-		fileNumber  = 1
-		queryInfo   response_model.AirQueryInfo
-		types       int64
-		typesMap    = map[int64]int64{}
+		err        error
+		log        string
+		fileNumber = 1
+		queryInfo  response_model.AirQueryInfo
+		types      int64
+		typesMap   = map[int64]int64{}
 	)
+	defer func() {
+		if r := recover(); r != nil {
+			tools.ProcessMap.Delete(param.Account)
+			sendMessage(typesMap, param)
+		}
+	}()
 	time.Sleep(2 * time.Second) // 先休眠两秒钟，因为CCL系统处理比较慢，等待两秒缓冲时间
 	tools.Logger(param.Serial, "开始模拟点击Query MAWB/Query Master功能", "")
 	queryInfo, err = request_http.GetQueryInfo(login) // 模拟查询信息
@@ -104,6 +110,18 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 		}
 		fileNumber++
 	}
+	sendMessage(typesMap, param)
+	tools.ProcessMap.Delete(param.Account)
+	return nil
+}
+
+func sendMessage(typesMap map[int64]int64, param request_model.CCLParam) {
+	var (
+		result string
+	)
+	if param.Email == "" {
+		return
+	}
 	switch {
 	case len(typesMap) == 2: //说明有成功和失败的
 		if typesMap[1] >= typesMap[2] {
@@ -123,6 +141,4 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 		}
 	}
 	go tools.MailAttachment(param.Email, result, param.Serial)
-	tools.ProcessMap.Delete(param.Account)
-	return nil
 }

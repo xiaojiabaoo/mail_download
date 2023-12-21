@@ -50,24 +50,37 @@ func MergeSlice(s1 []string, s2 []string) []string {
 	return slice
 }
 
-func MailAttachment(email, result string, serial int64) error {
+func MailAttachment(email, result, serial string) error {
 	var (
-		subject = fmt.Sprintf(`CCL流程操作结果通知，流水号：%d`, serial)
+		subject = fmt.Sprintf(`CCL流程操作结果通知，流水号：%s`, serial)
 		body    string
 		text    = "后续若发现操作的数据存在错误等信息，也可查看附件中的操作记录排查问题原因"
-		path    = fmt.Sprintf(`./logs/%d.log`, serial)
+		path    = fmt.Sprintf(`./logs/%s.log`, serial)
 	)
-	switch result {
-	case CCL_RESULT_FAIL:
-		body = "CCL流程操作因服务器或CCL系统原因导致中断，请联系相关技术人员处理（已执行完成的主单号不受影响）；" + text
-	case CCL_RESULT_PART_SUCCESS:
-		body = fmt.Sprintf(`CCL流程操作已完成；此次操作仅有部分成功，其余大部分操作因数据原因未执行完成，下载附件中的操作记录查看详细信息；%s`, text)
-	case CCL_RESULT_PART_FAIL:
-		body = fmt.Sprintf(`CCL流程操作已完成；部分操作因数据原因未执行完成，下载附件中的操作记录查看详细信息；%s`, text)
-	case CCL_RESULT_ALL_SUCCESS:
-		body = "CCL流程操作已全部操作成功；" + text
-	case CCL_RESULT_ALL_FAIL:
-		body = "CCL流程操作因数据问题导致提供的PDF文件操作全部失败，下载附件中的操作记录查看详细信息；" + text
+	if strings.HasPrefix(serial, "CCL") {
+		switch result {
+		case CCL_RESULT_FAIL:
+			body = "CCL流程操作因服务器或CCL系统原因导致中断，请联系相关技术人员处理（已执行完成的主单号不受影响）；" + text
+		case CCL_RESULT_PART_SUCCESS:
+			body = fmt.Sprintf(`CCL流程操作已完成；此次操作仅有部分成功，其余大部分操作因数据原因未执行完成，下载附件中的操作记录查看详细信息；%s`, text)
+		case CCL_RESULT_PART_FAIL:
+			body = fmt.Sprintf(`CCL流程操作已完成；部分操作因数据原因未执行完成，下载附件中的操作记录查看详细信息；%s`, text)
+		case CCL_RESULT_ALL_SUCCESS:
+			body = "CCL流程操作已全部操作成功；" + text
+		case CCL_RESULT_ALL_FAIL:
+			body = "CCL流程操作因数据问题导致提供的PDF文件操作全部失败，下载附件中的操作记录查看详细信息；" + text
+		}
+	} else {
+		switch result {
+		case CCL_RESULT_FAIL:
+			body = "邮件附件下载因服务器或第三方邮件系统原因导致中断，请联系相关技术人员处理（已下载完成的邮件附件不受影响）；" + text
+		case CCL_RESULT_ALL_SUCCESS:
+			body = "邮件附件下载已全部下载成功；" + text
+		case CCL_RESULT_ALL_FAIL:
+			body = "邮箱中没有符合条件的邮件或全部下载失败，下载附件中的操作记录查看详细信息；" + text
+		case CCL_RESULT_PART_FAIL:
+			body = fmt.Sprintf(`邮件附件下载已完成；本次操作中有为下载成功的邮件附件邮件未下载成功，下载附件中的操作记录查看详细信息，%s`, text)
+		}
 	}
 	return SendMailAttachment([]string{email}, subject, body, path)
 }

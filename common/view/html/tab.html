@@ -48,6 +48,29 @@
             *right: -18px;
             _display: none;
         }
+        .layui-tab-brief>.layui-tab-title .layui-this {
+            color: #FFB6C1 !important;
+        }
+        .layui-form-checkbox[lay-skin=primary] span {
+            padding-left: 0;
+            padding-right: 15px;
+            line-height: 18px;
+            font-size: 10px;
+            background: 0 0;
+            color: #FFB6C1;
+        }
+        .layui-form-checkbox[lay-skin=primary]:hover i {
+            border-color: #FFB6C1;
+            color: #fff;
+        }
+        .layui-form-checked[lay-skin=primary] i {
+            border-color: #FFB6C1!important;
+            background-color: #FFB6C1;
+            color: #fff;
+        }
+        #LAY_layuipro {
+            background-color: #393D49 !important;
+        }
     </style>
 </head>
 <body>
@@ -80,8 +103,9 @@
 
     layui.use(['layer', 'laydate'], function () {
         let form = layui.form;
+        let layer = layui.layer;
         let date = new Date();
-        let times = 31
+        let times = 21
         let read = false
         if (date.getHours() >= 18 || date.getHours() <= 6) {
             $("body").css("background-color", "#333").css("color", "#fff")
@@ -103,60 +127,53 @@
             }
         }, 1000);
 
-        let item = localStorage.getItem("mail-download-read");
+        let item = localStorage.getItem("mail-download-read01");
         if (item == "" || item == null || item == undefined) {
             let open = layer.open({
                 type: 1,
-                title: '<h2>使用前请先仔细阅读以下介绍</h2>',
-                //closeBtn: false,
-                area: ['30%', '80%'],
-                shade: 0.8,
+                title: '<h2>首次使用介绍</h2>',
+                area: ['550px', '610px'],
+                shade: 0.5,
                 id: 'LAY_layuipro', //设定一个id，防止重复弹出
-                //btn: ['好的'],
                 btnAlign: 'c',
                 moveType: 1, //拖拽模式，0或者1
-                content: '<div style="padding: 50px; background-color: #393D49; color: #E6E6FA;line-height: 25px;">' +
+                content: '<div style="padding: 50px; color: #E6E6FA;line-height: 25px;">' +
                     /*'<h2>使用前请先仔细阅读以下介绍</h2><br>' +*/
-                    '<p><span style="font-weight: bold;color:#FFDAB9;">1.怎样看程序是否跑完/附件是否下载完</span></p>' +
-                    '<p>- 程序控制台（启动的那个黑板板）会提示文字：所有邮件下载完成，总耗时：xxx分钟；</p>' +
-                    '<p>- 只要有上面这句话显示，即表示程序已经正常执行完毕，所有附件已经下载完成，并附带显示下载附件总共消耗的时间</p>' +
-                    '<p>- 如果是显示“正在解析加载中”或是“已获取到邮件”或是一直在刷新程序控制台的信息，即表示程序正在解析下载附件中，请耐心等待</p>' +
-                    '<p><span style="font-weight: bold;color:#FFDAB9;">2.附件下载中途遇到错误会怎样提示</span></p>' +
-                    '<p>- 下载附件途中如遇到错误，服务会记录该错误信息并继续下载后面的附件，待所有附件下载完成后会在控制台末尾显示错误信息</p>' +
-                    '<p>- 错误记录从以 “以下是下载附件时记录的报错信息-开始” 开始到以 “以是上下载附件时记录的报错信息-结束” 结束</p>' +
-                    '<p>- 如果在控制台未显示该字样，表示附件下载中途没有错误信息</p>' +
-                    '<p><span style="font-weight: bold;color:#FFDAB9;">3.附件全部下载完成需要多久</span></p>' +
-                    '<p>- 下载时间由下载的邮件数量、附件内容的大小和网络而决定</p>' +
-                    '<p>- 正常网络下，一个附件下载平均速度为0.5秒；经测试，下载8000个附件的时间大约是87分钟（数据仅供参考）</p>' +
-                    '<p>- 建议 如果是第一次下载（需要下载的附件较多），使用数量方式下载会比较快</p>' +
-                    '<p>- 建议 如果是增量下载（只需要下载的较少的附件），使用时间方式下载会比较快</p>' +
-                    '<span style="font-weight: bold;color:#FFDAB9;">4.邮箱服务器地址为必填项，常见邮箱类型服务地址请参考</span>（其它未提供的非常见邮箱地址请自行搜索查询）<br>' +
-                    '      <a style="color: #00BBFF" href="https://www.youqiyi.net/article260/detail276.html" target="_blank">https://www.youqiyi.net/article260/detail276.html</a><br>' +
-                    '<br>' +
-                    '以上为常见且重要的信息提示，更多其它的提示信息请仔细阅读下载页的内容<br>' +
+                    '<p><span style="font-weight: bold;color:#FFB6C1;">一.介绍</span></p>' +
+                    '<p>本程序分为：“CCL发票邮件附件下载” 和 “EFC 海运、空运 操作流程” 两个功能模块；程序可支持后台运行</p>' +
+                    '<p><span style="font-weight: bold;color:#FFB6C1;">二.使用</span></p>' +
+                    '<p>1.&nbsp;&nbsp;在发起操作请求后，如需要实时查看操作进度和结果；可查看位于程序根目录下名为 “logs” 的目录，该目录下存储了每次的操作记录，每个操作都会有记录日志文件，根据流水号查找到对应的记录文件查看</p>' +
+                    '<p>2.&nbsp;&nbsp;在发起操作请求后，操作的最后结果也可以通过填写邮箱信息推送到你的邮箱中，邮件中会附带记录日志文件（文件来源请参考上一条）</p>' +
+                    '<p>3.&nbsp;&nbsp;如果是 “CCL发票邮件附件下载”，记录日志文件以 “MAIL” 开头；</p>' +
+                    '<p>4.&nbsp;&nbsp;如果是 “EFC海运、空运的操作流程”，记录日志文件以 “CCL” 开头；</p>' +
+                    '<p>5.&nbsp;&nbsp;程序发起操作请求后的执行时间可能会比较长，具体视网络情况而定</p>' +
+                    '<p>6.&nbsp;&nbsp;本程序操作的数据并不能保证精准无误，仅起到一个辅助工作作用，若发现下载的附件内容有误或是操作的CCL操作流程的数据有误，请根据操作流水号查询记录排查问题原因</p>' +
+                    '<p></p><br>' +
+                    '<p>更多操作上的提示请留意操作页的信息</p>' +
                     '<form class="layui-form">' +
-                    '<input type="checkbox" name="read" value="1" lay-skin="primary" lay-filter="read" title="我已仔细阅读并知晓以上重要提示，且下次不再提醒我">' +
-                    '<span id="tip-last-time" style="font-size: 14px;">浏览剩余时间：<span id="tip-time">40</span>秒</span>' +
+                    '<input type="checkbox" name="read" value="1" lay-skin="primary" lay-filter="read" title="我已仔细阅读并知晓以上提示，下次不再提醒我">' +
+                    '<span id="tip-last-time" style="font-size: 12px;">浏览剩余时间：<span id="tip-time">21</span>秒</span>' +
                     '</form>' +
                     '</div>',
                 cancel: function () {
                     if (times > 0) {
-                        layer.msg('<span style="color: #90EE90;">以上重要信息提示还需要' + times + '秒的阅读时间，请仔细阅读以上提示</span>', {
+                        layer.msg('<span style="color: #FFB6C1;">以上信息提示还需要' + times + '秒的阅读时间，请先阅读完成</span>', {
                             time: 3000
                         });
                         return false
                     } else {
                         if (!read) {
-                            layer.msg('<span style="color: #90EE90;">请勾选“我已仔细阅读并知晓以上重要提示”！</span>', {
+                            layer.msg('<span style="color: #FFB6C1;">请勾选 “我已仔细阅读并知晓以上提示” ！</span>', {
                                 time: 3000
                             });
                             return false
                         } else {
-                            localStorage.setItem("mail-download-read", "true");
+                            localStorage.setItem("mail-download-read01", "true");
                         }
                     }
                 }
             });
+            form.render();
         }
     });
 </script>

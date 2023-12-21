@@ -12,11 +12,14 @@ var (
 	mu sync.Mutex
 )
 
-func Logger(times int64, text, level string) {
+func Logger(serial string, text, level string) {
 	mu.Lock()
 	defer mu.Unlock()
 	if level == "" {
 		level = LOG_LEVEL_INFO
+	}
+	if serial == "" {
+		return
 	}
 	dir := fmt.Sprintf("./logs")
 	// 日志目录不存在会自己创建
@@ -24,7 +27,7 @@ func Logger(times int64, text, level string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	f, err := os.OpenFile(filepath.Join(dir, fmt.Sprintf("%d.log", times)), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(filepath.Join(dir, fmt.Sprintf("%s.log", serial)), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}

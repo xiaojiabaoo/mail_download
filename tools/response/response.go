@@ -16,7 +16,7 @@ type Response struct {
 }
 
 // 返回响应
-func ResponseData(c *gin.Context, err error, serial int64, data any) {
+func ResponseData(c *gin.Context, err error, serial string, data any) {
 	if data == "" || data == nil {
 		data = make([]int, 0)
 	}

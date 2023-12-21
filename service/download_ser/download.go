@@ -24,7 +24,6 @@ func Download(param request_model.DownloadParam) error {
 	var (
 		err     error
 		clients = &client.Client{}
-		now     = time.Now()
 	)
 	//校验参数
 	err = checkParam(&param)
@@ -38,28 +37,36 @@ func Download(param request_model.DownloadParam) error {
 			return customErr.New(customErr.DOWNLOAD_URL_ERROR, "")
 		}
 	}
+	tools.ProcessMap.Store(param.Account, param.Serial) // 添加本次操作表示
+	tools.Logger(param.Serial, "-----------------------分隔符-开始准备工作------------------------", "")
+	tools.Logger(param.Serial, fmt.Sprintf(`客户端发出下载邮箱附件的指令，开始执行指令；请求信息：%+v`, param), "")
+	tools.Logger(param.Serial, "开始模拟登录邮箱", "")
 	clients, err = loginEmail(param.Server, param.Account, param.Password)
 	if err != nil {
-		fmt.Println("登录邮箱出错：" + err.Error())
+		tools.ProcessMap.Delete(param.Account)
 		return customErr.New(customErr.EMAIL_LOGIN_ERROR, "")
 	}
-	go body(clients, param, now)
+	tools.Logger(param.Serial, "模拟登录邮箱成功", "")
+	go body(clients, param)
 	return nil
 }
 
-func body(clients *client.Client, param request_model.DownloadParam, now time.Time) error {
+func body(clients *client.Client, param request_model.DownloadParam) error {
 	var (
-		index    = 1
-		errorMsg []string
-		texts    string
-		minute   float64
-		done     = make(chan error, 1)
-		seqset   = new(imap.SeqSet)
-		section  = imap.BodySectionName{}
-		items    = []imap.FetchItem{section.FetchItem()}
-		mbox     = &imap.MailboxStatus{}
-		err      error
+		total, number, count int // total.邮件总数.包含下载的和不符合规则后被跳过的数量；count.下载的邮件数量
+		done                 = make(chan error, 1)
+		seqset               = new(imap.SeqSet)
+		section              = imap.BodySectionName{}
+		items                = []imap.FetchItem{section.FetchItem()}
+		mbox                 = &imap.MailboxStatus{}
+		err                  error
 	)
+	defer func() {
+		if r := recover(); r != nil {
+			tools.ProcessMap.Delete(param.Account)
+			sendMessage(param, 0, 0, 0)
+		}
+	}()
 	newClient := goImapId.NewClient(clients)
 	newClient.ID(
 		goImapId.ID{
@@ -70,16 +77,16 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 	defer clients.Close()
 	mbox, err = clients.Select("INBOX", false)
 	if err != nil {
-		fmt.Println("程序已终止，获取邮件箱出现错误：" + err.Error())
+		tools.ProcessMap.Delete(param.Account)
 		return customErr.New(customErr.SYSTEM_ERROR, "")
 	}
-	fmt.Println("正在解析加载中，过程可能会消耗较长的时间，建议您最小化当前页面，继续您的其他工作！（不影响本程序执行）")
+	tools.Logger(param.Serial, fmt.Sprintf(`开始获取邮箱中的所有邮件`), "")
 	var lens = mbox.Messages
 	var start uint32 = 1
 	if param.Count > 0 {
 		if param.Count < mbox.Messages {
-			start = mbox.Messages - param.Count
-			lens = param.Count
+			start = mbox.Messages - (param.Count - 1)
+			lens = param.Count - 1
 		}
 	} else {
 		start, lens = checkMailCount(clients, lens, lens, param.Time)
@@ -91,7 +98,7 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 		done <- clients.Fetch(seqset, items, messages)
 	}()
 	imap.CharsetReader = charset.Reader
-	fmt.Println("已获取到邮件，正在按条件筛选合适的附件中......")
+	tools.Logger(param.Serial, fmt.Sprintf(`已获取到邮箱中的邮件，开始按照条件筛选合适的附件`), "")
 	for msg := range messages {
 		var (
 			mr       *mail.Reader
@@ -99,32 +106,37 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 			date     time.Time
 			sections = imap.BodySectionName{}
 		)
+		total++
+		tools.Logger(param.Serial, fmt.Sprintf(`-----------------------分隔符-开始操作第%d个邮件（邮箱中所有的邮件，不仅限于符合操作条件的）------------------------`, total), "")
 		text := msg.GetBody(&sections)
 		if text != nil {
 			mr, err = mail.CreateReader(text)
 			if err != nil {
-				errorMsg = append(errorMsg, "创建邮件内容信息对象出现错误："+err.Error()+"；上一封邮件信息："+texts)
+				tools.Logger(param.Serial, fmt.Sprintf(`创建邮件Reader对象出现错误：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
 				continue
 			}
 			date, _ = mr.Header.Date()
 			subject, _ = mr.Header.Subject()
 			if !strings.Contains(subject, "INVOICE") || strings.Contains(subject, "回复") ||
 				strings.Contains(subject, "RE:") || strings.Contains(subject, "Re: ") {
+				tools.Logger(param.Serial, fmt.Sprintf(`检测到发送时间：%s，主题：%s，的邮件不符合指定的规则，已跳过`, date.Format("2006-01-02 15:04:05"), subject), tools.LOG_LEVEL_ERROR)
+				number++
 				continue
 			}
 			if !strings.Contains(subject, "#") && !strings.Contains(subject, "/") {
+				tools.Logger(param.Serial, fmt.Sprintf(`检测到发送时间：%s，主题：%s，的邮件不符合指定的规则，已跳过`, date.Format("2006-01-02 15:04:05"), subject), tools.LOG_LEVEL_ERROR)
+				number++
 				continue
 			}
 			if param.Time != "" {
 				dateTime := tools.StrToDateTime(param.Time)
 				unix := dateTime.Unix()
 				if date.Unix() < unix {
+					number++
 					continue
 				}
 			}
-			texts = fmt.Sprintf(`正在下载第%d封邮件附件，发送日期：%s，主题：%s`, index, date.Format("2006-01-02 15:04:05"), subject)
-			fmt.Println(texts)
-			index++
+			tools.Logger(param.Serial, fmt.Sprintf(`当前操作邮件的发送日期：%s，主题：%s`, date.Format("2006-01-02 15:04:05"), subject), "")
 			// 处理邮件正文
 			var fileNum uint
 			for {
@@ -137,7 +149,7 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 				if err == io.EOF {
 					break
 				} else if err != nil {
-					errorMsg = append(errorMsg, "获取邮件部分正文出现错误，错误信息："+err.Error()+"；上一封邮件信息："+texts)
+					tools.Logger(param.Serial, fmt.Sprintf(`获取当前邮件部分正文出现错误：%s`, err.Error()), tools.LOG_LEVEL_ERROR)
 				}
 				if part != nil {
 					switch header := part.Header.(type) {
@@ -150,7 +162,7 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 							}
 							content, err = ioutil.ReadAll(part.Body)
 							if err != nil {
-								errorMsg = append(errorMsg, "读取邮件中的附件出现错误，邮件发送日期："+date.Format("2006-01-02 15:04:05")+"；邮件主题："+subject+"；附件名称："+filename+"；错误信息："+err.Error())
+								tools.Logger(param.Serial, fmt.Sprintf(`读取当前邮件中的附件出现错误，附件名称：%s，错误信息：%s`, filename, err.Error()), tools.LOG_LEVEL_ERROR)
 							} else {
 								if strings.Contains(subject, "#") {
 									i := strings.Index(subject, "#")
@@ -165,9 +177,12 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 								}
 								err = writeFile(filename, param, content, date)
 								if err != nil {
-									errorMsg = append(errorMsg, "发送日期："+date.Format("2006-01-02 15:04:05")+"；邮件主题："+subject+"；附件名称："+filename+"；错误信息："+err.Error())
+									tools.Logger(param.Serial, fmt.Sprintf(`把附件中的信息下载写入PDF息错误，附件名称：%s，错误信息：%s`, filename, err.Error()), tools.LOG_LEVEL_ERROR)
 									continue
 								}
+								tools.Logger(param.Serial, fmt.Sprintf(`邮件附件下载成功：附件名称：%s，邮件主题：%s，邮件发送时间：%s`, filename, subject, date.Format("2006-01-02 15:04:05")), "")
+								number++
+								count++
 							}
 						}
 					}
@@ -175,52 +190,34 @@ func body(clients *client.Client, param request_model.DownloadParam, now time.Ti
 			}
 		}
 	}
-	minute = (float64(time.Now().Unix()) - float64(now.Unix())) / 60
-	fmt.Println(fmt.Sprintf(`------------------------------------所有邮件下载完成，总耗时：%v分钟------------------------------------`, minute))
-	if len(errorMsg) >= 1 {
-		fmt.Println("------------------------------------以下是下载附件时记录的报错信息-开始------------------------------------")
-		for k, v := range errorMsg {
-			fmt.Println(fmt.Sprintf("--%d:", k+1) + v)
-		}
-		fmt.Println("------------------------------------以上是下载附件时记录的报错信息-结束------------------------------------")
-	}
+	tools.Logger(param.Serial, fmt.Sprintf(`邮件附件下载结束：本次共获取到了%d封邮件；其中下载成功%d封`, total, count), "")
 	//邮件通知
+	sendMessage(param, total, number, count)
+	tools.ProcessMap.Delete(param.Account)
+	return nil
+}
+
+func sendMessage(param request_model.DownloadParam, total, number, count int) {
 	if param.Inform == "on" {
-		fmt.Println("准备发送通知邮件，准备数据中......")
 		var (
-			subject, mailBody string
-			account           = param.Account
+			account = param.Account
+			result  string
 		)
 		if param.InformAccount != "" {
 			account = param.InformAccount
 		}
-		if index > 1 {
-			index = index - 1
-		}
 		switch {
-		case len(errorMsg) == index || (index == 1 && len(errorMsg) > 0):
-			subject = "全部下载出错"
-		case len(errorMsg) > 0 && index > 1:
-			subject = "部分下载出错"
-		case len(errorMsg) == 0:
-			subject = "全部下载成功"
+		case number == 0:
+			result = tools.CCL_RESULT_FAIL
+		case total == number && count > 0:
+			result = tools.CCL_RESULT_ALL_SUCCESS
+		case count == 0:
+			result = tools.CCL_RESULT_ALL_FAIL
+		default:
+			result = tools.CCL_RESULT_PART_FAIL
 		}
-		mailBody = fmt.Sprintf(`本次共下载了%d个附件，错误%d个；`, index, len(errorMsg))
-		for k, v := range errorMsg {
-			if k == 0 {
-				mailBody += fmt.Sprintf("未下载成功的错误邮件：\n")
-			}
-			mailBody += v + "\n"
-		}
-
-		err = tools.SendMail([]string{account}, mailBody, "附件下载结果："+subject)
-		if err != nil {
-			fmt.Println(fmt.Sprintf("发送通知邮件失败，发送账号：%s，失败原因：%s", account, err.Error()))
-		} else {
-			fmt.Println(fmt.Sprintf("发送通知邮件完成，发送账号：%s，请前往邮箱中查看", account))
-		}
+		tools.MailAttachment(account, result, param.Serial)
 	}
-	return nil
 }
 
 func checkMailCount(clients *client.Client, start, count uint32, time string) (uint32, uint32) {
