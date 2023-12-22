@@ -102,6 +102,9 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 				go tools.MailAttachment(param.Email, tools.CCL_RESULT_FAIL, param.Serial)
 				return err
 			}
+			if types == 2 {
+				continue //如果这个单号去操作流程并且成功了，后面匹配到的单号就没必要再去查询了
+			}
 			count, ok := typesMap[types]
 			if ok {
 				count++
@@ -144,7 +147,7 @@ func sendMessage(typesMap map[int64]int64, param request_model.CCLParam) {
 	}
 	err = tools.MailAttachment(param.Email, result, param.Serial)
 	if err != nil {
-		tools.Logger(param.Serial, fmt.Sprintf(`发送邮件通知失败，请联系技术人员处理；错误信息：%s`, err.Error()), "")
+		tools.Logger(param.Serial, fmt.Sprintf(`发送邮件通知失败，请联系技术人员处理；错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
 	}
 	tools.Logger(param.Serial, "邮箱通知已发送成功", "")
 }

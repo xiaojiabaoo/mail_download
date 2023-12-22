@@ -12,7 +12,7 @@ import (
 	"net/http"
 )
 
-func GetOihCharges(aihHblId int64, login response_model.LoginResp) (response_model.ShiGetOihCharges, error) {
+func GetOihCharges(oihHblId int64, login response_model.LoginResp) (response_model.ShiGetOihCharges, error) {
 	var (
 		client   = &http.Client{}
 		request  = &http.Request{}
@@ -23,9 +23,9 @@ func GetOihCharges(aihHblId int64, login response_model.LoginResp) (response_mod
 		writer   = multipart.NewWriter(payload)
 	)
 	_ = writer.WriteField("caller", "")
-	_ = writer.WriteField("callid", fmt.Sprintf(`%d`, aihHblId))
+	_ = writer.WriteField("callid", fmt.Sprintf(`%d`, oihHblId))
 	_ = writer.WriteField("sortName", "plm_charge_cost_seq_no")
-	_ = writer.WriteField("filterStr", fmt.Sprintf(`[{"type":"numeric","field":"plm_hbl_id","value":"%d"},{"type":"string","field":"op_type","value":"AI"}]`, aihHblId))
+	_ = writer.WriteField("filterStr", fmt.Sprintf(`[{"type":"numeric","field":"plm_hbl_id","value":"%d"},{"type":"string","field":"op_type","value":"OI"}]`, oihHblId))
 	_ = writer.WriteField("action", "Filter")
 	_ = writer.WriteField("type", "subform")
 	_ = writer.WriteField("showSearch", "false")

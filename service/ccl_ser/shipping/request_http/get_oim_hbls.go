@@ -12,7 +12,7 @@ import (
 	"net/http"
 )
 
-func GetOimHbls(aimMasterId int64, login response_model.LoginResp) (response_model.ShiGetOimHbls, error) {
+func GetOimHbls(oimMasterId int64, login response_model.LoginResp) (response_model.ShiGetOimHbls, error) {
 	var (
 		client   = &http.Client{}
 		request  = &http.Request{}
@@ -23,9 +23,9 @@ func GetOimHbls(aimMasterId int64, login response_model.LoginResp) (response_mod
 		writer   = multipart.NewWriter(payload)
 	)
 	_ = writer.WriteField("caller", "")
-	_ = writer.WriteField("callid", fmt.Sprintf(`%d`, aimMasterId)) // aim_master_id
+	_ = writer.WriteField("callid", fmt.Sprintf(`%d`, oimMasterId)) // oim_master_id
 	_ = writer.WriteField("sortName", "oih_hbl_display_seq")
-	_ = writer.WriteField("filterStr", fmt.Sprintf(`[{"type":"numeric","field":"oim_master_id","value":"%d"}]`, aimMasterId))
+	_ = writer.WriteField("filterStr", fmt.Sprintf(`[{"type":"numeric","field":"oim_master_id","value":"%d"}]`, oimMasterId))
 	_ = writer.WriteField("action", "Filter")
 	_ = writer.WriteField("type", "subform")
 	_ = writer.WriteField("showSearch", "false")

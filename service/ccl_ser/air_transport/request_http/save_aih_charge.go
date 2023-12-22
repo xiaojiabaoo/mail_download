@@ -42,10 +42,10 @@ func SaveAihChargeJsonParam(charges response_model.AirGetAihChargesRows) request
 	param.DocCodeHouse = tools.AnyToString(charges.DocCodeHouse)
 	param.PrepaidCharge = charges.PrepaidCharge
 	param.CollectCharge = charges.CollectCharge
-	param.ArCharge = fmt.Sprintf(`%v`, charges.ArCharge)
+	param.ArCharge = charges.ArCharge
 	param.PrepaidCost = charges.PrepaidCost
 	param.CollectCost = charges.CollectCost
-	param.ApCost = fmt.Sprintf(`%v`, charges.ApCost)
+	param.ApCost = charges.ApCost
 	param.CurrencySw = charges.CurrencySw
 	param.PrepaidChargeCurrency = charges.PrepaidChargeCurrency
 	param.CollectChargeCurrency = charges.CollectChargeCurrency
@@ -58,7 +58,7 @@ func SaveAihChargeJsonParam(charges response_model.AirGetAihChargesRows) request
 	param.CurrencyXDCode = charges.CurrencyXDCode
 	param.ArChargeOtherCurrency = charges.ArChargeOtherCurrency
 	param.ApCostOtherCurrency = charges.ApCostOtherCurrency
-	param.Reference = charges.Reference
+	param.Reference = charges.Reference.(string)
 	param.ExtraDesc = tools.AnyToString(charges.ExtraDesc)
 	param.VendorId = charges.VendorId
 	param.CustomerId = charges.CustomerId

@@ -32,10 +32,10 @@ type SaveAihChargeParam struct {
 	DocCodeHouse          string  `json:"doc_code_house"`
 	PrepaidCharge         float64 `json:"prepaid_charge"`
 	CollectCharge         float64 `json:"collect_charge"`
-	ArCharge              string  `json:"ar_charge"`
+	ArCharge              float64 `json:"ar_charge"`
 	PrepaidCost           float64 `json:"prepaid_cost"`
 	CollectCost           float64 `json:"collect_cost"`
-	ApCost                string  `json:"ap_cost"`
+	ApCost                float64 `json:"ap_cost"`
 	CurrencySw            bool    `json:"currency_sw"`
 	PrepaidChargeCurrency float64 `json:"prepaid_charge_currency"`
 	CollectChargeCurrency float64 `json:"collect_charge_currency"`
@@ -48,7 +48,7 @@ type SaveAihChargeParam struct {
 	CurrencyXDCode        any     `json:"currency_x_d_code"`
 	ArChargeOtherCurrency float64 `json:"ar_charge_other_currency"`
 	ApCostOtherCurrency   float64 `json:"ap_cost_other_currency"`
-	Reference             any     `json:"reference"`
+	Reference             string  `json:"reference"`
 	ExtraDesc             string  `json:"extra_desc"`
 	VendorId              int64   `json:"vendor_id"`
 	CustomerId            int64   `json:"customer_id"`
@@ -105,12 +105,6 @@ type SaveAihChargeParam struct {
 }
 
 type SaveOihChargeParam struct {
-	TableKeyName          string  `json:"TableKeyName"`
-	IsFooter              any     `json:"IsFooter"`
-	Selector              any     `json:"selector"`
-	KeyId                 int64   `json:"KeyId"`
-	MasterId              any     `json:"MasterId"`
-	Caller                any     `json:"caller"`
 	PlmChargeCostId       int64   `json:"plm_charge_cost_id"`
 	EfcCompanyId          int64   `json:"efc_company_id"`
 	EfcBranchId           int64   `json:"efc_branch_id"`
@@ -129,10 +123,10 @@ type SaveOihChargeParam struct {
 	DocCodeHouse          string  `json:"doc_code_house"`
 	PrepaidCharge         float64 `json:"prepaid_charge"`
 	CollectCharge         float64 `json:"collect_charge"`
-	ArCharge              string  `json:"ar_charge"`
+	ArCharge              float64 `json:"ar_charge"`
 	PrepaidCost           float64 `json:"prepaid_cost"`
 	CollectCost           float64 `json:"collect_cost"`
-	ApCost                string  `json:"ap_cost"`
+	ApCost                float64 `json:"ap_cost"`
 	CurrencySw            bool    `json:"currency_sw"`
 	PrepaidChargeCurrency float64 `json:"prepaid_charge_currency"`
 	CollectChargeCurrency float64 `json:"collect_charge_currency"`
@@ -145,7 +139,7 @@ type SaveOihChargeParam struct {
 	CurrencyXDCode        any     `json:"currency_x_d_code"`
 	ArChargeOtherCurrency float64 `json:"ar_charge_other_currency"`
 	ApCostOtherCurrency   float64 `json:"ap_cost_other_currency"`
-	Reference             any     `json:"reference"`
+	Reference             string  `json:"reference"`
 	ExtraDesc             string  `json:"extra_desc"`
 	VendorId              int64   `json:"vendor_id"`
 	CustomerId            int64   `json:"customer_id"`
@@ -196,6 +190,12 @@ type SaveOihChargeParam struct {
 	SelSw                 int64   `json:"sel_sw"`
 	X12ChargeCode         any     `json:"x12_charge_code"`
 	ObjectState           int64   `json:"ObjectState"`
+	TableKeyName          string  `json:"TableKeyName"`
+	IsFooter              any     `json:"IsFooter"`
+	Selector              any     `json:"selector"`
+	KeyId                 int64   `json:"KeyId"`
+	MasterId              any     `json:"MasterId"`
+	Caller                any     `json:"caller"`
 	Selector1             string  `json:"_selector"`
 	Color                 string  `json:"color"`
 	DbAction              int     `json:"DbAction"`
