@@ -124,9 +124,10 @@ func sendMessage(typesMap map[int64]int64, param request_model.CCLParam) {
 		err    error
 	)
 	if param.Email == "" {
+		tools.Logger(param.Serial, "因用户未选择邮箱通知，本次结果将不会推送", "")
 		return
 	}
-	tools.Logger(param.Serial, "准备发送邮件通知", "")
+	tools.Logger(param.Serial, "准备发送邮件通知，发送账号："+param.Email, "")
 	switch {
 	case len(typesMap) == 2: //说明有成功和失败的
 		if typesMap[1] >= typesMap[2] {
@@ -149,5 +150,5 @@ func sendMessage(typesMap map[int64]int64, param request_model.CCLParam) {
 	if err != nil {
 		tools.Logger(param.Serial, fmt.Sprintf(`发送邮件通知失败，请联系技术人员处理；错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
 	}
-	tools.Logger(param.Serial, "邮箱通知已发送成功", "")
+	tools.Logger(param.Serial, "邮箱通知已发送成功，请留意你的邮箱；如果没有找到，它可能在你的垃圾邮箱中；", "")
 }
