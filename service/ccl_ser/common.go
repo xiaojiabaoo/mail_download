@@ -118,10 +118,12 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 func sendMessage(typesMap map[int64]int64, param request_model.CCLParam) {
 	var (
 		result string
+		err    error
 	)
 	if param.Email == "" {
 		return
 	}
+	tools.Logger(param.Serial, "准备发送邮件通知", "")
 	switch {
 	case len(typesMap) == 2: //说明有成功和失败的
 		if typesMap[1] >= typesMap[2] {
@@ -140,5 +142,9 @@ func sendMessage(typesMap map[int64]int64, param request_model.CCLParam) {
 			result = tools.CCL_RESULT_ALL_SUCCESS
 		}
 	}
-	go tools.MailAttachment(param.Email, result, param.Serial)
+	err = tools.MailAttachment(param.Email, result, param.Serial)
+	if err != nil {
+		tools.Logger(param.Serial, fmt.Sprintf(`发送邮件通知失败，请联系技术人员处理；错误信息：%s`, err.Error()), "")
+	}
+	tools.Logger(param.Serial, "邮箱通知已发送成功", "")
 }
