@@ -26,7 +26,6 @@ func SendMail(account []string, body, subject string) error {
 	if len(account) == 0 || len(body) == 0 || len(subject) == 0 {
 		return errors.New("发送信息不能为空")
 	}
-	//subject := "邮件验证码：" + codeNum
 	hp := strings.Split(host, ":")
 	auth := smtp.PlainAuth("", user, password, hp[0])
 	contentType = "Content-Type: text/plain" + "; charset=UTF-8"

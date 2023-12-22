@@ -14,7 +14,7 @@
             text-align: left;
             background-color: #FAFAFA;
             width: 1000px;
-            height: 640px;
+            height: 620px;
             border-radius: 5px;
         }
 
@@ -91,15 +91,14 @@
             <div id="tips" class="" style="margin-top: 40px;margin-left: 50px;line-height: 27px;">
                 <span>
                     <h3>如何知道我的CCL流程是否操作完成或是该程序是否执行完成：</h3>
-                        <p>   在程序存放处的根目录下会有一个名为“logs”的目录，该目录用于存放操作记录日志文件，文件名是流水号，查看对应的记录可根据流水号查询</p>
-                        <p>   如果在下面的“通知邮箱账号”中填写了邮箱信息，系统会在操作完成后自动给该邮箱发送通知</p>
-                        <p>   发送的邮件中也会有本次操作的流水号信息，与记录日志文件的流水号对应；邮件内容中也会带有附件，附件来源“logs”目录，本次操作的记录</p>
+                        <p>   可以前往 “logs” 目录中找到对应流水号的记录日志文件中查看本次操作的记录和结果</p>
+                        <p>   如果在下面的 “通知账号” 中填写了邮箱信息，系统会在操作完成后自动将结果和操作记录文件发送到填写的邮箱中（附件来源 “logs” 目录）</p>
                    <h3>附件下载中途遇到错误会怎样操作或提示：</h3>
                         <p>   下载附件途中如遇到错误，系统会在记录日志文件中将该本次错误信息保存并继续操作后面的流程</p>
                 </span>
             </div>
             <div class="layui-form-item" style="margin-top: 20px;margin-left: 20px;">
-                <label class="layui-form-label" style="width: 100px;">请填写登录账号</label>
+                <label class="layui-form-label" style="width: 100px;">登录账号</label>
                 <div class="layui-input-block">
                     <input style="width: 300px" type="text" name="account" lay-verify="account" autocomplete="off"
                            placeholder="请填写登录账号（必填）" class="layui-input">
@@ -111,14 +110,14 @@
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
-                <label class="layui-form-label" style="width: 100px;">请填写登录密码</label>
+                <label class="layui-form-label" style="width: 100px;">登录密码</label>
                 <div class="layui-input-block">
                     <input style="width: 300px" type="password" name="password" lay-verify="password" autocomplete="off"
                            placeholder="请填写登录密码（必填）" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
-                <label class="layui-form-label" style="width: 100px;">操作文件的目录</label>
+                <label class="layui-form-label" style="width: 100px;">文件目录</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="url" autocomplete="off"
                            placeholder="请选择操作文件的目录（必填）" class="layui-input">
@@ -128,7 +127,7 @@
                 </div>
             </div>
             <div class="layui-form-item" id="inform-input" style="margin-left: 20px;">
-                <label class="layui-form-label" style="width: 100px;">通知邮箱账号</label>
+                <label class="layui-form-label" style="width: 100px;">通知账号</label>
                 <div class="layui-input-block">
                     <input style="width: 300px" type="text" name="email" autocomplete="off"
                            placeholder="请填写通知邮箱账号（选填）" class="layui-input">
