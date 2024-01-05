@@ -14,7 +14,7 @@
             text-align: left;
             background-color: #FAFAFA;
             width: 1000px;
-            height: 1430px;
+            height: 1380px;
             border-radius: 5px;
         }
 
@@ -58,6 +58,18 @@
             background: 0 0;
             color: #E0FFFF;
         }
+        /*这个是系统提示的样式。到时候如果不需要提hi了删除这个就可以了*/
+        /*.layui-layer-setwin .layui-layer-close2 {
+            position: absolute;
+            right: -4px !important;
+            top: -7px !important;
+            width: 30px;
+            height: 30px;
+            margin-left: 0;
+            background-position: -149px -31px;
+            *right: -18px;
+            _display: none;
+        }*/
     </style>
 </head>
 <body>
@@ -67,15 +79,12 @@
             <div id="tips" class="" style="margin-top: 40px;margin-left: 50px;line-height: 27px;">
                 <span>
                     <h3>如何知道我的邮件是否下载完成或是该程序是否执行完成：</h3>
-                        <p>   方式一：下面选择需要邮件通知并填写你的邮箱，系统会在下载完成后自动将结果和记录日志文件推送到填写的邮箱中</p>
-                        <p>   方式二：前往程序所在目录的根目录下名为 “logs” 的目录中查看对应的操作记录文件</p>
+                        <p>   方式一：下面选择需要邮件通知并填写你的邮箱，系统会在下载完成后自动将结果和记录文件推送到填写的邮箱中，记录文件请参考“方式二”</p>
+                        <p>   方式二：前往程序所在目录下名为 “logs” 的目录中查看对应的操作记录文件</p>
                     <h3>附件下载中途遇到错误会怎样操作或提示：</h3>
-                        <p>   下载附件途中如遇到错误，服务会记录该本次错误信息并继续下载后面的附件</p>
-                        <p>   如果选择的是上面的方式一：错误信息会在通知邮件的附件中</p>
-                        <p>   如果选择的是上面的方式二：错误信息会在记录日志文件中</p>
+                        <p>   下载附件途中如遇到错误，服务会记录该本次错误信息并继续下载后面的附件，记录文件请参考“方式二”</p>
                     <h3>附件全部下载完成需要多久：</h3>
-                        <p>   下载时间由下载的邮件数量、附件内容的大小和网络而决定</p>
-                        <p>   正常网络下，一个附件下载平均速度为0.5秒；经测试，下载8000个附件的时间大约是87分钟（数据仅供参考）</p>
+                        <p>   下载时间由下载的邮件数量、附件内容的大小和网络而决定；正常网络下，一个附件下载平均速度为0.5秒；</p>
                         <p>   建议 如果是第一次下载（需要下载的附件较多），使用数量方式下载会比较快</p>
                         <p>   建议 如果是增量下载（只需要下载的较少的附件），使用时间方式下载会比较快</p>
                 </span>
@@ -135,18 +144,19 @@
                     <input style="width: 300px" type="text" name="count" lay-verify="count" autocomplete="off"
                            placeholder="请填写下载邮件数量" class="layui-input">
                 </div>
-                <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
-                    下载最新的邮件的数量；比如：10.表示下载最新的十封邮件
+                <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 130px;line-height: 27px;">
+                    <p>下载邮件的数量；填写的数字即表示下载最新的多少封符合条件的邮件；</p>
+                    <p>注意：填写的数量尽量保证在近期是足够的，否则系统将会一直查询历史邮件来满足该数量，直到满足数量或没有历史邮件为止</p>
                 </div>
             </div>
             <div class="layui-form-item" id="type_time" style="margin-left: 20px;">
                 <label class="layui-form-label" style="width: 100px;">下载邮件时间</label>
                 <div class="layui-input-inline">
-                    <input style="width: 300px" type="text" name="time" placeholder="请填写下载邮件时间范围"
+                    <input style="width: 300px" type="text" name="time" placeholder="请选择下载邮件开始时间"
                            lay-verify="time" class="layui-input" id="time" readonly>
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color: #C0C0C0 !important;margin-left: 120px;"> 
-                    填写下载开始时间，从开始时间到现在时间的所有邮件附件
+                    从输入的时间开始到现在时间的所有邮件附件；注意：为保证下载的效率与质量，只能下载三个月以内的邮件！
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
@@ -241,35 +251,64 @@
 
         form.on('radio(inform)', function (data) {
             let value = data.value;
+            let height = $(".child").height();
+            let number = 110
             if (value == "on") {
                 $("#inform-p1").css("display", "")
                 $("#inform-p2").css("display", "")
                 $("#inform-input").css("display", "")
-                $(".child").css("height", "1550px")
+                $(".child").css("height", height+number+"px")
             } else {
                 $("#inform-p1").css("display", "none")
                 $("#inform-p2").css("display", "none")
                 $("#inform-input").css("display", "none")
-                $(".child").css("height", "1450px")
+                //$(".child").css("height", "1450px")
+                $(".child").css("height", height-number+"px")
             }
         });
 
+        /*layer.open({
+            type: 1,
+            title: '<h2 style="color: red;">系统提示</h2>',
+            area: ['400px', '150px'],
+            shade: 0.5,
+            id: 'tips_disable', //设定一个id，防止重复弹出
+            btnAlign: 'c',
+            moveType: 1, //拖拽模式，0或者1
+            content: "<div style='padding-left: 20px;padding-top: 20px;font-weight: bold;'>邮件附件下载功能升级维护中；暂停使用！</div>",
+            cancel: function () {
+                layer.msg('此窗口不可关闭');
+                return false
+            }
+        });*/
+        form.render();
+
         form.on('radio(download_type)', function (data) {
             let value = data.value;
+            let height = $(".child").height();
+            let number = 30
             if (value == "time") {
                 $("#type_time").css("display", "")
                 $("#type_count").css("display", "none")
                 $("input[name='count']").val("0")
+                $(".child").css("height", height-number+"px")
             } else {
                 $("#type_time").css("display", "none")
                 $("#type_count").css("display", "")
                 $("input[name='time']").val("")
+                $(".child").css("height", height+number+"px")
             }
+            form.render();
         });
+
 
         laydate.render({
             elem: '#time',
-            type: 'datetime'
+            type: 'datetime',
+            btns: ['confirm'],
+            theme: '#393D49',
+            min: -90,
+            max: 0
         });
 
         form.verify({
@@ -306,8 +345,12 @@
             if (count == 0 || count == undefined || count == null) {
                 count = 0
             }
+            let datetime = 0
+            if (data.field.time != "") {
+                datetime = new Date(data.field.time).getTime()/1000;
+            }
             let param = '{"server":"'+data.field.server+'","account":"'+data.field.account+'","password":"'+data.field.password+'",' +
-                '"time":"'+data.field.time+'","count":'+count+',"url":"'+data.field.url+'","classify":"'+data.field.classify+'",' +
+                '"time":'+datetime+',"count":'+count+',"url":"'+data.field.url+'","classify":"'+data.field.classify+'",' +
                 '"type":"'+data.field.type+'","inform":"'+data.field.inform+'","inform_account":"'+data.field.inform_account+'"}'
             show_loading()
             $.ajax({

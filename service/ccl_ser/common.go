@@ -67,7 +67,7 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 	defer func() {
 		if r := recover(); r != nil {
 			tools.ProcessMap.Delete(param.Account)
-			sendMessage(typesMap, param)
+			SendMessage(typesMap, param, r.(error))
 		}
 	}()
 	time.Sleep(2 * time.Second) // 先休眠两秒钟，因为CCL系统处理比较慢，等待两秒缓冲时间
@@ -75,7 +75,7 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 	queryInfo, err = request_http.GetQueryInfo(login) // 模拟查询信息
 	if err != nil {
 		tools.ProcessMap.Delete(param.Account)
-		go tools.MailAttachment(param.Email, tools.CCL_RESULT_FAIL, param.Serial)
+		SendMessage(typesMap, param, err)
 		return err
 	}
 	tools.Logger(param.Serial, fmt.Sprintf(`模拟点击Query MAWB/Query Master功能成功，调用GetQueryInfo查询表格所需要使用到的参数数据，查询结果：%+v`, queryInfo), "")
@@ -98,57 +98,62 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 			}
 			if err != nil {
 				tools.ProcessMap.Delete(param.Account)
-				tools.Logger(param.Serial, fmt.Sprintf(`服务器错误导致流程中断，请联系技术人员，错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
-				go tools.MailAttachment(param.Email, tools.CCL_RESULT_FAIL, param.Serial)
+				SendMessage(map[int64]int64{}, param, err)
 				return err
-			}
-			if types == 2 {
-				continue //如果这个单号去操作流程并且成功了，后面匹配到的单号就没必要再去查询了
 			}
 			count, ok := typesMap[types]
 			if ok {
 				count++
 			}
 			typesMap[types] = count
+			if types == 2 {
+				break //如果这个单号去操作流程并且成功了，这个文件中后面匹配到的单号就没必要再去查询了
+			}
 		}
 		fileNumber++
 	}
-	sendMessage(typesMap, param)
+	SendMessage(typesMap, param, nil)
 	tools.ProcessMap.Delete(param.Account)
 	return nil
 }
 
-func sendMessage(typesMap map[int64]int64, param request_model.CCLParam) {
+func SendMessage(typesMap map[int64]int64, param request_model.CCLParam, r error) {
 	var (
 		result string
 		err    error
+		text   = "后续若发现操作的数据存在错误等信息，也可查看记录文件排查问题原因"
 	)
-	if param.Email == "" {
-		tools.Logger(param.Serial, "因用户未选择邮箱通知，本次结果将不会推送", "")
-		return
-	}
-	tools.Logger(param.Serial, "准备发送邮件通知，发送账号："+param.Email, "")
 	switch {
 	case len(typesMap) == 2: //说明有成功和失败的
 		if typesMap[1] >= typesMap[2] {
-			result = tools.CCL_RESULT_PART_SUCCESS
+			result = fmt.Sprintf(`CCL流程操作已完成；此次操作仅有部分成功，其余大部分操作因数据原因未执行完成（或被终止），打开记录文件查看详细信息；%s`, text)
 		} else if typesMap[1] < typesMap[2] {
-			result = tools.CCL_RESULT_PART_FAIL
-		} else {
-			result = tools.CCL_RESULT_PART_SUCCESS
+			result = fmt.Sprintf(`CCL流程操作已完成；部分操作因数据原因未执行完成（或被终止），打开记录文件查看详细信息；%s`, text)
 		}
 	case len(typesMap) == 1:
 		_, ok1 := typesMap[1]
 		_, ok2 := typesMap[2]
 		if ok1 {
-			result = tools.CCL_RESULT_ALL_FAIL
+			result = "CCL流程操作因数据问题导致提供的PDF文件操作全部失败，打开记录文件查看详细信息；" + text
 		} else if ok2 {
-			result = tools.CCL_RESULT_ALL_SUCCESS
+			result = "CCL流程操作已全部操作成功；" + text
 		}
+	default:
+		result = "CCL流程操作因服务器或CCL系统原因导致中断，请联系相关技术人员处理（已执行完成的主单号不受影响）；" + text
 	}
+	tools.Logger(param.Serial, result, "")
+	if r != nil {
+		tools.Logger(param.Serial, fmt.Sprintf(`报错信息（该报错请技术人员查看）：%s`, r.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+	}
+	if param.Email == "" {
+		tools.Logger(param.Serial, "检测到用户未选择邮箱通知，本次结果将不会推送", "")
+		return
+	}
+	tools.Logger(param.Serial, "准备发送邮件通知，发送账号："+param.Email, "")
 	err = tools.MailAttachment(param.Email, result, param.Serial)
 	if err != nil {
 		tools.Logger(param.Serial, fmt.Sprintf(`发送邮件通知失败，请联系技术人员处理；错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+		return
 	}
 	tools.Logger(param.Serial, "邮箱通知已发送成功，请留意你的邮箱；如果没有找到，它可能在你的垃圾邮箱中；", "")
 }

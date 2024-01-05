@@ -17,6 +17,15 @@ const (
 	CCL_RESULT_FAIL         = "失败"
 )
 
+const (
+	MAIL_RESULT_ALL_SUCCESS  = "全部成功"
+	MAIL_RESULT_ALL_FAIL     = "全部失败"
+	MAIL_RESULT_PART_SUCCESS = "部分成功"
+	MAIL_RESULT_PART_FAIL    = "部分失败"
+	MAIL_RESULT_FAIL         = "失败"
+	MAIL_RESULT_NOT_COUNT    = "失败"
+)
+
 var (
 	ProcessMap = sync.Map{}
 )

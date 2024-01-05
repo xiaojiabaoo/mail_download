@@ -41,7 +41,7 @@ func Run(addr string) {
 	router.Static("/static/css", "./common/view/css")
 	router.Static("/static/js", "./common/view/js")
 	router.Static("/static/image", "./common/view/image")
-	router.Static("/static/html", "./common/view/image")
+	router.Static("/static/html", "./common/view/html")
 	router.LoadHTMLFiles("./common/view/html/tips.html", "./common/view/html/catalogue.html",
 		"./common/view/html/tab.html", "./common/view/html/cll.html")
 	router.GET("/download", func(c *gin.Context) {

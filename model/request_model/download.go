@@ -4,7 +4,7 @@ type DownloadParam struct {
 	Server        string `json:"server"`         // 邮箱服务器地址，此参数必须填写
 	Account       string `json:"account"`        // 邮箱账号，此参数必须填写
 	Password      string `json:"password"`       // 邮箱密码，此参数必须填写
-	Time          string `json:"time"`           // 下载邮件的时间范围，比如：2023-01-01 00:00:00（若该值不为空，请严格按照该格式填写时间），表示下载这个时间（>=这个时间）到当前时间的所有邮件附件，该字段和count字段只能二选一
+	Time          int64  `json:"time"`           // 下载邮件的时间范围，比如：2023-01-01 00:00:00（若该值不为空，请严格按照该格式填写时间），表示下载这个时间（>=这个时间）到当前时间的所有邮件附件，该字段和count字段只能二选一
 	Count         uint32 `json:"count"`          // 下载指定数量的邮件，比如：10表示下载最新的十封邮件；20表示下载最新的二十封邮件；适合第一次下载附件使用；该字段和time字段只能二选一
 	Url           string `json:"url"`            // 附件下载的所在目录；如果目录不存在，会在指定位置创建该目录
 	Classify      string `json:"classify"`       // 下载目录划分级别：year.年；month.月；day.天；如果选择的是year，那么邮件附件是按年份的目录存放；如果选择的是month那么邮件附件是按年份+月份的目录存放；如果选择的是day那么邮件附件是按年份+月份+天的目录存放，此参数必须填写
