@@ -23,16 +23,12 @@ func Download(param request_model.DownloadParam) error {
 		clients = &client.Client{}
 	)
 	//校验参数
-	err = CheckParam(&param)
-	if err != nil {
+	if err = CheckParam(&param); err != nil {
 		return err
 	}
-	//检测目录是否存在
-	if tools.Exists(param.Url) {
-		//检测是否为目录，如果是文件，则打回操作
-		if !tools.IsDir(param.Url) {
-			return customErr.New(customErr.DOWNLOAD_URL_ERROR, "")
-		}
+	//检测目录是否存在、是否为目录；如果是文件，则打回操作
+	if tools.Exists(param.Url) && !tools.IsDir(param.Url) {
+		return customErr.New(customErr.DOWNLOAD_URL_ERROR, "")
 	}
 	tools.ProcessMap.Store(param.Account, param.Serial) // 添加本次操作表示
 	tools.Logger(param.Serial, "-----------------------分隔符-开始准备工作------------------------", "")
@@ -106,6 +102,7 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 }
 
 func CheckParam(param *request_model.DownloadParam) error {
+	now := time.Now()
 	if param.Server == "" {
 		return customErr.New(customErr.SERVER_ADDR_ERROR, "")
 	}
@@ -129,6 +126,9 @@ func CheckParam(param *request_model.DownloadParam) error {
 	}
 	if param.Count == 0 && param.Time == 0 {
 		return customErr.New(customErr.TIME_COUNT_ERROR, "")
+	}
+	if param.Time > 0 && (now.Unix()-param.Time > 86400*90 || param.Time > now.Unix()) {
+		return customErr.New(customErr.DOWNLOAD_TIME_ERROR, "")
 	}
 	if param.Count > 100 {
 		return customErr.New(customErr.NUMBER_DOWNLOADS_100_ERROR, "")
@@ -169,8 +169,7 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 	for {
 		search, err = PaginationSearch(clients, start, end)
 		if err != nil {
-			index := strings.Index(err.Error(), "imap: connection closed")
-			if index != -1 {
+			if strings.Index(err.Error(), "imap: connection closed") != -1 {
 				tools.Logger(param.Serial, "因下载量过大导致连接被中断，一分钟后尝试重新连接", tools.LOG_LEVEL_SYSTEM_ERROR)
 				time.Sleep(60 * time.Second)
 				clients.Logout()
@@ -235,8 +234,7 @@ func GetMailForDate(clients *client.Client, param request_model.DownloadParam, t
 	for {
 		search, err = PaginationSearch(clients, start, end)
 		if err != nil {
-			index := strings.Index(err.Error(), "imap: connection closed")
-			if index != -1 {
+			if strings.Index(err.Error(), "imap: connection closed") != -1 {
 				tools.Logger(param.Serial, "因下载量过大导致连接被中断，一分钟后尝试重新连接", tools.LOG_LEVEL_SYSTEM_ERROR)
 				time.Sleep(60 * time.Second)
 				clients.Logout()
@@ -302,7 +300,7 @@ func PaginationSearch(c *client.Client, start, end uint32) ([]*imap.Message, err
 	if err := <-done; err != nil {
 		return msage, errors.Wrap(err, "因数据量太多，数据解析时间过长导致连接被中断")
 	}
-	time.Sleep(1 * time.Second)
+	time.Sleep(5 * time.Second)
 	return msage, nil
 }
 
@@ -313,17 +311,17 @@ func GetMailBody(msg *imap.Message, param request_model.DownloadParam) bool {
 		reader   *mail.Reader
 		fileNum  uint
 		date     = time.Unix(msg.Envelope.Date.Unix(), 0)
-		bools    bool
+		result   bool
 		filename string
 	)
 	if text == nil {
 		tools.Logger(param.Serial, "获取邮件正文为空", tools.LOG_LEVEL_SYSTEM_ERROR)
-		return bools
+		return result
 	}
 	reader, err = mail.CreateReader(text)
 	if err != nil {
 		tools.Logger(param.Serial, fmt.Sprintf(`创建当前邮件Reader对象出现错误：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
-		return bools
+		return result
 	}
 	for {
 		var (
@@ -375,15 +373,15 @@ func GetMailBody(msg *imap.Message, param request_model.DownloadParam) bool {
 				err = errors.New(fmt.Sprintf(`把附件中的信息下载写入PDF息错误，附件名称：%s，错误信息：%s`, filename, err.Error()))
 				continue
 			}
-			bools = true
+			result = true
 		}
 	}
-	if bools {
+	if result {
 		tools.Logger(param.Serial, fmt.Sprintf(`邮件附件下载成功！附件名称：%s`, filename), "")
 	} else {
 		tools.Logger(param.Serial, fmt.Sprintf(`邮件附件下载失败！附件名称：%s；失败原因：%s`, filename, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
 	}
-	return bools
+	return result
 }
 
 func WriteFile(filename string, param request_model.DownloadParam, content []byte, date time.Time) error {

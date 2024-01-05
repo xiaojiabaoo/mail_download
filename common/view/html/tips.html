@@ -146,7 +146,8 @@
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 130px;line-height: 27px;">
                     <p>下载邮件的数量；填写的数字即表示下载最新的多少封符合条件的邮件；</p>
-                    <p>注意：填写的数量尽量保证在近期是足够的，否则系统将会一直查询历史邮件来满足该数量，直到满足数量或没有历史邮件为止</p>
+                    <p>注意：填写的数量尽量保证在近期是足够的，否则系统将会一直查询历史邮件来满足该数量，直到数量满足或没有可查询的历史</p>
+                    <p>   邮件为止</p>
                 </div>
             </div>
             <div class="layui-form-item" id="type_time" style="margin-left: 20px;">
@@ -286,7 +287,7 @@
         form.on('radio(download_type)', function (data) {
             let value = data.value;
             let height = $(".child").height();
-            let number = 30
+            let number = 60
             if (value == "time") {
                 $("#type_time").css("display", "")
                 $("#type_count").css("display", "none")

@@ -71,7 +71,7 @@ var ErrText = map[int64]string{
 	EMAIL_DOWNLOAD_URL_ERROR:     "请填写你的附件下载目录，需要下载到哪里",
 	EMAIL_LOGIN_ERROR:            "邮箱登录出错！请检查网络是否连接或邮箱信息是否填写正确无误",
 	DOWNLOAD_URL_ERROR:           "检测到当前附件的下载路径是文件，请改为目录",
-	DOWNLOAD_TIME_ERROR:          "下载邮件的时间格式错误",
+	DOWNLOAD_TIME_ERROR:          "下载邮件的时间不合法",
 	EMAIL_EMPTY_ERROR:            "邮件箱中未获取到邮件信息",
 	FILE_TYPE_EMPTY_ERROR:        "请选择若附件存在同名文件时的操作",
 	FILE_DOWNLOAD_CLASSIFY_ERROR: "请选择下载目录划分级别",

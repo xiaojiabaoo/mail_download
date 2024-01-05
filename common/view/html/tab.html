@@ -107,6 +107,7 @@
         let date = new Date();
         let times = 21
         let read = false
+        let readcount = 0
         if (date.getHours() >= 18 || date.getHours() <= 6) {
             $("body").css("background-color", "#333").css("color", "#fff")
             $(".layui-tab").css("background-color", "#333")
@@ -126,12 +127,14 @@
                 clearInterval(interval);
             }
         }, 1000);
-
-        let item = localStorage.getItem("mail-download-read01");
+        for (let i = 1; i <= readcount; i++) {
+            localStorage.removeItem("mail-download-read"+i)
+        }
+        let item = localStorage.getItem("mail-download-read"+(readcount+1));
         if (item == "" || item == null || item == undefined) {
             let open = layer.open({
                 type: 1,
-                title: '<h2>首次使用介绍</h2>',
+                title: '<h2>新版本首次使用介绍</h2>',
                 area: ['550px', '610px'],
                 shade: 0.5,
                 id: 'LAY_layuipro', //设定一个id，防止重复弹出
@@ -170,7 +173,7 @@
                             });
                             return false
                         } else {
-                            localStorage.setItem("mail-download-read01", "true");
+                            localStorage.setItem("mail-download-read"+(readcount+1), "true");
                         }
                     }
                 }
