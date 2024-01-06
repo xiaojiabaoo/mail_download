@@ -76,7 +76,7 @@
 <body>
 <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
     <ul class="layui-tab-title" style="width: 1000px;margin: 0 auto;">
-        <li class="layui-this"><i class="layui-icon layui-icon-email"></i> 邮件附件下载</li>
+        <li class="layui-this"><i class="layui-icon layui-icon-email"></i> CCL发票下载</li>
         <li><i class="layui-icon layui-icon-form"></i> EFC操作流程</li>
     </ul>
     <div class="layui-tab-content" style="height: 100px;">
@@ -107,7 +107,7 @@
         let date = new Date();
         let times = 21
         let read = false
-        let readcount = 0
+        let readcount = 1
         if (date.getHours() >= 18 || date.getHours() <= 6) {
             $("body").css("background-color", "#333").css("color", "#fff")
             $(".layui-tab").css("background-color", "#333")
@@ -143,20 +143,21 @@
                 content: '<div style="padding: 50px; color: #E6E6FA;line-height: 25px;">' +
                     /*'<h2>使用前请先仔细阅读以下介绍</h2><br>' +*/
                     '<p><span style="font-weight: bold;color:#FFB6C1;">一. 介绍</span></p>' +
-                    '<p>本程序分为：“CCL发票邮件附件下载” 和 “EFC 海运、空运 操作流程” 两个功能模块；程序可支持后台运行</p>' +
+                    '<p>本程序分为：“CCL发票下载” 和 “EFC 海运、空运 操作流程” 两个功能模块；可支持后台运行。</p>' +
                     '<p><span style="font-weight: bold;color:#FFB6C1;">二. 使用</span></p>' +
-                    '<p>1.&nbsp;&nbsp;流水号：每次在发起操作请求后，都会生成一个流水号并会在页面明显处提示；用于查询操作记录文件；</p>' +
-                    '<p>2.&nbsp;&nbsp;记录文件：每次发起操作请求都会生产一个记录文件，文件保存在程序所在目录下名为 “logs” 的目录中，文件名以 “MAIL” 或 “CCL” 开头，后面的数字即本次操作的流水号，保存了本次操作的所有记录信息，该文件主要用于后续存在问题时排查问题使用；</p>' +
-                    '<p>3.&nbsp;&nbsp;如果是 “CCL发票邮件附件下载”，记录文件名以 “MAIL” 开头；</p>' +
-                    '<p>4.&nbsp;&nbsp;如果是 “EFC海运、空运的操作流程”，记录文件名以 “CCL” 开头；</p>' +
-                    '<p>5.&nbsp;&nbsp;在发起操作请求后，若需要实时查看操作进度和结果；可查看记录文件中的记录信息（文件保存位置：参考第2条）；</p>' +
-                    '<p>6.&nbsp;&nbsp;在发起操作请求后，操作的结果也可以推送推到填写的邮箱地址中（操作时选择需要通知并填写邮箱），邮件中会附带记录文件（文件来源：参考第2条）</p>' +
+                    '<p>1.&nbsp;&nbsp;流水号：每次操作都会生成一个流水号并会在操作发起后进进行提示；用于查询记录文件；</p>' +
+                    '<p>2.&nbsp;&nbsp;记录文件：每次操作都会生产一个记录文件，文件名以 “MAIL” 或 “CCL” 开头，后缀即对应本次操作的流水号，保存在程序所在目录下名为 “logs” 的目录中，记录了本次操作的所有操作信息，该文件主要用于后续存在问题时排查问题使用；</p>' +
+                    '<p>3.&nbsp;&nbsp;若操作的是 “CCL发票下载” 功能，记录文件的名称以 “MAIL” 开头；</p>' +
+                    '<p>4.&nbsp;&nbsp;若操作的是 “EFC海运、空运的操作流程” 功能，记录文件的名称以 “CCL” 开头；</p>' +
+                    '<p>5.&nbsp;&nbsp;在操作过程中，若需要实时查看操作进度和结果；可打开记录文件查看（文件保存位置和如何查找对应的文件：参考第2、3、4条）；</p>' +
+                    '<p>6.&nbsp;&nbsp;若没时间等待程序操完成，发起操作时可以选择需要通知并填写邮箱地址，系统会在本次操作结束后将结果推送到该邮箱中。</p>' +
                     '<p>7.&nbsp;&nbsp;程序发起操作请求后的执行时间可能会比较长，具体视网络情况和邮件数量而定</p>' +
-                    '<p>8.&nbsp;&nbsp;本程序仅起到辅助工作作用，无法保证操作的CCL流程或下载的邮件精准无误，若发现下载的附件内容有误或是操作的CCL操作流程的数据有误，请根据操作流水号查询记录排查问题原因</p>' +
+                    '<p><span style="font-weight: bold;color:#FFB6C1;">三. 声明</span></p>' +
+                    '<p>8.&nbsp;&nbsp;本系统仅起到辅助工作作用，不能保证每次操作的 “EFC海运、空运的操作流程” 或 “CCL发票下载” 精准无误；若发现部分下载的附件缺失或是操作的EFC操作的数据有误，还请根据操作流水号查询记录排查问题原因</p>' +
                     '<p></p><br>' +
                     '<p>更多操作上的提示请留意操作页的提示信息</p>' +
                     '<form class="layui-form">' +
-                    '<input type="checkbox" name="read" value="1" lay-skin="primary" lay-filter="read" title="我已仔细阅读并知晓以上提示，下次不再提醒我">' +
+                    '<input type="checkbox" name="read" value="1" lay-skin="primary" lay-filter="read" title="我已仔细阅读并知晓以上提示，下次版本更新前不再提醒我">' +
                     '<span id="tip-last-time" style="font-size: 12px;">浏览剩余时间：<span id="tip-time">21</span>秒</span>' +
                     '</form>' +
                     '</div>',
