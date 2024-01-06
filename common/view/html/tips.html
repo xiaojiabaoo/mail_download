@@ -14,7 +14,8 @@
             text-align: left;
             background-color: #FAFAFA;
             width: 1000px;
-            height: 1380px;
+            /*height: 1380px;*/
+            height: 480px;
             border-radius: 5px;
         }
 
@@ -58,18 +59,25 @@
             background: 0 0;
             color: #E0FFFF;
         }
-        /*这个是系统提示的样式。到时候如果不需要提hi了删除这个就可以了*/
-        /*.layui-layer-setwin .layui-layer-close2 {
-            position: absolute;
-            right: -4px !important;
-            top: -7px !important;
-            width: 30px;
-            height: 30px;
-            margin-left: 0;
-            background-position: -149px -31px;
-            *right: -18px;
-            _display: none;
-        }*/
+        .layui-form-checked span, .layui-form-checked:hover span {
+            background-color: #FFB6C1 !important;
+        }
+        .layui-form-checked i, .layui-form-checked:hover i {
+            color: #FFB6C1 !important;
+        }
+
+
+        .layui-form-checkbox span {
+            padding: 0 10px;
+            height: 100%;
+            font-size: 14px;
+            border-radius: 2px 0 0 2px;
+            background-color: #9E9E9E;
+            color: #fff;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
 <body>
@@ -93,7 +101,7 @@
                 <label class="layui-form-label" style="width: 100px;">邮箱服务地址</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="server" lay-verify="server" autocomplete="off"
-                           placeholder="请填写邮箱服务器地址（必填）" class="layui-input">
+                           placeholder="请填写邮箱服务器地址（必填）" class="layui-input" value="imap.mxhichina.com:993">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;">
                     aliyun服务器地址：imap.qiye.aliyun.com:993或imap.mxhichina.com:993
@@ -103,14 +111,24 @@
                 <label class="layui-form-label" style="width: 100px;">邮箱登录账号</label>
                 <div class="layui-input-block">
                     <input style="width: 300px" type="text" name="account" lay-verify="email" autocomplete="off"
-                           placeholder="请填写邮箱登录账号（必填）" class="layui-input">
+                           placeholder="请填写邮箱登录账号（必填）" class="layui-input" value="acc02@ggt-world.com">
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
                 <label class="layui-form-label" style="width: 100px;">邮箱登录密码</label>
-                <div class="layui-input-block">
+                <div class="layui-input-inline">
                     <input style="width: 300px" type="password" name="password" lay-verify="password" autocomplete="off"
-                           placeholder="请填写邮箱登录密码（必填）" class="layui-input">
+                           placeholder="请填写邮箱登录密码（必填）" class="layui-input" value="Acc01.ggt125">
+                </div>
+                <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;padding: 5px 0!important;">
+                    <button type="button" id="mail-box-button" class="layui-btn layui-btn-sm" style="background-color:#FFB6C1 !important;">检测</button>
+                </div>
+            </div>
+            <div id="body-param" style="display: none;">
+            <div class="layui-form-item" style="margin-left: 20px;">
+                <label class="layui-form-label" style="width: 100px;">请选择收件箱</label>
+                <div class="layui-input-block" id="mail-box-data" style="margin-left: 130px !important;">
+                    <input type="checkbox" name="" title="无" disabled>
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
@@ -220,9 +238,10 @@
                 <div class="layui-input-block" style="margin-left: 150px;width: 700px;">
                     <button type="submit" class="layui-btn layui-btn-primary layui-border layui-btn-fluid"
                             lay-submit="" lay-filter="submit">开始下载附件<i
-                            class="layui-icon layui-icon-download-circle"></i></button>
+                            class="layui-icon layui-icon-download-circle" layui-btn-disabled></i></button>
                     <!--<button type="reset" class="layui-btn layui-btn-primary layui-border-black">重置<i class="layui-icon layui-icon-fonts-clear"></i></button>-->
                 </div>
+            </div>
             </div>
         </div>
     </div>
@@ -236,6 +255,7 @@
         let layer = layui.layer;
         let laydate = layui.laydate;
         let date = new Date();
+        let hasbox = 0;
         if (date.getHours() >= 18 || date.getHours() <= 6) {
             $("body").css("background-color", "#111")
             $(".child").css("background-color", "#222").css("color", "#f2f2f2")
@@ -267,21 +287,6 @@
                 $(".child").css("height", height-number+"px")
             }
         });
-
-        /*layer.open({
-            type: 1,
-            title: '<h2 style="color: red;">系统提示</h2>',
-            area: ['400px', '150px'],
-            shade: 0.5,
-            id: 'tips_disable', //设定一个id，防止重复弹出
-            btnAlign: 'c',
-            moveType: 1, //拖拽模式，0或者1
-            content: "<div style='padding-left: 20px;padding-top: 20px;font-weight: bold;'>邮件附件下载功能升级维护中；暂停使用！</div>",
-            cancel: function () {
-                layer.msg('此窗口不可关闭');
-                return false
-            }
-        });*/
         form.render();
 
         form.on('radio(download_type)', function (data) {
@@ -342,6 +347,16 @@
         });
 
         form.on('submit(submit)', function (data) {
+            let mailBoxVal = [];
+            if (hasbox == 1) {
+                $('input[name="mail-box"]:checked').each(function(){
+                    mailBoxVal.push($(this).val());
+                });
+                if (mailBoxVal.length == 0) {
+                    layer.msg("请选择收件箱", {icon: 5, anim: 6});
+                    return false;
+                }
+            }
             let count = data.field.count
             if (count == 0 || count == undefined || count == null) {
                 count = 0
@@ -364,7 +379,7 @@
                         layer.msg(result.msg, {icon: 5, anim: 6});
                     } else {
                         //配置一个透明的询问框
-                        let str = '<div style="text-align: left;font-weight: bold;">请求操作成功！，操作流水号：<span style="color: #FFB6C1;">'+result.data+'</span> 妥善保管；可用于查找操作记录' +
+                        let str = '<div style="text-align: left;font-weight: bold;">请求操作成功！操作流水号：<span style="color: #FFB6C1;">'+result.data+'</span> 妥善保管；可用于查找操作记录' +
                             '<br/>附件已开始下载。请耐心等待；处理结果请查看记录文件或留意您的邮箱（如有填写）' +
                             '<br>如果不想等待，关闭此页面继续你的其他工作！不影响操作流程</div>'
                         layer.msg(str, {
@@ -394,6 +409,48 @@
                 type: 2,
                 area: ['300px', '400px'],
                 content: '/catalogue'
+            });
+        });
+
+        $("#mail-box-button").click(function(){
+            let server = $('input[name="server"]').val();
+            let account = $('input[name="account"]').val();
+            let password = $('input[name="password"]').val();
+            let url = '/mail/boxes?server='+server+'&account='+account+'&password='+password
+            show_loading()
+            $.ajax({
+                url: url,
+                method: 'GET',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function(result) {
+                    if (result.ret != 0) {
+                        layer.msg(result.msg, {icon: 5, anim: 6});
+                    } else {
+                        let str = ''
+                        for (let i = 0; i < result.data.length; i++) {
+                            hasbox = 1
+                            let data = result.data[i]
+                            if (data.name == "INBOX") {
+                                data.name = "主收件箱"
+                            }
+                            str += '<input type="checkbox" name="mail-box" value="'+data.value+'" title="'+data.name+'">'
+                        }
+                        $("#mail-box-data").html(str)
+                        $("#body-param").css("display", "")
+                        form.render();
+                        $(".child").css("height", (1400+$("#mail-box-data").height())+"px")
+                        form.render();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // 处理错误情况
+                    layer.msg("服务器内部错误", {icon: 2, anim: 6});
+                },
+                complete: function() {
+                    // 请求完成后隐藏加载中动画
+                    hide_loading()
+                }
             });
         });
     });

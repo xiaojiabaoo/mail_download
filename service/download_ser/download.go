@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"mail_download/model/request_model"
+	"mail_download/model/response_model"
 	"mail_download/tools"
 	customErr "mail_download/tools/error"
 	"os"
@@ -467,4 +468,39 @@ func SendMessage(param request_model.DownloadParam, total, count int, r error) {
 		return
 	}
 	tools.Logger(param.Serial, "邮箱通知已发送成功，请留意你的邮箱；如果没有找到，它可能在你的垃圾邮箱中；", "")
+}
+
+func GetMailboxes(param request_model.MailboxesParam) ([]response_model.MailBoxes, error) {
+	var (
+		err      error
+		c        = &client.Client{}
+		boxes    = make(chan *imap.MailboxInfo, 10)
+		done     = make(chan error, 1)
+		response = make([]response_model.MailBoxes, 0)
+	)
+	c, err = Login(request_model.DownloadParam{
+		Server:   param.Server,
+		Account:  param.Account,
+		Password: param.Password,
+	})
+	if err != nil {
+		return response, errors.Wrap(err, "登录失败，请检查邮箱服务地址和账号密码是否填写正确")
+	}
+	defer c.Logout()
+	go func() {
+		done <- c.List("", "*", boxes)
+	}()
+	for m := range boxes {
+		if m.Name == "" || m.Name == "草稿" || m.Name == "已发送" || m.Name == "垃圾邮件" || m.Name == "已删除邮件" {
+			continue
+		}
+		response = append(response, response_model.MailBoxes{
+			Name: strings.ReplaceAll(m.Name, "INBOX/", ""),
+			Val:  m.Name,
+		})
+	}
+	if err = <-done; err != nil {
+		return response, errors.Wrap(err, "连接超时")
+	}
+	return response, nil
 }

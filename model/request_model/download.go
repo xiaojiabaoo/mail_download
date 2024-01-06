@@ -14,6 +14,12 @@ type DownloadParam struct {
 	Serial        string `json:"-"`              // 操作流水号，后台使用
 }
 
+type MailboxesParam struct {
+	Server   string `form:"server" binding:"required"`   // 邮箱服务器地址，此参数必须填写
+	Account  string `form:"account" binding:"required"`  // 邮箱账号，此参数必须填写
+	Password string `form:"password" binding:"required"` // 邮箱密码，此参数必须填写
+}
+
 type CCLParam struct {
 	Account  string `json:"account" binding:"required"`  // 登录账号，此参数必须填写
 	Password string `json:"password" binding:"required"` // 登录密码，此参数必须填写

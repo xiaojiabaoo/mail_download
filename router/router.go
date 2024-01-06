@@ -32,6 +32,7 @@ func Run(addr string) {
 	{
 		mailGroup.POST("/download", download.Download)
 		mailGroup.POST("/ccl", ccl.CCL)
+		mailGroup.GET("/boxes", download.GetMailboxes)
 	}
 
 	systemGroup := router.Group("/system")
