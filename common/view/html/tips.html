@@ -66,17 +66,99 @@
             color: #FFB6C1 !important;
         }
 
+        /*layui-form-checkbox span*/
+        .day-layui-form-checkbox-span {
+            padding: 0 10px;
+            height: 100%;
+            font-size: 14px;
+            border-radius: 5px 0 0 5px !important;
+            background-color: #E1F5FE !important;
+            color: #34495E !important;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        /*layui-form-checkbox i*/
+        .day-layui-form-checkbox-i {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 30px;
+            height: 28px;
+            border: 1px solid #E1F5FE !important;
+            border-left: none;
+            border-radius: 0 5px 5px 0 !important;
+            color: #E1F5FE !important;
+            font-size: 20px;
+            text-align: center;
+            background-color: #F7F9F9 !important;
+        }
+
+        /*layui-form-checkbox*/
+        .night-layui-form-checkbox {
+            position: relative;
+            height: 30px;
+            line-height: 30px;
+            margin-right: 10px;
+            padding-right: 30px;
+            cursor: pointer;
+            font-size: 0;
+            -webkit-transition: .1s linear;
+            transition: .1s linear;
+            box-sizing: border-box;
+            background-color: rgb(34, 34, 34) !important;
+        }
+        /*layui-form-checkbox span*/
+        .night-layui-form-checkbox-span {
+            padding: 0 10px;
+            height: 100%;
+            font-size: 14px;
+            border-radius: 5px 0 0 5px !important;
+            background-color: #455A64 !important;
+            color: #f6f6f6 !important;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        /*layui-form-checkbox i*/
+        .night-layui-form-checkbox-i {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 30px;
+            height: 30px !important;
+            border: 0;
+            border-left: none;
+            border-radius: 0 5px 5px 0 !important;
+            color: #455A64 !important;
+            font-size: 20px;
+            text-align: center;
+            background-color: #fff !important;
+        }
 
         .layui-form-checkbox span {
             padding: 0 10px;
             height: 100%;
             font-size: 14px;
-            border-radius: 2px 0 0 2px;
-            background-color: #9E9E9E;
+            border-radius: 0 !important;
+            background-color: #90A4AE;
             color: #fff;
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
+        }
+        .layui-form-checkbox i {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 30px;
+            height: 28px;
+            border: 1px solid #d2d2d2;
+            border-left: none;
+            border-radius: 0 !important;
+            color: #eee;
+            font-size: 20px;
+            text-align: center;
         }
     </style>
 </head>
@@ -121,7 +203,8 @@
                            placeholder="请填写邮箱登录密码（必填）" class="layui-input" value="Acc01.ggt125">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;padding: 5px 0!important;">
-                    <button type="button" id="mail-box-button" class="layui-btn layui-btn-sm" style="background-color:#FFB6C1 !important;">检测</button>
+                    <button type="button" id="mail-box-button" class="layui-btn layui-btn-sm" style="background-color:#FFB6C1 !important;">
+                        <i class="layui-icon layui-icon-search"></i>查询收件箱</button>
                 </div>
             </div>
             <div id="body-param" style="display: none;">
@@ -264,11 +347,11 @@
             $("input").css("color", "#f2f2f2")
             $("#tips").removeClass("tips-day")
             $("#tips").addClass("tips-night")
-            form.render();
         } else {
             $("#tips").removeClass("tips-night")
             $("#tips").addClass("tips-day")
         }
+        form.render();
 
         form.on('radio(inform)', function (data) {
             let value = data.value;
@@ -347,16 +430,18 @@
         });
 
         form.on('submit(submit)', function (data) {
-            let mailBoxVal = [];
+            let arr = new Array()
             if (hasbox == 1) {
-                $('input[name="mail-box"]:checked').each(function(){
-                    mailBoxVal.push($(this).val());
+                $("input:checkbox[name='mail_box']:checked").each(function (i) {
+                    arr[i] = $(this).val()
+                    console.log($(this))
                 });
-                if (mailBoxVal.length == 0) {
+                if (arr.length == 0) {
                     layer.msg("请选择收件箱", {icon: 5, anim: 6});
                     return false;
                 }
             }
+            console.log(arr)
             let count = data.field.count
             if (count == 0 || count == undefined || count == null) {
                 count = 0
@@ -434,12 +519,13 @@
                             if (data.name == "INBOX") {
                                 data.name = "主收件箱"
                             }
-                            str += '<input type="checkbox" name="mail-box" value="'+data.value+'" title="'+data.name+'">'
+                            str += '<input type="checkbox" name="mail_box" lay-filter="mail_box" value="'+data.value+'" title="'+data.name+'">'
                         }
-                        $("#mail-box-data").html(str)
+                        $("#mail-box-data").html(str).show()
+                        form.render('checkbox'); // 重新渲染复选框
                         $("#body-param").css("display", "")
-                        form.render();
                         $(".child").css("height", (1400+$("#mail-box-data").height())+"px")
+                        $("#mail-box-button").html('<i class="layui-icon layui-icon-refresh-3"></i>刷新收件箱')
                         form.render();
                     }
                 },
@@ -452,6 +538,10 @@
                     hide_loading()
                 }
             });
+        });
+
+        form.on('checkbox(mail_box)', function (data) {
+            alert(data.elem.value)
         });
     });
 </script>
