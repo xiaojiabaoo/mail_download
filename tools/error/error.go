@@ -42,6 +42,7 @@ const (
 	FILE_DOWNLOAD_CLASSIFY_ERROR = 30011
 	GET_SYSTEM_PATH_ERROR        = 30012
 	NUMBER_DOWNLOADS_100_ERROR   = 30013
+	MAIL_BOX_EMPTY_ERROR         = 30014
 
 	CLL_LOGIN_ERROR             = 40001
 	INVOICENO_EMPTY_ERROR       = 40002
@@ -64,12 +65,12 @@ var ErrText = map[int64]string{
 
 	DATA_NOT_EXIST: "数据不存在！",
 
-	SERVER_ADDR_ERROR:            "邮件服务器地址是空的或错误的，请规范填写",
+	SERVER_ADDR_ERROR:            "邮箱服务器填写错误或无法连接",
 	EMAIL_ACCOUNT_ERROR:          "请填写你的邮箱账号",
 	EMAIL_PASSWORD_ERROR:         "请填写你的邮箱密码",
 	TIME_COUNT_ERROR:             "下载邮件的时间范围和下载指定数量的邮件必须要填写一个",
 	EMAIL_DOWNLOAD_URL_ERROR:     "请填写你的附件下载目录，需要下载到哪里",
-	EMAIL_LOGIN_ERROR:            "邮箱登录出错！请检查网络是否连接或邮箱信息是否填写正确无误",
+	EMAIL_LOGIN_ERROR:            "邮箱账号密码错误或无法登录",
 	DOWNLOAD_URL_ERROR:           "检测到当前附件的下载路径是文件，请改为目录",
 	DOWNLOAD_TIME_ERROR:          "下载邮件的时间不合法",
 	EMAIL_EMPTY_ERROR:            "邮件箱中未获取到邮件信息",
@@ -77,6 +78,7 @@ var ErrText = map[int64]string{
 	FILE_DOWNLOAD_CLASSIFY_ERROR: "请选择下载目录划分级别",
 	GET_SYSTEM_PATH_ERROR:        "获取系统路径出现错误",
 	NUMBER_DOWNLOADS_100_ERROR:   "根据数量下载时不能超过100封邮件",
+	MAIL_BOX_EMPTY_ERROR:         "请选需要下载的择收件箱",
 
 	CLL_LOGIN_ERROR:             "账号或密码错误，请重新填写",
 	INVOICENO_EMPTY_ERROR:       "未识别到单号或是单号错误",

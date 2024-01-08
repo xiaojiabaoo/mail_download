@@ -38,7 +38,7 @@ func Download(param request_model.DownloadParam) error {
 	clients, err = Login(param)
 	if err != nil {
 		tools.ProcessMap.Delete(param.Account)
-		return customErr.New(customErr.EMAIL_LOGIN_ERROR, "")
+		return err
 	}
 	tools.Logger(param.Serial, "模拟登录邮箱成功", "")
 	go Body(clients, param)
@@ -48,7 +48,6 @@ func Download(param request_model.DownloadParam) error {
 func Body(clients *client.Client, param request_model.DownloadParam) error {
 	var (
 		count   int
-		mbox    = &imap.MailboxStatus{}
 		err     error
 		message = make([]*imap.Message, 0)
 	)
@@ -59,23 +58,31 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 		}
 	}()
 	defer clients.Logout()
-	mbox, err = clients.Select("INBOX", false)
-	if err != nil {
-		tools.ProcessMap.Delete(param.Account)
-		SendMessage(param, -1, 0, err)
-		return errors.Wrap(err, "获取邮箱INBOX错误")
-	}
-	tools.Logger(param.Serial, fmt.Sprintf(`开始筛选出邮箱中的符合的邮件`), "")
-	switch {
-	case param.Time > 0:
-		message, err = GetMailForDate(clients, param, mbox.Messages)
-	case param.Count > 0:
-		message, err = GetMailForCount(clients, param, mbox.Messages)
-	}
-	if err != nil {
-		tools.ProcessMap.Delete(param.Account)
-		SendMessage(param, -1, 0, err)
-		return err
+	for _, box := range param.Box {
+		var (
+			messages = make([]*imap.Message, 0)
+			mbox     = &imap.MailboxStatus{}
+		)
+		mbox, err = clients.Select(box, false)
+		if err != nil {
+			tools.ProcessMap.Delete(param.Account)
+			SendMessage(param, -1, 0, err)
+			return errors.Wrap(err, "获取邮箱："+box+" 错误")
+		}
+		tools.Logger(param.Serial, fmt.Sprintf(`开始收取收件箱：%s 中的邮件`, box), "")
+		switch {
+		case param.Time > 0:
+			messages, err = GetMailForDate(clients, param, mbox.Messages, box)
+		case param.Count > 0:
+			messages, err = GetMailForCount(clients, param, mbox.Messages, box)
+		}
+		if err != nil {
+			tools.ProcessMap.Delete(param.Account)
+			SendMessage(param, -1, 0, err)
+			return err
+		}
+		message = append(message, messages...)
+		tools.Logger(param.Serial, fmt.Sprintf(`收件箱：%s 中的邮件已收取完成，共筛选到：%d封邮件`, box, len(messages)), "")
 	}
 	if len(message) == 0 {
 		tools.ProcessMap.Delete(param.Account)
@@ -86,7 +93,7 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 	sort.SliceStable(message, func(i, j int) bool {
 		return message[j].Envelope.Date.After(message[i].Envelope.Date)
 	})
-	tools.Logger(param.Serial, fmt.Sprintf(`已筛选完成，开始取出每个邮件中的附件`), "")
+	tools.Logger(param.Serial, fmt.Sprintf(`收件箱中的邮件已全部筛选完成，开始下载每个邮件中的附件`), "")
 	for index, msg := range message {
 		index++
 		date := time.Unix(msg.Envelope.Date.Unix(), 0)
@@ -112,6 +119,9 @@ func CheckParam(param *request_model.DownloadParam) error {
 	}
 	if param.Password == "" {
 		return customErr.New(customErr.EMAIL_PASSWORD_ERROR, "")
+	}
+	if len(param.Box) == 0 {
+		return customErr.New(customErr.MAIL_BOX_EMPTY_ERROR, "")
 	}
 	if param.Type != "cover" && param.Type != "jump" && param.Type != "all_reserved" {
 		return customErr.New(customErr.FILE_TYPE_EMPTY_ERROR, "")
@@ -144,22 +154,26 @@ func Login(param request_model.DownloadParam) (*client.Client, error) {
 	)
 	clients, err = client.DialTLS(param.Server, nil)
 	if err != nil {
-		return clients, err
+		return clients, customErr.New(customErr.SERVER_ADDR_ERROR, "")
 	}
 	err = clients.Login(param.Account, param.Password)
 	if err != nil {
-		return clients, err
+		if strings.Contains(err.Error(), "LOGIN failed") {
+			return clients, customErr.New(customErr.EMAIL_LOGIN_ERROR, "")
+		}
+		return clients, errors.Wrap(err, "邮箱登录异常")
 	}
 	return clients, nil
 }
 
-func GetMailForCount(clients *client.Client, param request_model.DownloadParam, total uint32) ([]*imap.Message, error) {
+func GetMailForCount(clients *client.Client, param request_model.DownloadParam, total uint32, box string) ([]*imap.Message, error) {
 	var (
 		search     = make([]*imap.Message, 0)
 		message    = make([]*imap.Message, 0)
 		err        error
 		pageSize   uint32 = 100
 		start, end uint32
+		page       = 1
 	)
 	end = total
 	if total >= 500 {
@@ -168,6 +182,7 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 		start = 1
 	}
 	for {
+		tools.Logger(param.Serial, fmt.Sprintf(`当前收取第%d页`, page), "")
 		search, err = PaginationSearch(clients, start, end)
 		if err != nil {
 			if strings.Index(err.Error(), "imap: connection closed") != -1 {
@@ -178,9 +193,9 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 				if err != nil {
 					return message, err
 				}
-				_, err = clients.Select("INBOX", false)
+				_, err = clients.Select(box, false)
 				if err != nil {
-					return message, errors.Wrap(err, "重新连接后获取邮箱INBOX错误")
+					return message, err
 				}
 				tools.Logger(param.Serial, "重新连接成功，开始继续获取邮件", "")
 				continue
@@ -191,6 +206,9 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 			return message, customErr.New(customErr.DATA_NOT_EXIST, "")
 		}
 		for _, v := range search {
+			if param.Count <= uint32(len(message)) {
+				return message, nil
+			}
 			if !strings.Contains(v.Envelope.Subject, "INVOICE") || strings.Contains(v.Envelope.Subject, "回复") ||
 				strings.Contains(v.Envelope.Subject, "RE:") || strings.Contains(v.Envelope.Subject, "Re: ") {
 				continue
@@ -198,13 +216,11 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 			if !strings.Contains(v.Envelope.Subject, "#") && !strings.Contains(v.Envelope.Subject, "/") {
 				continue
 			}
-			if param.Count <= uint32(len(message)) {
-				return message, nil
-			}
 			times := time.Unix(v.Envelope.Date.Unix(), 0)
 			tools.Logger(param.Serial, fmt.Sprintf(`筛选到邮件 时间：%s，主题：%s`, times.Format("2006-01-02 15:04:05"), v.Envelope.Subject), "")
 			message = append(message, v)
 		}
+		page++
 		if start <= 1 {
 			break
 		}
@@ -218,13 +234,14 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 	return message, nil
 }
 
-func GetMailForDate(clients *client.Client, param request_model.DownloadParam, total uint32) ([]*imap.Message, error) {
+func GetMailForDate(clients *client.Client, param request_model.DownloadParam, total uint32, box string) ([]*imap.Message, error) {
 	var (
 		search     = make([]*imap.Message, 0)
 		message    = make([]*imap.Message, 0)
 		err        error
 		pageSize   uint32 = 100
 		start, end uint32
+		page       = 1
 	)
 	end = total
 	if total >= 500 {
@@ -233,6 +250,7 @@ func GetMailForDate(clients *client.Client, param request_model.DownloadParam, t
 		start = 1
 	}
 	for {
+		tools.Logger(param.Serial, fmt.Sprintf(`当前收取第%d页`, page), "")
 		search, err = PaginationSearch(clients, start, end)
 		if err != nil {
 			if strings.Index(err.Error(), "imap: connection closed") != -1 {
@@ -243,9 +261,9 @@ func GetMailForDate(clients *client.Client, param request_model.DownloadParam, t
 				if err != nil {
 					return message, err
 				}
-				_, err = clients.Select("INBOX", false)
+				_, err = clients.Select(box, false)
 				if err != nil {
-					return message, errors.Wrap(err, "重新连接后获取邮箱INBOX错误")
+					return message, err
 				}
 				tools.Logger(param.Serial, "重新连接成功，开始继续获取邮件", "")
 				continue
@@ -256,6 +274,10 @@ func GetMailForDate(clients *client.Client, param request_model.DownloadParam, t
 			return message, customErr.New(customErr.DATA_NOT_EXIST, "")
 		}
 		for _, v := range search {
+			times := time.Unix(v.Envelope.Date.Unix(), 0)
+			if param.Time > times.Unix() {
+				return message, nil
+			}
 			if !strings.Contains(v.Envelope.Subject, "INVOICE") || strings.Contains(v.Envelope.Subject, "回复") ||
 				strings.Contains(v.Envelope.Subject, "RE:") || strings.Contains(v.Envelope.Subject, "Re: ") {
 				continue
@@ -263,14 +285,10 @@ func GetMailForDate(clients *client.Client, param request_model.DownloadParam, t
 			if !strings.Contains(v.Envelope.Subject, "#") && !strings.Contains(v.Envelope.Subject, "/") {
 				continue
 			}
-			times := time.Unix(v.Envelope.Date.Unix(), 0)
-			if param.Time <= times.Unix() {
-				tools.Logger(param.Serial, fmt.Sprintf(`筛选到邮件 时间：%s，主题：%s`, times.Format("2006-01-02 15:04:05"), v.Envelope.Subject), "")
-				message = append(message, v)
-			} else {
-				return message, nil
-			}
+			tools.Logger(param.Serial, fmt.Sprintf(`筛选到邮件 时间：%s，主题：%s`, times.Format("2006-01-02 15:04:05"), v.Envelope.Subject), "")
+			message = append(message, v)
 		}
+		page++
 		if start <= 1 {
 			break
 		}
@@ -484,7 +502,7 @@ func GetMailboxes(param request_model.MailboxesParam) ([]response_model.MailBoxe
 		Password: param.Password,
 	})
 	if err != nil {
-		return response, errors.Wrap(err, "登录失败，请检查邮箱服务地址和账号密码是否填写正确")
+		return response, err
 	}
 	defer c.Logout()
 	go func() {

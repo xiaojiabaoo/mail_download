@@ -66,6 +66,13 @@
             color: #FFB6C1 !important;
         }
 
+        .layui-laydate-content .laydate-day-next, .layui-laydate-content .laydate-day-prev {
+            color: #d2d2d2 !important;
+        }
+        .layui-laydate-content td {
+            color: #FFB6C1 !important;
+        }
+
         /*layui-form-checkbox span*/
         .day-layui-form-checkbox-span {
             padding: 0 10px;
@@ -175,15 +182,15 @@
                         <p>   下载附件途中如遇到错误，服务会记录该本次错误信息并继续下载后面的附件，记录文件请参考“方式二”</p>
                     <h3>附件全部下载完成需要多久：</h3>
                         <p>   下载时间由下载的邮件数量、附件内容的大小和网络而决定；正常网络下，一个附件下载平均速度为0.5秒；</p>
-                        <p>   建议 如果是第一次下载（需要下载的附件较多），使用数量方式下载会比较快</p>
-                        <p>   建议 如果是增量下载（只需要下载的较少的附件），使用时间方式下载会比较快</p>
+                        <p>   建议：如果是需要下载的CCL发票较多，使用时间方式下载可能会比较快</p>
+                        <p>   建议：如果是增量下载的CCL发票较少，使用数量方式下载可能会比较快</p>
                 </span>
             </div>
             <div class="layui-form-item" style="margin-top: 20px;margin-left: 20px;">
                 <label class="layui-form-label" style="width: 100px;">邮箱服务地址</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="server" lay-verify="server" autocomplete="off"
-                           placeholder="请填写邮箱服务器地址（必填）" class="layui-input" value="imap.mxhichina.com:993">
+                           placeholder="请填写邮箱服务器地址（必填）" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;">
                     aliyun服务器地址：imap.qiye.aliyun.com:993或imap.mxhichina.com:993
@@ -193,14 +200,14 @@
                 <label class="layui-form-label" style="width: 100px;">邮箱登录账号</label>
                 <div class="layui-input-block">
                     <input style="width: 300px" type="text" name="account" lay-verify="email" autocomplete="off"
-                           placeholder="请填写邮箱登录账号（必填）" class="layui-input" value="acc02@ggt-world.com">
+                           placeholder="请填写邮箱登录账号（必填）" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
                 <label class="layui-form-label" style="width: 100px;">邮箱登录密码</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="password" name="password" lay-verify="password" autocomplete="off"
-                           placeholder="请填写邮箱登录密码（必填）" class="layui-input" value="Acc01.ggt125">
+                           placeholder="请填写邮箱登录密码（必填）" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;padding: 5px 0!important;">
                     <button type="button" id="mail-box-button" class="layui-btn layui-btn-sm" style="background-color:#FFB6C1 !important;">
@@ -224,7 +231,7 @@
                     <button type="button" id="select" class="layui-btn layui-btn-sm layui-btn-primary">选择目录</button>
                 </div>-->
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
-                    如果填写的目录不存在，程序会自动创建该目标；如果未填写目录，下载的附件默认会存放在C:\mail_file_download中
+                    如果填写的目录不存在，程序会自动创建该目标；如果未填写目录，下载的附件默认会存放在 <span style="font-weight: bolder">C:\mail_file_download</span> 中
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
@@ -235,8 +242,8 @@
                 </div>
                 <div style="color: #C0C0C0;margin-left: 130px;line-height: 27px;">
                     <p>该选项用于控制下载的方式：</p>
-                    <p>   如果选择的“根据时间范围下载”；填写的时间必须是小于现在的时间，系统会下载从填写的时间到现在为止所有邮件的附件文件</p>
-                    <p>   如果选择的“根据指定数量下载”；填写具体的数量，系统会根据数量下载最近对应数量的邮件的附件文件</p>
+                    <p>   如果选择的 “根据时间范围下载” 填写的时间必须是历史时间，系统会下载从填写的时间到当前为止所有邮件的附件文件</p>
+                    <p>   如果选择的 “根据指定数量下载” 填写具体的数量，系统会根据数量下载最近对应数量的邮件的附件文件</p>
                 </div>
             </div>
             <div class="layui-form-item" id="type_count" style="margin-left: 20px;display: none;">
@@ -246,9 +253,9 @@
                            placeholder="请填写下载邮件数量" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 130px;line-height: 27px;">
-                    <p>下载邮件的数量；填写的数字即表示下载最新的多少封符合条件的邮件；</p>
-                    <p>注意：填写的数量尽量保证在近期是足够的，否则系统将会一直查询历史邮件来满足该数量，直到数量满足或没有可查询的历史</p>
-                    <p>   邮件为止</p>
+                    <p>下载邮件的数量；填写的数字即表示在指定的收件箱中分别下载最新的填写的多少封符合条件的邮件；</p>
+                    <p>注意：填写的数量尽量保证在指定的收件箱中且在近期是足够的，否则系统将会一直查询历史邮件来满足该数量，直到达</p>
+                    <p>   到该数量或没有可查询的历史邮件为止，浪费不必要的时间</p>
                 </div>
             </div>
             <div class="layui-form-item" id="type_time" style="margin-left: 20px;">
@@ -338,7 +345,6 @@
         let layer = layui.layer;
         let laydate = layui.laydate;
         let date = new Date();
-        let hasbox = 0;
         if (date.getHours() >= 18 || date.getHours() <= 6) {
             $("body").css("background-color", "#111")
             $(".child").css("background-color", "#222").css("color", "#f2f2f2")
@@ -430,18 +436,27 @@
         });
 
         form.on('submit(submit)', function (data) {
-            let arr = new Array()
-            if (hasbox == 1) {
-                $("input:checkbox[name='mail_box']:checked").each(function (i) {
-                    arr[i] = $(this).val()
-                    console.log($(this))
-                });
-                if (arr.length == 0) {
-                    layer.msg("请选择收件箱", {icon: 5, anim: 6});
-                    return false;
+            let array = new Array()
+            let box = '['
+            $("input:checkbox[name='mail_box']:checked").each(function (i) {
+                let val = $(this).val();
+                if (val != "" && val != undefined && val != null && val != NaN &&
+                    val != "undefined" && val != "null" && val != "NaN") {
+                    array[i] = $(this).val()
+                }
+            });
+            if (array.length == 0) {
+                layer.msg("请选择收件箱", {icon: 5, anim: 6});
+                return false;
+            }
+            for (let i = 0; i <array.length; i++) {
+                if (i==array.length-1) {
+                    box += '"'+array[i]+'"'
+                } else {
+                    box += '"'+array[i]+'",'
                 }
             }
-            console.log(arr)
+            box += ']'
             let count = data.field.count
             if (count == 0 || count == undefined || count == null) {
                 count = 0
@@ -452,7 +467,8 @@
             }
             let param = '{"server":"'+data.field.server+'","account":"'+data.field.account+'","password":"'+data.field.password+'",' +
                 '"time":'+datetime+',"count":'+count+',"url":"'+data.field.url+'","classify":"'+data.field.classify+'",' +
-                '"type":"'+data.field.type+'","inform":"'+data.field.inform+'","inform_account":"'+data.field.inform_account+'"}'
+                '"type":"'+data.field.type+'","inform":"'+data.field.inform+'","inform_account":"'+data.field.inform_account+'",' +
+                '"box":'+box+'}'
             show_loading()
             $.ajax({
                 url: '/mail/download',
@@ -464,9 +480,9 @@
                         layer.msg(result.msg, {icon: 5, anim: 6});
                     } else {
                         //配置一个透明的询问框
-                        let str = '<div style="text-align: left;font-weight: bold;">请求操作成功！操作流水号：<span style="color: #FFB6C1;">'+result.data+'</span> 妥善保管；可用于查找操作记录' +
-                            '<br/>附件已开始下载。请耐心等待；处理结果请查看记录文件或留意您的邮箱（如有填写）' +
-                            '<br>如果不想等待，关闭此页面继续你的其他工作！不影响操作流程</div>'
+                        let str = '<div style="text-align: left;font-weight: bold;">请求操作成功！操作流水号：<span style="color: #FFB6C1;">'+result.data+'</span> 请妥善保管；可用于后续出现问题时查找操作记录' +
+                            '<br/>CCL发票已开始操作，待操作完成后会自动下载。请耐心等待；处理结果请查看记录文件或留意您的邮箱（如有填写）' +
+                            '<br>系统支持后台运行，关闭此页面继续你的其他工作！不影响系统运行</div>'
                         layer.msg(str, {
                             time: 0,
                             btn: ['知道了'],
@@ -501,6 +517,10 @@
             let server = $('input[name="server"]').val();
             let account = $('input[name="account"]').val();
             let password = $('input[name="password"]').val();
+            if (server == "" || account == "" || password == "") {
+                layer.msg("邮箱服务器地址和账号密码不能为空", {icon: 5, anim: 6});
+                return false
+            }
             let url = '/mail/boxes?server='+server+'&account='+account+'&password='+password
             show_loading()
             $.ajax({
@@ -514,15 +534,17 @@
                     } else {
                         let str = ''
                         for (let i = 0; i < result.data.length; i++) {
-                            hasbox = 1
                             let data = result.data[i]
                             if (data.name == "INBOX") {
                                 data.name = "主收件箱"
                             }
-                            str += '<input type="checkbox" name="mail_box" lay-filter="mail_box" value="'+data.value+'" title="'+data.name+'">'
+                            str += '<input type="checkbox" name="mail_box" value="'+data.val+'" title="'+data.name+'">'
+                        }
+                        if (result.data.length == 0) {
+                            str += '<input type="checkbox" name="mail_box" value="INBOX" title="主收件箱">'
                         }
                         $("#mail-box-data").html(str).show()
-                        form.render('checkbox'); // 重新渲染复选框
+                        form.render(); // 重新渲染复选框
                         $("#body-param").css("display", "")
                         $(".child").css("height", (1400+$("#mail-box-data").height())+"px")
                         $("#mail-box-button").html('<i class="layui-icon layui-icon-refresh-3"></i>刷新收件箱')
@@ -538,10 +560,6 @@
                     hide_loading()
                 }
             });
-        });
-
-        form.on('checkbox(mail_box)', function (data) {
-            alert(data.elem.value)
         });
     });
 </script>
