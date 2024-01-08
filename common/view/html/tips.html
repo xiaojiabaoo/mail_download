@@ -465,8 +465,10 @@
             if (data.field.time != "") {
                 datetime = new Date(data.field.time).getTime()/1000;
             }
+            let urls = data.field.url
+            urls = urls.replace(/[\\]/g, '\\\\').replace(/[\"]/g, '\\"').replace(/[\/]/g, '\\/').replace(/[\b]/g, '\\b').replace(/[\f]/g, '\\f').replace(/[\n]/g, '\\n').replace(/[\r]/g, '\\r').replace(/[\t]/g, '\\t').replace(/[']/g, '\\\'');
             let param = '{"server":"'+data.field.server+'","account":"'+data.field.account+'","password":"'+data.field.password+'",' +
-                '"time":'+datetime+',"count":'+count+',"url":"'+data.field.url+'","classify":"'+data.field.classify+'",' +
+                '"time":'+datetime+',"count":'+count+',"url":"'+urls+'","classify":"'+data.field.classify+'",' +
                 '"type":"'+data.field.type+'","inform":"'+data.field.inform+'","inform_account":"'+data.field.inform_account+'",' +
                 '"box":'+box+'}'
             show_loading()
