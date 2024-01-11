@@ -8,8 +8,10 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
+	"mail_download/model"
 	"mail_download/model/request_model"
 	"mail_download/model/response_model"
+	"mail_download/service/excel_ser"
 	"mail_download/tools"
 	customErr "mail_download/tools/error"
 	"os"
@@ -32,15 +34,15 @@ func Download(param request_model.DownloadParam) error {
 		return customErr.New(customErr.DOWNLOAD_URL_ERROR, "")
 	}
 	tools.ProcessMap.Store(param.Account, param.Serial) // 添加本次操作表示
-	tools.Logger(param.Serial, "-----------------------分隔符-开始准备工作------------------------", "")
-	tools.Logger(param.Serial, fmt.Sprintf(`客户端发出下载邮箱附件的指令，开始执行指令；请求信息：%+v`, param), "")
-	tools.Logger(param.Serial, "开始模拟登录邮箱", "")
+	tools.Logger(param.Serial, "开始准备工作", "", "")
+	tools.Logger(param.Serial, fmt.Sprintf(`客户端发出下载邮箱附件的指令，开始执行指令；请求信息：%+v`, param), "", "")
+	tools.Logger(param.Serial, "开始模拟登录邮箱", "", "")
 	clients, err = Login(param)
 	if err != nil {
 		tools.ProcessMap.Delete(param.Account)
 		return err
 	}
-	tools.Logger(param.Serial, "模拟登录邮箱成功", "")
+	tools.Logger(param.Serial, "模拟登录邮箱成功", "", "")
 	go Body(clients, param)
 	return nil
 }
@@ -69,7 +71,8 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 			SendMessage(param, -1, 0, err)
 			return errors.Wrap(err, "获取邮箱："+box+" 错误")
 		}
-		tools.Logger(param.Serial, fmt.Sprintf(`开始收取收件箱：%s 中的邮件`, box), "")
+		tools.Excel(param.Serial, model.XlsxData{})
+		tools.Logger(param.Serial, fmt.Sprintf(`开始收取收件箱：%s 中的邮件`, box), "", "")
 		switch {
 		case param.Time > 0:
 			messages, err = GetMailForDate(clients, param, mbox.Messages, box)
@@ -82,7 +85,7 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 			return err
 		}
 		message = append(message, messages...)
-		tools.Logger(param.Serial, fmt.Sprintf(`收件箱：%s 中的邮件已收取完成，共筛选到：%d封邮件`, box, len(messages)), "")
+		tools.Logger(param.Serial, fmt.Sprintf(`收件箱：%s 中的邮件已收取完成，共筛选到：%d封邮件`, box, len(messages)), "", "")
 	}
 	if len(message) == 0 {
 		tools.ProcessMap.Delete(param.Account)
@@ -93,11 +96,12 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 	sort.SliceStable(message, func(i, j int) bool {
 		return message[j].Envelope.Date.After(message[i].Envelope.Date)
 	})
-	tools.Logger(param.Serial, fmt.Sprintf(`收件箱中的邮件已全部筛选完成，开始下载每个邮件中的附件`), "")
+	tools.Logger(param.Serial, fmt.Sprintf(`收件箱中的邮件已全部筛选完成，开始下载每个邮件中的附件`), "", "")
 	for index, msg := range message {
 		index++
 		date := time.Unix(msg.Envelope.Date.Unix(), 0)
-		tools.Logger(param.Serial, fmt.Sprintf(`-----------------------分隔符-开始操作第%d封邮件（共%d封邮件），时间：%s，邮件主题：%s------------------------`, index, len(message), date.Format("2006-01-02 15:04:05"), msg.Envelope.Subject), "")
+		tools.Excel(param.Serial, model.XlsxData{})
+		tools.Logger(param.Serial, fmt.Sprintf(`--------开始操作第%d封邮件（共%d封邮件），时间：%s，邮件主题：%s`, index, len(message), date.Format("2006-01-02 15:04:05"), msg.Envelope.Subject), "", "")
 		mailBody := GetMailBody(msg, param)
 		if mailBody {
 			count++
@@ -182,11 +186,11 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 		start = 1
 	}
 	for {
-		tools.Logger(param.Serial, fmt.Sprintf(`当前收取第%d页`, page), "")
+		tools.Logger(param.Serial, fmt.Sprintf(`当前收取第%d页`, page), "", "")
 		search, err = PaginationSearch(clients, start, end)
 		if err != nil {
 			if strings.Index(err.Error(), "imap: connection closed") != -1 {
-				tools.Logger(param.Serial, "因下载量过大导致连接被中断，一分钟后尝试重新连接", tools.LOG_LEVEL_SYSTEM_ERROR)
+				tools.Logger(param.Serial, "因下载量过大导致连接被中断，一分钟后尝试重新连接", "", tools.LOG_LEVEL_SYSTEM_ERROR)
 				time.Sleep(60 * time.Second)
 				clients.Logout()
 				clients, err = Login(param)
@@ -197,7 +201,7 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 				if err != nil {
 					return message, err
 				}
-				tools.Logger(param.Serial, "重新连接成功，开始继续获取邮件", "")
+				tools.Logger(param.Serial, "重新连接成功，开始继续获取邮件", "", "")
 				continue
 			}
 			return message, err
@@ -216,8 +220,8 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 			if !strings.Contains(v.Envelope.Subject, "#") && !strings.Contains(v.Envelope.Subject, "/") {
 				continue
 			}
-			times := time.Unix(v.Envelope.Date.Unix(), 0)
-			tools.Logger(param.Serial, fmt.Sprintf(`筛选到邮件 时间：%s，主题：%s`, times.Format("2006-01-02 15:04:05"), v.Envelope.Subject), "")
+			//times := time.Unix(v.Envelope.Date.Unix(), 0)
+			//tools.Logger(param.Serial, fmt.Sprintf(`筛选到邮件 时间：%s，主题：%s`, times.Format("2006-01-02 15:04:05"), v.Envelope.Subject), "", "")
 			message = append(message, v)
 		}
 		page++
@@ -250,11 +254,11 @@ func GetMailForDate(clients *client.Client, param request_model.DownloadParam, t
 		start = 1
 	}
 	for {
-		tools.Logger(param.Serial, fmt.Sprintf(`当前收取第%d页`, page), "")
+		tools.Logger(param.Serial, fmt.Sprintf(`当前收取第%d页`, page), "", "")
 		search, err = PaginationSearch(clients, start, end)
 		if err != nil {
 			if strings.Index(err.Error(), "imap: connection closed") != -1 {
-				tools.Logger(param.Serial, "因下载量过大导致连接被中断，一分钟后尝试重新连接", tools.LOG_LEVEL_SYSTEM_ERROR)
+				tools.Logger(param.Serial, "因下载量过大导致连接被中断，一分钟后尝试重新连接", "", tools.LOG_LEVEL_SYSTEM_ERROR)
 				time.Sleep(60 * time.Second)
 				clients.Logout()
 				clients, err = Login(param)
@@ -265,7 +269,7 @@ func GetMailForDate(clients *client.Client, param request_model.DownloadParam, t
 				if err != nil {
 					return message, err
 				}
-				tools.Logger(param.Serial, "重新连接成功，开始继续获取邮件", "")
+				tools.Logger(param.Serial, "重新连接成功，开始继续获取邮件", "", "")
 				continue
 			}
 			return message, err
@@ -288,7 +292,7 @@ func GetMailForDate(clients *client.Client, param request_model.DownloadParam, t
 			if param.Time > times.Unix() {
 				continue
 			}
-			tools.Logger(param.Serial, fmt.Sprintf(`筛选到邮件 时间：%s，主题：%s`, times.Format("2006-01-02 15:04:05"), v.Envelope.Subject), "")
+			//tools.Logger(param.Serial, fmt.Sprintf(`筛选到邮件 时间：%s，主题：%s`, times.Format("2006-01-02 15:04:05"), v.Envelope.Subject), "", "")
 			message = append(message, v)
 		}
 		page++
@@ -337,12 +341,12 @@ func GetMailBody(msg *imap.Message, param request_model.DownloadParam) bool {
 		filename string
 	)
 	if text == nil {
-		tools.Logger(param.Serial, "获取邮件正文为空", tools.LOG_LEVEL_SYSTEM_ERROR)
+		tools.Logger(param.Serial, "获取邮件正文为空", "", tools.LOG_LEVEL_SYSTEM_ERROR)
 		return result
 	}
 	reader, err = mail.CreateReader(text)
 	if err != nil {
-		tools.Logger(param.Serial, fmt.Sprintf(`创建当前邮件Reader对象出现错误：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+		tools.Logger(param.Serial, "创建当前邮件Reader对象出现错误", fmt.Sprintf(`错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
 		return result
 	}
 	for {
@@ -399,9 +403,9 @@ func GetMailBody(msg *imap.Message, param request_model.DownloadParam) bool {
 		}
 	}
 	if result {
-		tools.Logger(param.Serial, fmt.Sprintf(`邮件附件下载成功！附件名称：%s`, filename), "")
+		tools.Logger(param.Serial, fmt.Sprintf(`邮件附件下载成功！附件名称：%s`, filename), "", "")
 	} else {
-		tools.Logger(param.Serial, fmt.Sprintf(`邮件附件下载失败！附件名称：%s；失败原因：%s`, filename, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+		tools.Logger(param.Serial, fmt.Sprintf(`邮件附件下载失败！附件名称：%s`, filename), fmt.Sprintf(`失败原因：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
 	}
 	return result
 }
@@ -471,24 +475,30 @@ func SendMessage(param request_model.DownloadParam, total, count int, r error) {
 	case total/2 < count:
 		result = fmt.Sprintf(`邮件附件下载已完成；本次操作中有部分下载失败的邮件，可打开记录文件查看详细信息，%s`, text)
 	}
-	tools.Logger(param.Serial, result, "")
+	tools.Logger(param.Serial, result, "", "")
 	if r != nil {
-		tools.Logger(param.Serial, fmt.Sprintf(`程序报错信息（该错误请技术人员查看）：%s`, r.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+		tools.Logger(param.Serial, "程序发生错误，请联系技术人员处理", fmt.Sprintf(`错误信息：%s`, r.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+	}
+	//保存xlsx
+	err = excel_ser.Excel(param.Serial)
+	if err != nil {
+		tools.Logger(param.Serial, "保存xlsx出现错误", "错误信息："+err.Error(), tools.LOG_LEVEL_SYSTEM_ERROR)
 	}
 	if param.Inform == "off" || param.Inform == "" {
-		tools.Logger(param.Serial, "检测到用户未选择邮箱通知，本次结果将不会推送", "")
-		return
+		tools.Logger(param.Serial, "检测到用户未选择邮箱通知，本次结果将不会推送", "", "")
+	} else {
+		if param.InformAccount != "" {
+			account = param.InformAccount
+		}
+		tools.Logger(param.Serial, "发送邮件通知，发送账号："+account, "", "")
+		err = tools.MailAttachment(account, result, param.Serial)
+		if err != nil {
+			tools.Logger(param.Serial, "发送邮件通知失败，请联系技术人员处理", fmt.Sprintf(`错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+		} else {
+			tools.Logger(param.Serial, "邮箱通知已发送成功，请留意你的邮箱；如果没有找到，它可能在你的垃圾邮箱中；", "", "")
+		}
 	}
-	if param.InformAccount != "" {
-		account = param.InformAccount
-	}
-	tools.Logger(param.Serial, "准备发送邮件通知，发送账号："+account, "")
-	err = tools.MailAttachment(account, result, param.Serial)
-	if err != nil {
-		tools.Logger(param.Serial, fmt.Sprintf(`发送邮件通知失败，请联系技术人员处理；错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
-		return
-	}
-	tools.Logger(param.Serial, "邮箱通知已发送成功，请留意你的邮箱；如果没有找到，它可能在你的垃圾邮箱中；", "")
+	tools.XlsxMap.Delete(param.Serial)
 }
 
 func GetMailboxes(param request_model.MailboxesParam) ([]response_model.MailBoxes, error) {

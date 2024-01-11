@@ -8,6 +8,7 @@ import (
 	"mail_download/service/ccl_ser/air_transport"
 	"mail_download/service/ccl_ser/air_transport/request_http"
 	"mail_download/service/ccl_ser/shipping"
+	"mail_download/service/excel_ser"
 	"mail_download/tools"
 	customErr "mail_download/tools/error"
 	"strings"
@@ -29,8 +30,8 @@ func CLL(param request_model.CCLParam) error {
 		return customErr.New(customErr.ACCOUNT_TWO_PROCESSES_ERROR, "")
 	}
 	tools.ProcessMap.Store(param.Account, param.Serial) // 添加本次操作表示
-	tools.Logger(param.Serial, fmt.Sprintf(`-----------------------分隔符-开始准备工作------------------------`), "")
-	tools.Logger(param.Serial, fmt.Sprintf(`客户端发出CCL操作流程指令，开始执行指令；请求信息：%+v`, param), "")
+	tools.Logger(param.Serial, fmt.Sprintf(`开始准备工作`), "", "")
+	tools.Logger(param.Serial, fmt.Sprintf(`客户端发出CCL操作流程指令，开始执行指令；请求信息：%+v`, param), "", "")
 	fileMap, err = ReadPdfGroup(param.Url) //获取指定目录下的所有PDF文件
 	if err != nil {
 		tools.ProcessMap.Delete(param.Account)
@@ -40,7 +41,7 @@ func CLL(param request_model.CCLParam) error {
 		tools.ProcessMap.Delete(param.Account)
 		return customErr.New(customErr.TOO_MANY_FILES, "")
 	}
-	tools.Logger(param.Serial, "开始模拟登录CCL系统", "")
+	tools.Logger(param.Serial, "开始模拟登录EFC系统", "", "")
 	login, err = Login(param.Account, param.Password) //模拟登录系统，检测账号密码是否正确
 	if err != nil {
 		tools.ProcessMap.Delete(param.Account)
@@ -50,7 +51,7 @@ func CLL(param request_model.CCLParam) error {
 		tools.ProcessMap.Delete(param.Account)
 		return customErr.New(customErr.CLL_LOGIN_ERROR, "")
 	}
-	tools.Logger(param.Serial, fmt.Sprintf(`模拟登录CCL系统成功，系统登录响应结果：%+v`, login), "")
+	tools.Logger(param.Serial, "模拟登录EFC系统成功", fmt.Sprintf(`登录响应结果：%+v`, login), "")
 	go Operate(fileMap, login, param)
 	return nil
 }
@@ -71,19 +72,20 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 		}
 	}()
 	time.Sleep(2 * time.Second) // 先休眠两秒钟，因为CCL系统处理比较慢，等待两秒缓冲时间
-	tools.Logger(param.Serial, "开始模拟点击Query MAWB/Query Master功能", "")
+	tools.Logger(param.Serial, "开始模拟点击Query MAWB/Query Master功能", "", "")
 	queryInfo, err = request_http.GetQueryInfo(login) // 模拟查询信息
 	if err != nil {
 		tools.ProcessMap.Delete(param.Account)
 		SendMessage(typesMap, param, err)
 		return err
 	}
-	tools.Logger(param.Serial, fmt.Sprintf(`模拟点击Query MAWB/Query Master功能成功，调用GetQueryInfo查询表格所需要使用到的参数数据，查询结果：%+v`, queryInfo), "")
+	tools.Logger(param.Serial, "模拟点击Query MAWB/Query Master功能成功", fmt.Sprintf(`调用GetQueryInfo查询表格所需要使用到的参数数据，查询结果：%+v`, queryInfo), "")
 	for file, pdf := range fileMap {
-		log = fmt.Sprintf(`-----------------------分隔符-开始操作第%d个文件，共%d个，文件名：%s------------------------`, fileNumber, len(fileMap), file)
-		tools.Logger(param.Serial, log, "")
+		tools.Excel(param.Serial, model.XlsxData{})
+		log = fmt.Sprintf(`--------开始操作第%d个文件，共%d个，文件名：%s`, fileNumber, len(fileMap), file)
+		tools.Logger(param.Serial, log, "", "")
 		log = fmt.Sprintf(`在当前文件中检测出 Amount：%v，Invoice No：%s，主单号（Master No/MAWB No）：%v`, pdf.Amount, pdf.InvoiceNo, pdf.MasterMawbNo)
-		tools.Logger(param.Serial, log, "")
+		tools.Logger(param.Serial, log, "", "")
 		for _, no := range pdf.MasterMawbNo {
 			order := model.OrderParam{FileName: file, MasterMawbNo: no, QueryInfo: queryInfo, PdfData: pdf, Login: login}
 			switch {
@@ -94,7 +96,7 @@ func Operate(fileMap map[string]response_model.ReadPdf, login response_model.Log
 				//==========空运单号===========
 				types, err = air_transport.AirTransport(order, param)
 			default:
-				tools.Logger(param.Serial, fmt.Sprintf(`%s未检测出是海运单号还是空运单号，请人工核实`, file), tools.LOG_LEVEL_ERROR)
+				tools.Logger(param.Serial, fmt.Sprintf(`%s未检测出是海运单号还是空运单号，请人工核实`, file), "", tools.LOG_LEVEL_ERROR)
 			}
 			if err != nil {
 				tools.ProcessMap.Delete(param.Account)
@@ -141,19 +143,24 @@ func SendMessage(typesMap map[int64]int64, param request_model.CCLParam, r error
 	default:
 		result = "CCL流程操作因服务器或CCL系统原因导致中断，请联系相关技术人员处理（已执行完成的主单号不受影响）；" + text
 	}
-	tools.Logger(param.Serial, result, "")
+	tools.Logger(param.Serial, result, "", "")
 	if r != nil {
-		tools.Logger(param.Serial, fmt.Sprintf(`报错信息（该报错请技术人员查看）：%s`, r.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+		tools.Logger(param.Serial, "程序发生错误，请联系技术人员处理", fmt.Sprintf(`错误信息：%s`, r.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+	}
+	err = excel_ser.Excel(param.Serial)
+	if err != nil {
+		tools.Logger(param.Serial, "保存xlsx出现错误", "错误信息："+err.Error(), tools.LOG_LEVEL_SYSTEM_ERROR)
 	}
 	if param.Email == "" {
-		tools.Logger(param.Serial, "检测到用户未选择邮箱通知，本次结果将不会推送", "")
-		return
+		tools.Logger(param.Serial, "检测到用户未选择邮箱通知，本次结果将不会推送", "", "")
+	} else {
+		tools.Logger(param.Serial, "发送邮件通知，发送账号："+param.Email, "", "")
+		err = tools.MailAttachment(param.Email, result, param.Serial)
+		if err != nil {
+			tools.Logger(param.Serial, "发送邮件通知失败，请联系技术人员处理", fmt.Sprintf(`错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+		} else {
+			tools.Logger(param.Serial, "邮箱通知已发送成功，请留意你的邮箱；如果没有找到，它可能在你的垃圾邮箱中；", "", "")
+		}
 	}
-	tools.Logger(param.Serial, "准备发送邮件通知，发送账号："+param.Email, "")
-	err = tools.MailAttachment(param.Email, result, param.Serial)
-	if err != nil {
-		tools.Logger(param.Serial, fmt.Sprintf(`发送邮件通知失败，请联系技术人员处理；错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
-		return
-	}
-	tools.Logger(param.Serial, "邮箱通知已发送成功，请留意你的邮箱；如果没有找到，它可能在你的垃圾邮箱中；", "")
+	tools.XlsxMap.Delete(param.Serial)
 }

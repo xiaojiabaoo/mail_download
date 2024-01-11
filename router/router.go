@@ -5,7 +5,10 @@ import (
 	"mail_download/controller/cll"
 	"mail_download/controller/download"
 	"mail_download/controller/system"
+	customErr "mail_download/tools/error"
+	"mail_download/tools/response"
 	"net/http"
+	"runtime"
 )
 
 func Cors() gin.HandlerFunc {
@@ -25,9 +28,20 @@ func Cors() gin.HandlerFunc {
 	}
 }
 
+func CheckSystem() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if "windows" != runtime.GOOS {
+			response.ResponseData(ctx, customErr.New(customErr.OPERATING_SYSTEM_ERROR, ""), "", nil)
+			return
+		}
+		// 处理请求
+		ctx.Next()
+	}
+}
+
 func Run(addr string) {
 	router := gin.Default()
-	router.Use(Cors())
+	router.Use(Cors(), CheckSystem())
 	mailGroup := router.Group("/mail")
 	{
 		mailGroup.POST("/download", download.Download)

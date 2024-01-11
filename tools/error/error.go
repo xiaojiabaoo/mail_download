@@ -26,6 +26,7 @@ const (
 	FUNCTION_NOT_AVAILABLE     = 10003
 	PARAMETER_ILLEGAL_DELETION = 10004
 	NO_RECORDS_FOUND           = 10005
+	OPERATING_SYSTEM_ERROR     = 10006
 
 	DATA_NOT_EXIST = 20001
 
@@ -62,6 +63,7 @@ var ErrText = map[int64]string{
 	FUNCTION_NOT_AVAILABLE:     "功能暂未开发",
 	PARAMETER_ILLEGAL_DELETION: "参数非法或缺失！",
 	NO_RECORDS_FOUND:           "没有查询到数据",
+	OPERATING_SYSTEM_ERROR:     "本程序暂不支持非Windows操作系统的设备运行，请尝试更换其他Windows设备使用",
 
 	DATA_NOT_EXIST: "数据不存在！",
 

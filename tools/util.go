@@ -697,3 +697,9 @@ func IsDir(path string) bool {
 func IsFile(path string) bool {
 	return !IsDir(path)
 }
+
+func Serial(serial string) string {
+	serial = strings.ReplaceAll(serial, "MAIL-", "")
+	serial = strings.ReplaceAll(serial, "CCL-", "")
+	return serial
+}

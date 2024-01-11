@@ -11,4 +11,5 @@ var (
 
 var (
 	ProcessMap = sync.Map{}
+	XlsxMap    = sync.Map{}
 )

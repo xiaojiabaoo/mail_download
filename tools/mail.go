@@ -52,7 +52,7 @@ func MergeSlice(s1 []string, s2 []string) []string {
 func MailAttachment(email, body, serial string) error {
 	var (
 		subject string
-		path    = fmt.Sprintf(`./logs/%s.log`, serial)
+		path    = fmt.Sprintf(`./logs/%s/%s.log`, Serial(serial), serial)
 	)
 	if strings.HasPrefix(serial, "CCL") {
 		subject = fmt.Sprintf(`CCL流程操作结果通知，流水号：%s`, serial)
@@ -81,7 +81,6 @@ func SendMailAttachment(account []string, subject, body, path string) error {
 	}
 	accounts = strings.Join(account, ";")
 	// 创建附件消息体
-	part := fmt.Sprintf(`Content-Disposition: attachment; filename="%s"`, name)
 	message.WriteString(fmt.Sprintf("To: %s\r\n", accounts))
 	message.WriteString(fmt.Sprintf("From: %s\r\n", "CCL邮件操作<"+user+">"))
 	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
@@ -94,6 +93,7 @@ func SendMailAttachment(account []string, subject, body, path string) error {
 	// 添加邮件正文
 	message.WriteString(body)
 	// 添加附件内容
+	part := fmt.Sprintf(`Content-Disposition: attachment; filename="%s"`, name)
 	message.WriteString(fmt.Sprintf("\r\n--%s\r\n", "boundary_separator"))
 	message.WriteString(fmt.Sprintf("%s\r\n", part))
 	message.WriteString(fmt.Sprintf("Content-Type: application/octet-stream\r\n"))
