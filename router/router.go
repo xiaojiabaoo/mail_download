@@ -52,6 +52,7 @@ func Run(addr string) {
 	systemGroup := router.Group("/system")
 	{
 		systemGroup.GET("/list", system.List)
+		systemGroup.POST("/update", system.Update)
 	}
 	router.Static("/static/css", "./common/view/css")
 	router.Static("/static/js", "./common/view/js")

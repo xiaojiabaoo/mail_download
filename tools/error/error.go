@@ -27,6 +27,10 @@ const (
 	PARAMETER_ILLEGAL_DELETION = 10004
 	NO_RECORDS_FOUND           = 10005
 	OPERATING_SYSTEM_ERROR     = 10006
+	COMMIT_VERSION_ERROR       = 10007
+	IS_LATEST_VERSION          = 10008
+	VERSION_NUMBER_ERROR       = 10009
+	GET_APPPATH_ERROR          = 10010
 
 	DATA_NOT_EXIST = 20001
 
@@ -64,6 +68,10 @@ var ErrText = map[int64]string{
 	PARAMETER_ILLEGAL_DELETION: "参数非法或缺失！",
 	NO_RECORDS_FOUND:           "没有查询到数据",
 	OPERATING_SYSTEM_ERROR:     "本程序暂不支持非Windows操作系统的设备运行，请尝试更换其他Windows设备使用",
+	COMMIT_VERSION_ERROR:       "获取新版本错误，无法检测到新版本号",
+	IS_LATEST_VERSION:          "当前已经是最新版本，无需更新",
+	VERSION_NUMBER_ERROR:       "检测到新版本低于当前版本，版本可能存在问题；请联系技术人员处理",
+	GET_APPPATH_ERROR:          "获取系统路径失败",
 
 	DATA_NOT_EXIST: "数据不存在！",
 

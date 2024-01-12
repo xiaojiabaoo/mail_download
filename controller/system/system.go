@@ -20,3 +20,11 @@ func List(ctx *gin.Context) {
 	list, err := system_ser.List(param)
 	response.ResponseData(ctx, err, "", list)
 }
+
+func Update(ctx *gin.Context) {
+	var (
+		err error
+	)
+	err = system_ser.Update()
+	response.ResponseData(ctx, err, "", nil)
+}

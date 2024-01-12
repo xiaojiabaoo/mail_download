@@ -26,4 +26,5 @@ func InitConfigData() {
 	AppConfigData.Name = viper.GetString("app.name")
 	AppConfigData.Port = viper.GetString("app.port")
 	AppConfigData.CronTime = viper.GetString("app.cron_time")
+	AppConfigData.Version = viper.GetFloat64("app.version")
 }
