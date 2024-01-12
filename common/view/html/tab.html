@@ -78,6 +78,7 @@
     <ul class="layui-tab-title" style="width: 1000px;margin: 0 auto;">
         <li class="layui-this"><i class="layui-icon layui-icon-email"></i> CCL发票下载</li>
         <li><i class="layui-icon layui-icon-form"></i> EFC操作流程</li>
+        <li><i class="layui-icon layui-icon-util"></i> 版本更新</li>
     </ul>
     <div class="layui-tab-content" style="height: 100px;">
         <div class="layui-tab-item layui-show">
@@ -85,6 +86,9 @@
         </div>
         <div class="layui-tab-item">
             <iframe id="iframe2" src="http://127.0.0.1:8023/cll" width="100%" style="border: none;"></iframe>
+        </div>
+        <div class="layui-tab-item">
+            <iframe id="iframe3" src="http://127.0.0.1:8023/update" width="100%" style="border: none;"></iframe>
         </div>
     </div>
 </div>
@@ -100,6 +104,10 @@
     let myIframe2 = document.getElementById("iframe2");
     // 设置iframe的高度为浏览器窗口的高度
     myIframe2.style.height = (window.innerHeight - 55) + "px";
+
+    let myIframe3 = document.getElementById("iframe3");
+    // 设置iframe的高度为浏览器窗口的高度
+    myIframe3.style.height = (window.innerHeight - 55) + "px";
 
     layui.use(['layer', 'laydate'], function () {
         let form = layui.form;

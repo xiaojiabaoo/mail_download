@@ -53,13 +53,14 @@ func Run(addr string) {
 	{
 		systemGroup.GET("/list", system.List)
 		systemGroup.POST("/update", system.Update)
+		systemGroup.POST("/check_update", system.CheckUpdate)
 	}
 	router.Static("/static/css", "./common/view/css")
 	router.Static("/static/js", "./common/view/js")
 	router.Static("/static/image", "./common/view/image")
 	router.Static("/static/html", "./common/view/html")
 	router.LoadHTMLFiles("./common/view/html/tips.html", "./common/view/html/catalogue.html",
-		"./common/view/html/tab.html", "./common/view/html/cll.html")
+		"./common/view/html/tab.html", "./common/view/html/cll.html", "./common/view/html/update.html")
 	router.GET("/download", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "tips.html", gin.H{})
 	})
@@ -68,6 +69,9 @@ func Run(addr string) {
 	})
 	router.GET("/cll", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "cll.html", gin.H{})
+	})
+	router.GET("/update", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "update.html", gin.H{})
 	})
 	router.GET("/catalogue", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "catalogue.html", gin.H{})

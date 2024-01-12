@@ -3,7 +3,7 @@
     "name": "wechat_message_push",
     "port": "8023",
     "cron_time": "0 0 8 * * ?",
-    "version": 3.3
+    "version": 3.2
   }
 }
 

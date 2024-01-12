@@ -3,6 +3,7 @@ package system
 import (
 	"github.com/gin-gonic/gin"
 	"mail_download/model/request_model"
+	"mail_download/model/response_model"
 	"mail_download/service/system_ser"
 	customErr "mail_download/tools/error"
 	"mail_download/tools/response"
@@ -27,4 +28,13 @@ func Update(ctx *gin.Context) {
 	)
 	err = system_ser.Update()
 	response.ResponseData(ctx, err, "", nil)
+}
+
+func CheckUpdate(ctx *gin.Context) {
+	var (
+		err    error
+		update response_model.Version
+	)
+	update, err = system_ser.CheckUpdate()
+	response.ResponseData(ctx, err, "", update)
 }

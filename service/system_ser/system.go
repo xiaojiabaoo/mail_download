@@ -48,46 +48,71 @@ func List(param request_model.SysListParam) ([]response_model.SystemList, error)
 	return data, nil
 }
 
+func CheckUpdate() (response_model.Version, error) {
+	return checkUpdate()
+}
+
+func checkUpdate() (response_model.Version, error) {
+	var (
+		response   = response_model.Version{}
+		version    = configx.AppConfigData.Version
+		url        = "https://gitee.com/xiaojiabaoo/mail_download.git"
+		branch     = "main"
+		err        error
+		commit     string
+		index      int
+		newVersion float64
+	)
+	// 获取最新提交的信息，并从中截取版本号
+	commit, err = GetCommit(url, branch)
+	if err != nil {
+		return response, err
+	}
+	index = strings.Index(commit, "Version:")
+	if index == -1 {
+		return response, customErr.New(customErr.COMMIT_VERSION_ERROR, "")
+	}
+	newVersion = tools.StringToFloat64(strings.ReplaceAll(commit[index:], "Version:", ""))
+	if newVersion == version {
+		return response, customErr.New(customErr.IS_LATEST_VERSION, "")
+	}
+	if newVersion < version {
+		return response, customErr.New(customErr.VERSION_NUMBER_ERROR, "")
+	}
+	response.CurrentVersion = version
+	response.NewVersion = newVersion
+	return response, nil
+}
+
 func Update() error {
 	var (
-		version      = configx.AppConfigData.Version
-		url          = "https://gitee.com/xiaojiabaoo/mail_download.git"
-		branch       = "main"
-		err          error
-		commit, path string
-		appPath      string
-		index        int
-		newVersion   float64
+		url     = "https://gitee.com/xiaojiabaoo/mail_download.git"
+		branch  = "main"
+		err     error
+		path    string
+		appPath string
+		update  response_model.Version
 	)
 	appPath, err = os.Executable()
 	if err != nil {
 		return customErr.New(customErr.GET_APPPATH_ERROR, "")
 	}
+	appPath = "D:\\临时文件\\CCL发票机器人\\CCL发票机器人3.2"
 	// 获取上一级目录
-	path = filepath.Join(filepath.Dir(appPath), "..")
-	// 获取最新提交的信息，并从中截取版本号
-	commit, err = GetCommit(url, branch)
+	path = filepath.Join(filepath.Dir(appPath), ".")
+	update, err = checkUpdate()
 	if err != nil {
 		return err
 	}
-	index = strings.Index(commit, "Version:")
-	if index == -1 {
-		return customErr.New(customErr.COMMIT_VERSION_ERROR, "")
-	}
-	newVersion = tools.StringToFloat64(commit[index:])
-	if newVersion == version {
-		return customErr.New(customErr.IS_LATEST_VERSION, "")
-	}
-	if newVersion < version {
-		return customErr.New(customErr.VERSION_NUMBER_ERROR, "")
-	}
-	path += fmt.Sprintf(`\\机器人 v%v`, newVersion)
+	path += fmt.Sprintf(`\机器人 v%v`, update.NewVersion)
 	// 创建文件夹
 	if _, err = os.Stat(path); os.IsNotExist(err) {
 		err = os.MkdirAll(path, 0755)
 		if err != nil {
 			return errors.Wrap(err, "创建文件夹失败")
 		}
+	} else {
+		return errors.Wrap(err, "文件存储路径异常")
 	}
 	cmd := exec.Command("git", "clone", "-b", branch, url, path)
 	cmd.Stdout = os.Stdout
@@ -95,6 +120,10 @@ func Update() error {
 	if err = cmd.Run(); err != nil {
 		return errors.Wrap(err, "拉取项目失败")
 	}
+	/*err = DelFile(path, ".git")
+	if err != nil {
+		return err
+	}*/
 	return nil
 }
 
@@ -128,4 +157,24 @@ func GetCommitDescribe(hash string) (string, error) {
 		return "", errors.Wrap(err, "获取提交描述时出错")
 	}
 	return strings.TrimSpace(string(output)), nil
+}
+
+func DelFile(path, file string) error {
+	err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		// 检查是否为目标文件，并删除
+		if filepath.Base(filePath) == file {
+			err = os.Remove(filePath)
+			if err != nil {
+				return errors.Wrap(err, "删除文件错误")
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return errors.Wrap(err, "文件目录错误")
+	}
+	return nil
 }
