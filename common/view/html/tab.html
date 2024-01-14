@@ -78,7 +78,7 @@
     <ul class="layui-tab-title" style="width: 1000px;margin: 0 auto;">
         <li class="layui-this"><i class="layui-icon layui-icon-email"></i> CCL发票下载</li>
         <li><i class="layui-icon layui-icon-form"></i> EFC操作流程</li>
-        <li><i class="layui-icon layui-icon-util"></i> 版本更新</li>
+        <li><i class="layui-icon layui-icon-util"></i> <span id="system_update">版本更新</span></li>
     </ul>
     <div class="layui-tab-content" style="height: 100px;">
         <div class="layui-tab-item layui-show">
@@ -193,6 +193,41 @@
             });
             form.render();
         }
+
+        window.checkUpdate = function () {
+            $.ajax({
+                url: "/system/check_update", // 替换为实际的API端点
+                method: "POST", // 请求方法，可以是 "GET" 或 "POST" 等
+                dataType: "json", // 预期的响应数据类型
+                success: function (data) {
+                    // 请求成功时的处理
+                    if (data.ret > 0) {
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                        return false
+                    }
+                    let currentVersion = data.data.current_version
+                    let newVersion = data.data.new_version
+                    if (newVersion > currentVersion) {
+                        $("#system_update").html('版本更新<span class="layui-badge">有更新</span>')
+                        localStorage.setItem("mail-download-has-new-version", "true");
+                    }
+                    localStorage.setItem("mail-download-new-version", newVersion);
+                    localStorage.setItem("mail-download-current-version", currentVersion);
+                },
+                error: function (error) {
+                    // 请求失败时的处理
+                    layer.msg("服务器异常", {icon: 5, anim: 6});
+                }
+            });
+        }
+
+        let hasNew = localStorage.getItem("mail-download-has-new-version")
+        if (hasNew == "true") {
+            $("#system_update").html('版本更新<span class="layui-badge">有更新</span>')
+        } else {
+            setTimeout(checkUpdate, 10000)
+        }
+
     });
 </script>
 </body>

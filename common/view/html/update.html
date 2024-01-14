@@ -14,7 +14,7 @@
             text-align: left;
             background-color: #FAFAFA;
             width: 1000px;
-            height: 620px;
+            height: 200px;/*无更新：160px、有更新：200px起*/
             border-radius: 5px;
         }
 
@@ -22,10 +22,6 @@
             text-align: center;
             margin-top: 30px;
             margin-bottom: 30px;
-        }
-
-        .layui-form-radio:hover *, .layui-form-radioed, .layui-form-radioed > i {
-            color: #FFB6C1 !important;
         }
 
         .layui-border {
@@ -50,37 +46,11 @@
             font-weight: bold;
         }
 
-        .layui-form-checkbox[lay-skin=primary] span {
-            padding-left: 0;
-            padding-right: 15px;
-            line-height: 18px;
-            font-size: 5px;
-            background: 0 0;
-            color: #E0FFFF;
-        }
-
-        .layui-layer-title {
-            padding: 0 80px 0 20px;
-            height: 50px;
-            line-height: 50px;
-            border-bottom: 1px solid #F0F0F0;
-            background-color: #393D49;
-            font-size: 14px;
-            color: #E6E6FA !important;
-            overflow: hidden;
-            border-radius: 2px 2px 0 0;
-        }
-
-        .layui-layer-setwin .layui-layer-close2 {
-            position: absolute;
-            right: -4px !important;
-            top: -7px !important;
-            width: 30px;
-            height: 30px;
-            margin-left: 0;
-            background-position: -149px -31px;
-            *right: -18px;
-            _display: none;
+        .layui-form-item .layui-input-inline {
+            float: left;
+            margin-top: 12px;
+            width: 190px;
+            margin-right: 10px;
         }
     </style>
 </head>
@@ -88,14 +58,20 @@
 <form class="layui-form" action="">
     <div class="parent">
         <div class="child">
-            <div id="tips" class="" style="margin-top: 40px;margin-left: 50px;line-height: 27px;">
-                <span>
-                    <h3>如何知道我的EFC流程是否操作完成或是该程序是否执行完成：</h3>
-                        <p>   可以前往 “logs” 目录中找到对应流水号的记录文件中查看本次操作的记录和结果</p>
-                        <p>   如果在下面的 “通知账号” 中填写了邮箱信息，系统会在操作完成后自动将结果和操作记录文件发送到填写的邮箱中（附件来源 “logs” 目录）</p>
-                   <h3>附件下载中途遇到错误会怎样操作或提示：</h3>
-                        <p>   下载附件途中如遇到错误，系统会在记录文件中将该本次错误信息保存并继续操作后面的流程</p>
-                </span>
+            <div class="layui-form-item" style="margin-top: 20px;margin-left: 20px;">
+                <div style="margin-left: 50px;margin-top: 40px;font-size: 17px;font-weight: bold;">
+                    <span>当前版本：</span>
+                    <span id="version"></span>
+                    <span style="margin-left: 50px;"><button type="button" id="mail-box-button" class="layui-btn  layui-btn-primary layui-btn-sm">检查更新</button></span>
+                </div>
+                <div id="no_new_version" style="margin-left: 50px;margin-top: 20px;display: block;">
+                    <span>已是最新版本，无需更新</span>
+                </div>
+                <div id="new_version" style="margin-left: 50px;margin-top: 20px;display: block;">
+                    <span>最新版本：</span>
+                    <span>v 3.3</span>
+                    <div style="margin-top: 10px;line-height: 25px;width: 870px;">修复了部分问题</div>
+                </div>
             </div>
         </div>
     </div>
@@ -123,82 +99,43 @@
             $("#tips").addClass("tips-day")
         }
 
-        form.on('checkbox(read)', function (data) {
-            read = data.elem.checked
-        });
-
-        form.on('radio(inform)', function (data) {
-            let value = data.value;
-            if (value == "on") {
-                $("#inform-p1").css("display", "")
-                $("#inform-p2").css("display", "")
-                $("#inform-input").css("display", "")
-                $(".child").css("height", "500px")
-            } else {
-                $("#inform-p1").css("display", "none")
-                $("#inform-p2").css("display", "none")
-                $("#inform-input").css("display", "none")
-                $(".child").css("height", "400px")
-            }
-        });
-
-        form.verify({
-            account: function (value) {
-                if (value.length == 0) {
-                    return '登录账号不能是空的噢';
-                }
-            },
-            password: function (value) {
-                if (value.length == 0) {
-                    return '邮箱登录密码不能是空的噢';
-                }
-            },
-            inform_account: function (value) {
-                if (value.length == 0) {
-                    return '通知邮箱账号不能是空的噢';
-                }
-            },
-            content: function (value) {
-                layedit.sync(editIndex);
-            }
-        });
-
-        form.on('submit(submit)', function (data) {
-            show_loading()
+        window.checkUpdate = function () {
             $.ajax({
-                url: '/mail/ccl',
-                method: 'POST',
-                data:JSON.stringify(data.field),
-                contentType: 'application/json; charset=utf-8',
-                success: function(result) {
-                    if (result.ret != 0) {
-                        layer.msg(result.msg, {icon: 5, anim: 6});
-                    } else {
-                        //配置一个透明的询问框
-                        let str = '<div style="text-align: left;font-weight: bold;">请求操作成功！操作流水号：<span style="color: #FFB6C1;">'+result.data+'</span> 妥善保管；可用于查找操作记录' +
-                            '<br/>EFC流程已开始处理。请耐心等待；处理结果请查看记录文件或留意您的邮箱（如有填写）' +
-                            '<br>系统支持后台运行，关闭此页面继续你的其他工作！不影响系统运行</div>'
-                        layer.msg(str, {
-                            time: 0,
-                            btn: ['知道了'],
-                            btn2: function () {
-                                layer.close()
-                            }
-                        });
+                url: "/system/check_update", // 替换为实际的API端点
+                method: "POST", // 请求方法，可以是 "GET" 或 "POST" 等
+                dataType: "json", // 预期的响应数据类型
+                success: function (data) {
+                    // 请求成功时的处理
+                    if (data.ret > 0) {
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                        return false
                     }
+                    let currentVersion = data.data.current_version
+                    let newVersion = data.data.new_version
+                    if (newVersion > currentVersion) {
+                        $("#new_version").show()
+                        localStorage.setItem("mail-download-has-new-version", "true");
+                    } else {
+                        $("#no_new_version").show()
+                    }
+                    localStorage.setItem("mail-download-new-version", newVersion);
+                    localStorage.setItem("mail-download-current-version", currentVersion);
+                    $("#version").text("V "+currentVersion)
                 },
-                error: function(xhr, status, error) {
-                    // 处理错误情况
-                    layer.msg("服务器内部错误", {icon: 2, anim: 6});
-                },
-                complete: function() {
-                    // 请求完成后隐藏加载中动画
-                    hide_loading()
+                error: function (error) {
+                    // 请求失败时的处理
+                    layer.msg("服务器异常", {icon: 5, anim: 6});
                 }
             });
-            return false;
-        });
-        form.render();
+        }
+
+        let hasNew = localStorage.getItem("mail-download-has-new-version")
+        if (hasNew != "true") {
+            checkUpdate()
+        } else {
+            $("#new_version").show()
+            $("#version").text("v "+localStorage.getItem("mail-download-current-version"))
+        }
     });
 </script>
 </body>

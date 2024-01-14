@@ -69,15 +69,8 @@ func checkUpdate() (response_model.Version, error) {
 		return response, err
 	}
 	index = strings.Index(commit, "Version:")
-	if index == -1 {
-		return response, customErr.New(customErr.COMMIT_VERSION_ERROR, "")
-	}
-	newVersion = tools.StringToFloat64(strings.ReplaceAll(commit[index:], "Version:", ""))
-	if newVersion == version {
-		return response, customErr.New(customErr.IS_LATEST_VERSION, "")
-	}
-	if newVersion < version {
-		return response, customErr.New(customErr.VERSION_NUMBER_ERROR, "")
+	if index >= 0 {
+		newVersion = tools.StringToFloat64(strings.ReplaceAll(commit[index:], "Version:", ""))
 	}
 	response.CurrentVersion = version
 	response.NewVersion = newVersion
@@ -92,27 +85,43 @@ func Update() error {
 		path    string
 		appPath string
 		update  response_model.Version
+		files   []os.DirEntry
 	)
 	appPath, err = os.Executable()
 	if err != nil {
 		return customErr.New(customErr.GET_APPPATH_ERROR, "")
 	}
-	appPath = "D:\\临时文件\\CCL发票机器人\\CCL发票机器人3.2"
+	appPath = "D:\\ActiveFile\\Temp\\Project1"
 	// 获取上一级目录
 	path = filepath.Join(filepath.Dir(appPath), ".")
 	update, err = checkUpdate()
 	if err != nil {
 		return err
 	}
+	if update.NewVersion == 0 {
+		return customErr.New(customErr.COMMIT_VERSION_ERROR, "")
+	}
+	if update.NewVersion == update.CurrentVersion {
+		return customErr.New(customErr.IS_LATEST_VERSION, "")
+	}
+	if update.NewVersion < update.CurrentVersion {
+		return customErr.New(customErr.VERSION_NUMBER_ERROR, "")
+	}
+	files, err = os.ReadDir(path)
+	if err != nil {
+		return errors.Wrap(err, "获取程序父级目录下的目录信息出现问题")
+	}
+	for _, file := range files {
+		if file.IsDir() && strings.Contains(file.Name(), fmt.Sprintf(`v%v`, update.NewVersion)) {
+			return customErr.New(customErr.VERSION_ERROR,
+				fmt.Sprintf(`即将更新的版本为：v%v；系统到你的电脑中已经存在了相同或更高的版本，为保证正常更新，请先删除相同和高版本的程序后重试`, update.NewVersion))
+		}
+	}
 	path += fmt.Sprintf(`\机器人 v%v`, update.NewVersion)
 	// 创建文件夹
-	if _, err = os.Stat(path); os.IsNotExist(err) {
-		err = os.MkdirAll(path, 0755)
-		if err != nil {
-			return errors.Wrap(err, "创建文件夹失败")
-		}
-	} else {
-		return errors.Wrap(err, "文件存储路径异常")
+	err = os.MkdirAll(path, 0755)
+	if err != nil {
+		return errors.Wrap(err, "创建文件夹失败")
 	}
 	cmd := exec.Command("git", "clone", "-b", branch, url, path)
 	cmd.Stdout = os.Stdout

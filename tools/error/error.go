@@ -31,6 +31,8 @@ const (
 	IS_LATEST_VERSION          = 10008
 	VERSION_NUMBER_ERROR       = 10009
 	GET_APPPATH_ERROR          = 10010
+	VERSION_EXIST_ERROR        = 10011
+	VERSION_ERROR              = 10012
 
 	DATA_NOT_EXIST = 20001
 
@@ -72,6 +74,8 @@ var ErrText = map[int64]string{
 	IS_LATEST_VERSION:          "当前已经是最新版本，无需更新",
 	VERSION_NUMBER_ERROR:       "检测到新版本低于当前版本，版本可能存在问题；请联系技术人员处理",
 	GET_APPPATH_ERROR:          "获取系统路径失败",
+	VERSION_EXIST_ERROR:        "检测到新版本在目录中已经存在，若需要更新，请先删除该版本后再重试",
+	VERSION_ERROR:              "检测到存在更高的版本，为保证更新体验，请先删除高版本的程序",
 
 	DATA_NOT_EXIST: "数据不存在！",
 
