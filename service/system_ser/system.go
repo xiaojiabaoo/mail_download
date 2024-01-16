@@ -3,7 +3,6 @@ package system_ser
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"mail_download/common/configx"
 	"mail_download/model/request_model"
 	"mail_download/model/response_model"
 	"mail_download/tools"
@@ -55,7 +54,6 @@ func CheckUpdate() (response_model.Version, error) {
 func checkUpdate() (response_model.Version, error) {
 	var (
 		response   = response_model.Version{}
-		version    = configx.AppConfigData.Version
 		url        = "https://gitee.com/xiaojiabaoo/mail_download.git"
 		branch     = "main"
 		err        error
@@ -79,7 +77,7 @@ func checkUpdate() (response_model.Version, error) {
 	if i >= 0 {
 		response.Describe = commit[i+2 : index]
 	}
-	response.CurrentVersion = version
+	response.CurrentVersion = tools.Version
 	response.NewVersion = newVersion
 	return response, nil
 }
@@ -98,7 +96,6 @@ func Update() error {
 	if err != nil {
 		return customErr.New(customErr.GET_APPPATH_ERROR, "")
 	}
-	appPath = "D:\\临时文件\\CCL发票机器人\\CCL发票机器人3.2"
 	// 获取上一级目录
 	path = filepath.Join(filepath.Dir(appPath), ".")
 	update, err = checkUpdate()
@@ -139,10 +136,7 @@ func Update() error {
 	if err = cmd.Run(); err != nil {
 		return errors.Wrap(err, "拉取项目失败")
 	}
-	/*err = DelFile(path, ".git")
-	if err != nil {
-		return err
-	}*/
+	DeleteFile(path + "\\.git")
 	return nil
 }
 
@@ -178,22 +172,6 @@ func GetCommitDescribe(hash string) (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
-func DelFile(path, file string) error {
-	err := filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		// 检查是否为目标文件，并删除
-		if filepath.Base(filePath) == file {
-			err = os.Remove(filePath)
-			if err != nil {
-				return errors.Wrap(err, "删除文件错误")
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return errors.Wrap(err, "文件目录错误")
-	}
-	return nil
+func DeleteFile(filePath string) error {
+	return os.RemoveAll(filePath)
 }

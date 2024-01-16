@@ -8,20 +8,9 @@
     <link rel="stylesheet" href="/static/js/layui-v2.6.8/css/layui.css">
     <link rel="stylesheet" href="/static/css/config.css">
     <style>
-        /*body {
-            background-color: #333 !important;
-            line-height: 1.6;
-            color: #fff !important;
-            font: 14px Helvetica Neue,Helvetica,PingFang SC,Tahoma,Arial,sans-serif;
-        }*/
         .layui-tab-content {
             padding: 0px 0 !important;
         }
-        /*.layui-tab {
-            background-color: #333 !important;
-            margin: 10px 0;
-            text-align: left !important;
-        }*/
         .layui-badge-rim, .layui-border, .layui-colla-content, .layui-colla-item, .layui-collapse, .layui-elem-field, .layui-form-pane .layui-form-item[pane], .layui-form-pane .layui-form-label, .layui-input, .layui-layedit, .layui-layedit-tool, .layui-panel, .layui-quote-nm, .layui-select, .layui-tab-bar, .layui-tab-card, .layui-tab-title, .layui-tab-title .layui-this:after, .layui-textarea {
             border-color: #FFB6C1 !important;
         }
@@ -82,13 +71,13 @@
     </ul>
     <div class="layui-tab-content" style="height: 100px;">
         <div class="layui-tab-item layui-show">
-            <iframe id="iframe1" src="http://127.0.0.1:8023/download" width="100%" style="border: none;"></iframe>
+            <iframe id="iframe1" src="/download" width="100%" style="border: none;"></iframe>
         </div>
         <div class="layui-tab-item">
-            <iframe id="iframe2" src="http://127.0.0.1:8023/cll" width="100%" style="border: none;"></iframe>
+            <iframe id="iframe2" src="/cll" width="100%" style="border: none;"></iframe>
         </div>
         <div class="layui-tab-item">
-            <iframe id="iframe3" src="http://127.0.0.1:8023/update" width="100%" style="border: none;"></iframe>
+            <iframe id="iframe3" src="/update" width="100%" style="border: none;"></iframe>
         </div>
     </div>
 </div>
@@ -142,7 +131,7 @@
         if (item == "" || item == null || item == undefined) {
             let open = layer.open({
                 type: 1,
-                title: '<h2>首次使用介绍<span style="color: #DC143C;">（首次使用前请认真阅读）</span></h2>',
+                title: '<h2>首次使用说明<span style="color: #DC143C;">（首次使用前请认真阅读）</span></h2>',
                 area: ['550px', '610px'],
                 shade: 0.5,
                 id: 'LAY_layuipro', //设定一个id，防止重复弹出
@@ -163,9 +152,12 @@
                     '<p>9.&nbsp;&nbsp;本系统所有功能支持后台运行；发起操作时可以选择需要通知并填写邮箱地址，系统会在本次操作结束后将结果推送到该邮箱中。如果不需要邮箱通知，请随时留意记录文件查看下载结果。</p>' +
                     '<p>10.&nbsp;&nbsp;程序发起操作请求后的执行时间可能较长，具体视网络情况和数量而定</p>' +
                     '<p><span style="font-weight: bold;color:#FFB6C1;">三. 升级</span></p>' +
-                    '<p>11.&nbsp;&nbsp;本系统为exe应用程序，需要将该程序下载至Windows电脑中才能使用；如果不更新程序包的情况下无法对系统升级或修复，若有使用中有问题或者建议请联系技术人员处理并发送新的exe程序包</p>' +
+                    '<p>11.&nbsp;&nbsp;系统为exe应用程序，更新需要前往 “版本更新” 页面中操作；若系统未提示有新版本，也可以手动点击 “版本更新” 页面中的 “检查更新” 按钮查看是否有新版本可以使用</p>' +
+                    '<p>12.&nbsp;&nbsp;更新过程视网络情况可能需要较长的时间，一般情况下在2分钟左右；更新过程中请不要退出程序（启动的那个黑板板）和关闭网页（可以最小化），否则可能导致页面显示异常</p>' +
+                    '<p>13.&nbsp;&nbsp;更新好的新版本的程序将在当前程序所在目录的上一级目录中存放，目录名称即 Version + 新的版本号，与当前使用中的程序互不干扰</p>' +
+                    '<p>14.&nbsp;&nbsp;使用新版本的程序前，需要将正在使用的旧程序全部退出（包括启动程序和网页）；再前往新版本的程序目录下启动程序即可，旧程序可自行选择删除或继续保留，建议不要马上删除，如果新本版出现功能问题，可以及时回到旧版本使用</p>' +
                     '<p><span style="font-weight: bold;color:#FFB6C1;">四. 声明</span></p>' +
-                    '<p>12.&nbsp;&nbsp;本系统作为辅助工作程序，不绝对保证每次操作的 “EFC海运、空运的操作流程” 或 “CCL发票下载” 都精准无误；若发现部分下载的附件缺失或是EFC操作的数据有误，还请根据操作流水号查询记录排查问题原因</p>' +
+                    '<p>15.&nbsp;&nbsp;本系统作为辅助工作程序，不绝对保证每次操作的 “EFC海运、空运的操作流程” 或 “CCL发票下载” 都精准无误；若发现部分下载的附件缺失或是EFC操作的数据有误，还请根据操作流水号查询记录排查问题原因</p>' +
                     '<p></p><br>' +
                     '<p>更多操作上的提示请留意操作页的提示信息</p>' +
                     '<form class="layui-form">' +

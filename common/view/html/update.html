@@ -53,6 +53,25 @@
             *right: -18px;
             _display: none;
         }
+        .layui-btn-xs {
+            border-color: #FFB6C1 !important;
+            color: #FFB6C1 !important;
+        }
+        .layui-layer-btn .layui-layer-btn0 {
+            border-color: #FFB6C1 !important;
+            background-color: #FFB6C1 !important;
+            color: #fff;
+        }
+        .layui-layer-title {
+            padding: 0 80px 0 20px;
+            height: 50px;
+            line-height: 50px;
+            border-bottom: 1px solid #FFB6C1 !important;
+            font-size: 14px;
+            color: #333;
+            overflow: hidden;
+            border-radius: 2px 2px 0 0;
+        }
     </style>
 </head>
 <body>
@@ -66,7 +85,7 @@
                 </div>
                 <div style="margin-left: 50px;margin-top: 10px;">
                     <span>
-                        <button type="button" id="check-update-button" class="layui-btn  layui-btn-primary layui-btn-xs">检查更新</button>
+                        <button type="button" id="check-update-button" class="layui-btn layui-btn-primary layui-btn-xs">检查更新</button>
                     </span>
                 </div>
                 <div id="content" style="margin-left: 50px;margin-top: 20px;"></div>
@@ -149,6 +168,10 @@
                         if (source == "click") {
                             layer.msg("当前已是最新版本，无需更新", {icon: 7, anim: 6})
                         }
+                        localStorage.removeItem("ccl-bill-has")
+                        localStorage.removeItem("ccl-bill-new")
+                        localStorage.removeItem("ccl-bill-describe")
+                        window.parent.UpdateTab()
                         return false
                     } else {
                         hasUpdateHtml(result.new_version, result.describe)
@@ -199,16 +222,16 @@
 
         $(".layui-btn-fluid").click(function() {
             let str = ''
-            str += '<div>1.更新过程可能需要较久的时间，更新过程中请不要退出程序和网页（可以最小化），请耐心等待更新完成；</div>'
-            str += '<div>2.更新完成后的版本为 Version '+localStorage.getItem("ccl-bill-new")+'，新的程序版本将在当前程序所在目录的上一级目录中存放，与当前使用的程序互不干扰</div>'
+            str += '<div>1.更新过程视网络情况可能需要较长的时间，正常情况下不会超过5分钟，更新过程中请不要退出程序和网页（可以最小化），请耐心等待更新完成；</div>'
+            str += '<div>2.更新完成后的版本将为 Version '+localStorage.getItem("ccl-bill-new")+'，新的程序版本将在当前程序所在目录的上一级目录中存放，与当前使用的程序互不干扰</div>'
             str += '<div>3.使用新的程序前，需要将正在使用的旧程序全部退出；再前往新的程序目录下找到exe启动程序即可（旧程序可自行选择删除或继续保留）</div>'
             layer.confirm(str, {
                     btn: ['更新', '取消'],
                     title: "更新前请注意以下信息",
-                    area: ['550px', '310px'],
+                    area: ['550px', ''],
                 },
                 function(index, layero){
-                    show_loading("系统更新中，请不要退出......")
+                    show_loading("系统正在更新中，请不要退出......")
                     $.ajax({
                         url: "/system/update",
                         method: "POST",
@@ -216,12 +239,13 @@
                         success: function (data) {
                             // 请求成功时的处理
                             if (data.ret > 0) {
-                                layer.confirm(data.msg, {
-                                    icon: 3,
-                                    title:'更新错误',
-                                    area: ['600px', '250px']
-                                }, function(index){
-                                    layer.close(index);
+                                layer.msg("更新错误！"+data.msg, {
+                                    time: 0,
+                                    btn: ['好的'],
+                                    area: ['600px', ''],
+                                    btn2:function () {
+                                        layer.close()
+                                    }
                                 });
                                 return false
                             }
@@ -233,16 +257,15 @@
                             window.parent.UpdateTab()
                             noUpdateHtml()
                             $("#version").text("Version "+localStorage.getItem("ccl-bill-version"))
-                            layer.confirm(data.msg+"，使用新版本请先将当前程序全部退出（程序控制台和网页），新版本程序文件保存在程序所在目录的上一级目录中，文件名为新的版本号",
+                            layer.msg("更新成功！使用新版本请先将当前程序全部退出（程序控制台和网页），新版本程序文件保存在程序所在目录的上一级目录中，文件名为新的版本号",
                                 {
+                                    time: 0,
                                     btn: ['好的'], //可以无限个按钮
-                                    icon: 1,
-                                    title:'更新成功',
-                                    area: ['600px', '200px']
-                                }, function(index){
-                                    layer.close(index);
-                                }
-                            );
+                                    area: ['600px', ''],
+                                    btn2:function () {
+                                        layer.close()
+                                    }
+                                });
                         },
                         error: function (error) {
                             // 请求失败时的处理
@@ -252,9 +275,7 @@
                         },
                         complete: function() {
                             // 请求完成后隐藏加载中动画
-                            if (source == "click") {
-                                hide_loading()
-                            }
+                            hide_loading()
                         }
                     });
                 }

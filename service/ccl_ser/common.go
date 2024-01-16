@@ -155,7 +155,7 @@ func SendMessage(typesMap map[int64]int64, param request_model.CCLParam, r error
 		tools.Logger(param.Serial, "检测到用户未选择邮箱通知，本次结果将不会推送", "", "")
 	} else {
 		tools.Logger(param.Serial, "发送邮件通知，发送账号："+param.Email, "", "")
-		err = tools.MailAttachment(param.Email, result, param.Serial)
+		err = tools.MailMultipleAttachment(param.Email, result, param.Serial)
 		if err != nil {
 			tools.Logger(param.Serial, "发送邮件通知失败，请联系技术人员处理", fmt.Sprintf(`错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
 		} else {

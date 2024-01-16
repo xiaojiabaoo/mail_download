@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"github.com/jordan-wright/email"
 	"github.com/pkg/errors"
 	"net/smtp"
 	"os"
@@ -112,4 +113,51 @@ func SendMailAttachment(account []string, subject, body, path string) error {
 		return errors.Wrap(err, "邮箱发送失败！请检查邮箱是否填写正确无误")
 	}
 	return nil
+}
+
+func MailMultipleAttachment(email, body, serial string) error {
+	var (
+		subject string
+		path    []string
+	)
+	if strings.HasPrefix(serial, "CCL") {
+		subject = fmt.Sprintf(`CCL流程操作结果通知，流水号：%s`, serial)
+	} else {
+		subject = fmt.Sprintf(`CCL流程邮件下载结果通知，流水号：%s`, serial)
+	}
+	path = append(path, fmt.Sprintf(`./logs/%s/%s.log`, Serial(serial), serial))
+	path = append(path, fmt.Sprintf(`./logs/%s/%s.xlsx`, Serial(serial), serial))
+	return SendMailMultipleAttachment([]string{email}, subject, body, path)
+}
+
+func SendMailMultipleAttachment(account []string, subject, body string, path []string) error {
+	var (
+		user     = "xiaoben_mail@163.com"
+		password = "TRCTOKIPVNJRDXOF"
+		host     = "smtp.163.com:25"
+	)
+	// 创建email结构
+	e := email.NewEmail()
+	e.From = user
+	e.To = account
+	e.Subject = subject
+	e.Text = []byte(body)
+	for _, attachments := range path {
+		attachment, err := os.Open(attachments)
+		if err != nil {
+			return errors.Wrap(err, "打开文件失败")
+		}
+		defer attachment.Close()
+		// 从文件中读取附件内容
+		fileInfo, _ := attachment.Stat()
+		fileName := fileInfo.Name()
+		if strings.HasSuffix(fileName, "xlsx") {
+			e.Attach(attachment, fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+		} else {
+			e.Attach(attachment, fileName, "application/octet-stream")
+		}
+	}
+	// 配置SMTP客户端，发送邮件
+	err := e.Send(host, smtp.PlainAuth("", user, password, strings.Split(host, ":")[0]))
+	return err
 }

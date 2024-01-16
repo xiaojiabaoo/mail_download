@@ -491,7 +491,7 @@ func SendMessage(param request_model.DownloadParam, total, count int, r error) {
 			account = param.InformAccount
 		}
 		tools.Logger(param.Serial, "发送邮件通知，发送账号："+account, "", "")
-		err = tools.MailAttachment(account, result, param.Serial)
+		err = tools.MailMultipleAttachment(account, result, param.Serial)
 		if err != nil {
 			tools.Logger(param.Serial, "发送邮件通知失败，请联系技术人员处理", fmt.Sprintf(`错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
 		} else {
