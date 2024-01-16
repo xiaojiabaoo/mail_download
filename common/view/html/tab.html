@@ -194,40 +194,14 @@
             form.render();
         }
 
-        window.checkUpdate = function () {
-            $.ajax({
-                url: "/system/check_update", // 替换为实际的API端点
-                method: "POST", // 请求方法，可以是 "GET" 或 "POST" 等
-                dataType: "json", // 预期的响应数据类型
-                success: function (data) {
-                    // 请求成功时的处理
-                    if (data.ret > 0) {
-                        layer.msg(data.msg, {icon: 5, anim: 6});
-                        return false
-                    }
-                    let currentVersion = data.data.current_version
-                    let newVersion = data.data.new_version
-                    if (newVersion > currentVersion) {
-                        $("#system_update").html('版本更新<span class="layui-badge">有更新</span>')
-                        localStorage.setItem("mail-download-has-new-version", "true");
-                    }
-                    localStorage.setItem("mail-download-new-version", newVersion);
-                    localStorage.setItem("mail-download-current-version", currentVersion);
-                },
-                error: function (error) {
-                    // 请求失败时的处理
-                    layer.msg("服务器异常", {icon: 5, anim: 6});
-                }
-            });
+        window.UpdateTab = function () {
+            if (localStorage.getItem("ccl-bill-has") == "true") {
+                $("#system_update").html('版本更新<span class="layui-badge">有更新</span>')
+            } else {
+                $("#system_update").html('版本更新')
+            }
         }
-
-        let hasNew = localStorage.getItem("mail-download-has-new-version")
-        if (hasNew == "true") {
-            $("#system_update").html('版本更新<span class="layui-badge">有更新</span>')
-        } else {
-            setTimeout(checkUpdate, 10000)
-        }
-
+        UpdateTab()
     });
 </script>
 </body>

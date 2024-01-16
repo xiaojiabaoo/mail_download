@@ -60,7 +60,7 @@ func checkUpdate() (response_model.Version, error) {
 		branch     = "main"
 		err        error
 		commit     string
-		index      int
+		index, i   int
 		newVersion float64
 	)
 	// 获取最新提交的信息，并从中截取版本号
@@ -71,6 +71,13 @@ func checkUpdate() (response_model.Version, error) {
 	index = strings.Index(commit, "Version:")
 	if index >= 0 {
 		newVersion = tools.StringToFloat64(strings.ReplaceAll(commit[index:], "Version:", ""))
+	}
+	i = strings.Index(commit, ")：")
+	if i == -1 {
+		i = strings.Index(commit, "):")
+	}
+	if i >= 0 {
+		response.Describe = commit[i+2 : index]
 	}
 	response.CurrentVersion = version
 	response.NewVersion = newVersion
@@ -91,7 +98,7 @@ func Update() error {
 	if err != nil {
 		return customErr.New(customErr.GET_APPPATH_ERROR, "")
 	}
-	appPath = "D:\\ActiveFile\\Temp\\Project1"
+	appPath = "D:\\临时文件\\CCL发票机器人\\CCL发票机器人3.2"
 	// 获取上一级目录
 	path = filepath.Join(filepath.Dir(appPath), ".")
 	update, err = checkUpdate()
@@ -112,12 +119,15 @@ func Update() error {
 		return errors.Wrap(err, "获取程序父级目录下的目录信息出现问题")
 	}
 	for _, file := range files {
-		if file.IsDir() && strings.Contains(file.Name(), fmt.Sprintf(`v%v`, update.NewVersion)) {
-			return customErr.New(customErr.VERSION_ERROR,
-				fmt.Sprintf(`即将更新的版本为：v%v；系统到你的电脑中已经存在了相同或更高的版本，为保证正常更新，请先删除相同和高版本的程序后重试`, update.NewVersion))
+		if file.IsDir() && strings.Contains(file.Name(), fmt.Sprintf(`Version %v`, update.NewVersion)) {
+			version := tools.StringToFloat64(strings.ReplaceAll(file.Name(), "Version ", ""))
+			if version >= update.NewVersion {
+				return customErr.New(customErr.VERSION_ERROR,
+					fmt.Sprintf(`更新的版本为：Version %v 系统检测到你的电脑中已经存在了相同或更高的版本，为保证更新正常进行，请先删除相同和高版本的程序后重新尝试`, update.NewVersion))
+			}
 		}
 	}
-	path += fmt.Sprintf(`\机器人 v%v`, update.NewVersion)
+	path += fmt.Sprintf(`\Version %v`, update.NewVersion)
 	// 创建文件夹
 	err = os.MkdirAll(path, 0755)
 	if err != nil {

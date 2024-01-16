@@ -10,8 +10,12 @@ function getRequestParam() {
 }
 
 //全局加载提示
-function show_loading() {
-    this.loadingMsg = layer.msg('加载中，请稍后...',
+function show_loading(msg) {
+    console.log(msg)
+    if (msg == "" || msg == undefined || msg == "undefined" || msg == "unll") {
+        msg = "加载中，请稍后..."
+    }
+    this.loadingMsg = layer.msg(msg,
         {
             /*icon: 16,*/
             id: 'layer_loading' + new Date().getTime(),
@@ -86,3 +90,12 @@ function sendPostApi(url, data, sendType, token) {
     return result
 }
 
+function checkNull(data) {
+    let result = ""
+    if (data == undefined || data == null || data == "" || data == "undefined" || data == "null") {
+        result = ""
+    } else {
+        result = data
+    }
+    return result
+}
