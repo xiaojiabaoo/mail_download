@@ -136,7 +136,6 @@ func Update() error {
 	if err = cmd.Run(); err != nil {
 		return errors.Wrap(err, "拉取项目失败")
 	}
-	DeleteFile(path + "\\.git")
 	return nil
 }
 
