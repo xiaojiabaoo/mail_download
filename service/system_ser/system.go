@@ -97,9 +97,7 @@ func Update() error {
 		return customErr.New(customErr.GET_APPPATH_ERROR, "")
 	}
 	// 获取上一级目录
-	path = filepath.Join(filepath.Dir(appPath), ".")
-	fmt.Println("程序目录：" + appPath)
-	fmt.Println("上一级目录：" + path)
+	path = filepath.Join(filepath.Dir(appPath), "..")
 	update, err = checkUpdate()
 	if err != nil {
 		return err
