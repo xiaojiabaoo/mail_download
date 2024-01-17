@@ -98,6 +98,7 @@ func Update() error {
 	}
 	// 获取上一级目录
 	path = filepath.Join(filepath.Dir(appPath), ".")
+	fmt.Println("程序目录：" + appPath)
 	fmt.Println("上一级目录：" + path)
 	update, err = checkUpdate()
 	if err != nil {
