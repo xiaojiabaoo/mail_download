@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 func List(param request_model.SysListParam) ([]response_model.SystemList, error) {
@@ -51,6 +52,10 @@ func CheckUpdate() (response_model.Version, error) {
 	return checkUpdate()
 }
 
+var (
+	mu sync.Mutex
+)
+
 func checkUpdate() (response_model.Version, error) {
 	var (
 		response          = response_model.Version{}
@@ -63,6 +68,8 @@ func checkUpdate() (response_model.Version, error) {
 		exist             bool
 		appPath, tempPath string
 	)
+	mu.Lock()
+	defer mu.Unlock()
 	appPath, err = os.Getwd()
 	if err != nil {
 		return response, customErr.New(customErr.GET_APPPATH_ERROR, "")
