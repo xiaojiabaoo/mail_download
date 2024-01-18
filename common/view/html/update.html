@@ -78,19 +78,22 @@
 <form class="layui-form" action="">
     <div class="parent">
         <div class="child">
-            <div class="layui-form-item" style="margin-top: 20px;margin-left: 20px;">
-                <div style="margin-left: 50px;margin-top: 40px;font-size: 17px;font-weight: bold;">
+            <div id="load_update_div" style="margin-left: 70px;margin-top: 40px;font-size: 17px;font-weight: bold;">
+                检查更新中，请稍后......
+            </div>
+            <div id="has_update_div" class="layui-form-item" style="margin-top: 20px;margin-left: 20px;display: none;">
+                <div  style="margin-left: 50px;margin-top: 40px;font-size: 17px;font-weight: bold;">
                     <span>当前版本：</span>
-                    <span id="version"></span>
+                    <span id="danqian_banben"></span>
                 </div>
                 <div style="margin-left: 50px;margin-top: 10px;">
                     <span>
-                        <button type="button" id="check-update-button" class="layui-btn layui-btn-primary layui-btn-xs">检查更新</button>
+                        <button type="button" id="check_update_button" class="layui-btn layui-btn-primary layui-btn-xs">检查更新</button>
                     </span>
                 </div>
                 <div id="content" style="margin-left: 50px;margin-top: 20px;"></div>
             </div>
-            <div class="layui-form-item" id="update-button" style="display: none;">
+            <div class="layui-form-item" id="update_button" style="display: none;">
                 <div class="layui-input-block" style="margin-left: 70px;width: 300px;">
                     <button type="button" class="layui-btn layui-border layui-btn-fluid">
                         下载更新
@@ -129,7 +132,9 @@
             str += '<div style="margin-top: 10px;line-height: 25px;width: 870px;">更新描述：'+ describe+'</div>'
             $("#content").html(str)
             $(".child").height((180+90)+"px")
-            $("#update-button").show()
+            $("#update_button").show()
+            $("#load_update_div").hide()
+            $("#has_update_div").show()
             form.render();
         }
 
@@ -138,8 +143,40 @@
             str += '<span>已是最新版本，无需更新</span>'
             $("#content").html(str)
             $(".child").height("180px")
-            $("#update-button").hide()
+            $("#update_button").hide()
+            $("#load_update_div").hide()
+            $("#has_update_div").show()
             form.render();
+        }
+
+        window.updated_status = function () {
+            localStorage.setItem("ccl_danqian_banben", localStorage.getItem("ccl_xin_banben"))
+            localStorage.removeItem("ccl_xin")
+            localStorage.removeItem("ccl_xin_banben")
+            localStorage.removeItem("ccl_xin_miaoshu")
+            window.parent.UpdateTab()
+            noUpdateHtml()
+            $("#danqian_banben").text("Version "+localStorage.getItem("ccl_danqian_banben"))
+        }
+
+        window.an_update = function (result) {
+            localStorage.setItem("ccl_xin", "true");
+            localStorage.setItem("ccl_xin_banben", result.new_version);
+            localStorage.setItem("ccl_danqian_banben", result.current_version);
+            localStorage.setItem("ccl_xin_miaoshu", result.describe);
+            hasUpdateHtml(result.new_version, result.describe)
+            $("#danqian_banben").text("Version "+result.current_version)
+            window.parent.UpdateTab()
+        }
+
+        window.no_update = function (version) {
+            $("#danqian_banben").text("Version "+version)
+            localStorage.setItem("ccl_danqian_banben", version);
+            localStorage.removeItem("ccl_xin")
+            localStorage.removeItem("ccl_xin_banben")
+            localStorage.removeItem("ccl_xin_miaoshu")
+            noUpdateHtml()
+            window.parent.UpdateTab()
         }
 
         window.getUpdateData = function (source) {
@@ -162,28 +199,19 @@
                         return false
                     }
                     if (result.current_version == result.new_version) {
-                        $("#version").text("Version "+result.current_version)
-                        localStorage.setItem("ccl-bill-version", result.current_version);
-                        noUpdateHtml()
                         if (source == "click") {
                             layer.msg("当前已是最新版本，无需更新", {icon: 7, anim: 6})
                         }
-                        localStorage.removeItem("ccl-bill-has")
-                        localStorage.removeItem("ccl-bill-new")
-                        localStorage.removeItem("ccl-bill-describe")
-                        window.parent.UpdateTab()
+                        no_update(result.current_version)
                         return false
                     } else {
-                        hasUpdateHtml(result.new_version, result.describe)
-                        localStorage.setItem("ccl-bill-has", "true");
-                        localStorage.setItem("ccl-bill-new", result.new_version);
-                        localStorage.setItem("ccl-bill-version", result.current_version);
-                        localStorage.setItem("ccl-bill-describe", result.describe);
-                        form.render();
-                        window.parent.UpdateTab()
+                        if (source == "click") {
+                            layer.msg("检测到新版本：Version "+result.new_version, {icon: 1, anim: 1})
+                        }
+                        an_update(result)
                     }
                     if (source == "init") {
-                        $("#version").text("Version "+result.current_version)
+                        $("#ccl_danqian_banben").text("Version "+result.current_version)
                     }
                 },
                 error: function (error) {
@@ -200,14 +228,14 @@
         };
 
         window.init = function () {
-            let version = localStorage.getItem("ccl-bill-version");
-            let has = localStorage.getItem("ccl-bill-has");
-            if (checkNull(version) == "" || checkNull(has) == "") {
+            let danqian_banben = localStorage.getItem("ccl_danqian_banben");
+            let xin = localStorage.getItem("ccl_xin");
+            if (checkNull(danqian_banben) == "" || checkNull(xin) == "") {
                 getUpdateData("init")
             } else {
-                $("#version").text("Version "+version)
-                if (localStorage.getItem("ccl-bill-has") == "true") {
-                    hasUpdateHtml(localStorage.getItem("ccl-bill-new"), localStorage.getItem("ccl-bill-describe"))
+                $("#danqian_banben").text("Version "+danqian_banben)
+                if (xin == "true") {
+                    hasUpdateHtml(localStorage.getItem("ccl_xin_banben"), localStorage.getItem("ccl_xin_miaoshu"))
                 } else {
                     noUpdateHtml()
                 }
@@ -216,7 +244,7 @@
         }
         init()
 
-        $("#check-update-button").click(function() {
+        $("#check_update_button").click(function() {
             getUpdateData("click")
         });
 
@@ -249,14 +277,7 @@
                                 });
                                 return false
                             }
-
-                            localStorage.setItem("ccl-bill-version", localStorage.getItem("ccl-bill-new"))
-                            localStorage.removeItem("ccl-bill-has")
-                            localStorage.removeItem("ccl-bill-new")
-                            localStorage.removeItem("ccl-bill-describe")
-                            window.parent.UpdateTab()
-                            noUpdateHtml()
-                            $("#version").text("Version "+localStorage.getItem("ccl-bill-version"))
+                            updated_status()
                             layer.msg("更新成功！使用新版本请先将当前程序全部退出（程序控制台和网页），新版本程序文件保存在程序所在目录的上一级目录中，文件名为新的版本号",
                                 {
                                     time: 0,
