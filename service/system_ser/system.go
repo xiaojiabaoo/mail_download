@@ -53,16 +53,42 @@ func CheckUpdate() (response_model.Version, error) {
 
 func checkUpdate() (response_model.Version, error) {
 	var (
-		response   = response_model.Version{}
-		url        = "https://gitee.com/xiaojiabaoo/mail_download.git"
-		branch     = "main"
-		err        error
-		commit     string
-		index, i   int
-		newVersion float64
+		response          = response_model.Version{}
+		url               = "https://gitee.com/xiaojiabaoo/mail_download.git"
+		branch            = "main"
+		err               error
+		commit            string
+		index, i          int
+		newVersion        float64
+		exist             bool
+		appPath, tempPath string
 	)
+	appPath, err = os.Getwd()
+	if err != nil {
+		return response, customErr.New(customErr.GET_APPPATH_ERROR, "")
+	}
+	tempPath = appPath + "\\Temp"
+	exist, err = DirExist(tempPath)
+	if err != nil {
+		return response, err
+	}
+	if exist {
+		os.RemoveAll(tempPath)
+	}
+	fmt.Println("临时包存放地址：" + tempPath)
+	// 创建文件夹
+	err = os.Mkdir(tempPath, os.ModePerm)
+	if err != nil && !strings.Contains(err.Error(), "file already exists") {
+		return response, errors.Wrap(err, "检测更新-创建文件夹失败")
+	}
+	cmd := exec.Command("git", "clone", "-b", branch, url, tempPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err = cmd.Run(); err != nil {
+		return response, errors.Wrap(err, "检测更新-拉取项目失败")
+	}
 	// 获取最新提交的信息，并从中截取版本号
-	commit, err = GetCommit(url, branch)
+	commit, err = GetCommit(url, branch, appPath, tempPath)
 	if err != nil {
 		return response, err
 	}
@@ -79,6 +105,7 @@ func checkUpdate() (response_model.Version, error) {
 	}
 	response.CurrentVersion = tools.Version
 	response.NewVersion = newVersion
+	os.RemoveAll(tempPath)
 	return response, nil
 }
 
@@ -92,12 +119,12 @@ func Update() error {
 		update  response_model.Version
 		files   []os.DirEntry
 	)
-	appPath, err = os.Executable()
+	appPath, err = os.Getwd()
 	if err != nil {
 		return customErr.New(customErr.GET_APPPATH_ERROR, "")
 	}
 	// 获取上一级目录
-	path = filepath.Join(filepath.Dir(appPath), "..")
+	path = filepath.Join(filepath.Dir(appPath), ".")
 	update, err = checkUpdate()
 	if err != nil {
 		return err
@@ -136,10 +163,22 @@ func Update() error {
 	if err = cmd.Run(); err != nil {
 		return errors.Wrap(err, "拉取项目失败")
 	}
+	DeleteFile(path + "\\.git")
 	return nil
 }
 
-func GetCommit(url, branch string) (string, error) {
+func GetCommit(url, branch, appPath, tempPath string) (string, error) {
+	err := os.Chdir(tempPath)
+	if err != nil {
+		return "", err
+	}
+	defer func() error {
+		err = os.Chdir(appPath)
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
 	cmd := exec.Command("git", "ls-remote", "--quiet", "--tags", "--heads", url, branch)
 	output, err := cmd.Output()
 	if err != nil {
@@ -173,4 +212,18 @@ func GetCommitDescribe(hash string) (string, error) {
 
 func DeleteFile(filePath string) error {
 	return os.RemoveAll(filePath)
+}
+
+func DirExist(path string) (bool, error) {
+	// 使用 os.Stat 获取目录信息
+	_, err := os.Stat(path)
+	// 判断目录是否存在
+	switch {
+	case err == nil:
+		return true, nil
+	case os.IsNotExist(err):
+		return false, nil
+	default:
+		return false, errors.Wrap(err, "检测目录信息错误")
+	}
 }
