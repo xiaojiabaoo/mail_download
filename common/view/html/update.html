@@ -202,6 +202,8 @@
                         if (source == "click") {
                             layer.msg("当前已是最新版本，无需更新", {icon: 7, anim: 6})
                         }
+                        let date = new Date()
+                        localStorage.setItem("ccl_select_no_update", date.getTime()/1000);
                         no_update(result.current_version)
                         return false
                     } else {
@@ -231,7 +233,14 @@
             let danqian_banben = localStorage.getItem("ccl_danqian_banben");
             let xin = localStorage.getItem("ccl_xin");
             if (checkNull(danqian_banben) == "" || checkNull(xin) == "") {
-                getUpdateData("init")
+                let date = new Date()
+                let item = localStorage.getItem("ccl_select_no_update");
+                item = checkNull(item) == "" ? 0:item;
+                if ((date.getTime() / 1000) - item > (60*5)) {
+                    getUpdateData("init")
+                } else {
+                    no_update(danqian_banben)
+                }
             } else {
                 $("#danqian_banben").text("Version "+danqian_banben)
                 if (xin == "true") {
