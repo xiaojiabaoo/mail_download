@@ -205,6 +205,9 @@
                         no_update(result.current_version)
                         return false
                     } else {
+                        if (source == "click") {
+                            layer.msg("检测到新版本：Version "+result.new_version, {icon: 1, anim: 1})
+                        }
                         an_update(result)
                     }
                     if (source == "init") {

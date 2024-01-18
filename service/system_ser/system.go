@@ -75,7 +75,6 @@ func checkUpdate() (response_model.Version, error) {
 	if exist {
 		os.RemoveAll(tempPath)
 	}
-	fmt.Println("临时包存放地址：" + tempPath)
 	// 创建文件夹
 	err = os.Mkdir(tempPath, os.ModePerm)
 	if err != nil && !strings.Contains(err.Error(), "file already exists") {
