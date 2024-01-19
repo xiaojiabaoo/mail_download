@@ -236,7 +236,7 @@
                 let date = new Date()
                 let item = localStorage.getItem("ccl_select_no_update");
                 item = checkNull(item) == "" ? 0:item;
-                if ((date.getTime() / 1000) - item > (60*5)) {
+                if ((date.getTime() / 1000) - item > (60*15)) {
                     getUpdateData("init")
                 } else {
                     no_update(danqian_banben)
