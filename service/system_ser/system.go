@@ -48,7 +48,10 @@ func List(param request_model.SysListParam) ([]response_model.SystemList, error)
 	return data, nil
 }
 
-func CheckUpdate() (response_model.Version, error) {
+func CheckUpdate(param request_model.CheckUpdateParam) (response_model.Version, error) {
+	if param.Type == 1 {
+		return response_model.Version{CurrentVersion: tools.Version}, nil
+	}
 	return checkUpdate()
 }
 

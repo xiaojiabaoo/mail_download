@@ -242,12 +242,34 @@
                     no_update(danqian_banben)
                 }
             } else {
-                $("#danqian_banben").text("Version "+danqian_banben)
-                if (xin == "true") {
-                    hasUpdateHtml(localStorage.getItem("ccl_xin_banben"), localStorage.getItem("ccl_xin_miaoshu"))
-                } else {
-                    noUpdateHtml()
-                }
+                $.ajax({
+                    url: "/system/check_update",
+                    method: "POST",
+                    data: '{"type":1}',
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        // 请求成功时的处理
+                        if (data.ret > 0) {
+                            layer.msg(data.msg, {icon: 5, anim: 6});
+                            return false
+                        }
+                        let result = data.data
+                        if (result.current_version != danqian_banben) {
+                            no_update(result.current_version)
+                        } else {
+                            $("#danqian_banben").text("Version "+danqian_banben)
+                            if (xin == "true") {
+                                hasUpdateHtml(localStorage.getItem("ccl_xin_banben"), localStorage.getItem("ccl_xin_miaoshu"))
+                            } else {
+                                noUpdateHtml()
+                            }
+                        }
+                    },
+                    error: function (error) {
+                        // 请求失败时的处理
+                        layer.msg("服务器异常", {icon: 5, anim: 6});
+                    }
+                });
                 form.render();
             }
         }

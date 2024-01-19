@@ -32,9 +32,14 @@ func Update(ctx *gin.Context) {
 
 func CheckUpdate(ctx *gin.Context) {
 	var (
+		param  = request_model.CheckUpdateParam{}
 		err    error
 		update response_model.Version
 	)
-	update, err = system_ser.CheckUpdate()
+	if err = ctx.ShouldBind(&param); err != nil {
+		response.ResponseData(ctx, customErr.New(customErr.PARAMETER_ILLEGAL_DELETION, err.Error()), "", nil)
+		return
+	}
+	update, err = system_ser.CheckUpdate(param)
 	response.ResponseData(ctx, err, "", update)
 }
