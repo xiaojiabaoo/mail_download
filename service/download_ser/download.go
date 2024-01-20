@@ -74,6 +74,8 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 		tools.Excel(param.Serial, model.XlsxData{})
 		tools.Logger(param.Serial, fmt.Sprintf(`开始收取收件箱：%s 中的邮件`, box), "", "")
 		switch {
+		case param.EndTime > 0 && param.TimeLimit == 1:
+			messages, err = GetMailForDateLimit(clients, param, mbox.Messages, box)
 		case param.Time > 0:
 			messages, err = GetMailForDate(clients, param, mbox.Messages, box)
 		case param.Count > 0:
@@ -236,6 +238,50 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 		}
 	}
 	return message, nil
+}
+
+func GetMailForDateLimit(clients *client.Client, param request_model.DownloadParam, total uint32, box string) ([]*imap.Message, error) {
+	var (
+		search     = make([]*imap.Message, 0)
+		message    = make([]*imap.Message, 0)
+		err        error
+		start, end uint32
+	)
+	end = total
+	start = 1
+	for start <= end {
+		mid := (start + end) / 2
+		search, err = PaginationSearch(clients, mid, mid)
+		if err != nil {
+			if strings.Index(err.Error(), "imap: connection closed") != -1 {
+				tools.Logger(param.Serial, "因下载量过大导致连接被中断，一分钟后尝试重新连接", "", tools.LOG_LEVEL_SYSTEM_ERROR)
+				time.Sleep(60 * time.Second)
+				clients.Logout()
+				clients, err = Login(param)
+				if err != nil {
+					return message, err
+				}
+				_, err = clients.Select(box, false)
+				if err != nil {
+					return message, err
+				}
+				tools.Logger(param.Serial, "重新连接成功，开始继续获取邮件", "", "")
+				continue
+			}
+			return message, err
+		}
+		if len(search) == 0 {
+			return message, customErr.New(customErr.DATA_NOT_EXIST, "")
+		}
+		times := time.Unix(search[0].Envelope.Date.Unix(), 0)
+		if param.EndTime < times.Unix() {
+			end = mid - 1 // 在左侧继续查找
+		} else {
+			start = mid + 1 // 在右侧继续查找
+		}
+	}
+	total = end + 1 // 这里是为了处理因二分查找法可能会出现索引位置偏移导致漏数据
+	return GetMailForDate(clients, param, total, box)
 }
 
 func GetMailForDate(clients *client.Client, param request_model.DownloadParam, total uint32, box string) ([]*imap.Message, error) {
