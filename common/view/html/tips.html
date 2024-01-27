@@ -195,7 +195,7 @@
                 <label class="layui-form-label" style="width: 100px;">邮箱服务地址</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="server" lay-verify="server" autocomplete="off"
-                           placeholder="请填写邮箱服务器地址（必填）" class="layui-input">
+                           placeholder="请填写邮箱服务器地址（必填）" class="layui-input" value="imap.mxhichina.com:993">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;">
                     aliyun服务器地址：imap.qiye.aliyun.com:993或imap.mxhichina.com:993
@@ -205,14 +205,14 @@
                 <label class="layui-form-label" style="width: 100px;">邮箱登录账号</label>
                 <div class="layui-input-block">
                     <input style="width: 300px" type="text" name="account" lay-verify="email" autocomplete="off"
-                           placeholder="请填写邮箱登录账号（必填）" class="layui-input">
+                           placeholder="请填写邮箱登录账号（必填）" class="layui-input"  value="acc02@ggt-world.com">
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
                 <label class="layui-form-label" style="width: 100px;">邮箱登录密码</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="password" name="password" lay-verify="password" autocomplete="off"
-                           placeholder="请填写邮箱登录密码（必填）" class="layui-input">
+                           placeholder="请填写邮箱登录密码（必填）" class="layui-input"  value="Acc01.ggt125">
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;padding: 5px 0!important;">
                     <button type="button" id="mail-box-button" class="layui-btn layui-btn-sm" style="background-color:#FFB6C1 !important;">
@@ -242,13 +242,19 @@
             <div class="layui-form-item" style="margin-left: 20px;">
                 <label class="layui-form-label" style="width: 100px;">附件下载方式</label>
                 <div class="layui-input-block">
-                    <input lay-filter="download_type" type="radio" name="download_type" value="time" title="根据时间范围下载" checked="">
+                    <input lay-filter="download_type" type="radio" name="download_type" value="time" title="根据最新时间范围下载" checked="">
+                    <input lay-filter="download_type" type="radio" name="download_type" value="assign_time" title="根据指定时间范围下载">
                     <input lay-filter="download_type" type="radio" name="download_type" value="count" title="根据指定数量下载" >
                 </div>
                 <div style="color: #C0C0C0;margin-left: 130px;line-height: 27px;">
                     <p>该选项用于控制下载的方式：</p>
-                    <p>   如果选择的 “根据时间范围下载” 填写的时间必须是历史时间，系统会下载从填写的时间到当前为止所有邮件的附件文件</p>
-                    <p>   如果选择的 “根据指定数量下载” 填写具体的数量，系统会根据数量下载最近对应数量的邮件的附件文件</p>
+                    <p>   如果选择的 “根据最新时间范围下载” 填写的时间必须是历史时间，系统会下载从该时间到当前范围内邮件的附件文件</p>
+                    <p>   如果选择的 “根据指定时间范围下载” 填写的时间必须包含开始时间和结束时间，系统会下载该时间范围内的附件文件</p>
+                    <p>   如果选择的 “根据指定数量下载” 填写具体的数量，系统会在选择的收件箱中分别下载对应数量的邮件</p>
+                    <p>注意：</p>
+                    <p>   选择 “根据最新时间范围下载” 和 “根据指定时间范围下载” 方式时，为保证下载的效率与质量，一次只能下载三个月的邮件！</p>
+                    <p>   选择 “根据指定数量下载” 方式时，填写的数量尽量保证在分别指定的收件箱中且在近期是足够的（已设最多限制：100封）</p>
+                    <p>   否则系统将会一直查询历史邮件来满足该数量，直到满足该数量或没有可查询的历史邮件为止，而浪费不必要的时间</p>
                 </div>
             </div>
             <div class="layui-form-item" id="type_count" style="margin-left: 20px;display: none;">
@@ -257,10 +263,12 @@
                     <input style="width: 300px" type="text" name="count" lay-verify="count" autocomplete="off"
                            placeholder="请填写下载邮件数量" class="layui-input">
                 </div>
-                <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 130px;line-height: 27px;">
-                    <p>下载邮件的数量；填写的数字即表示在指定的收件箱中分别下载最新的填写的多少封符合条件的邮件；</p>
-                    <p>注意：填写的数量尽量保证在指定的收件箱中且在近期是足够的，否则系统将会一直查询历史邮件来满足该数量，直到达</p>
-                    <p>   到该数量或没有可查询的历史邮件为止，浪费不必要的时间</p>
+            </div>
+            <div class="layui-form-item" id="type_assign_time" style="margin-left: 20px;display: none;">
+                <label class="layui-form-label" style="width: 100px;">下载邮件时间</label>
+                <div class="layui-input-inline">
+                    <input style="width: 300px" type="text" name="assign_time" placeholder="请选择下载邮件时间范围"
+                           lay-verify="assign_time" class="layui-input" id="assign_time" readonly>
                 </div>
             </div>
             <div class="layui-form-item" id="type_time" style="margin-left: 20px;">
@@ -268,9 +276,6 @@
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="time" placeholder="请选择下载邮件开始时间"
                            lay-verify="time" class="layui-input" id="time" readonly>
-                </div>
-                <div class="layui-form-mid layui-word-aux" style="color: #C0C0C0 !important;margin-left: 120px;"> 
-                    从输入的时间开始到现在时间的所有邮件附件；注意：为保证下载的效率与质量，只能下载三个月以内的邮件！
                 </div>
             </div>
             <div class="layui-form-item" style="margin-left: 20px;">
@@ -385,18 +390,21 @@
 
         form.on('radio(download_type)', function (data) {
             let value = data.value;
-            let height = $(".child").height();
-            let number = 60
             if (value == "time") {
                 $("#type_time").css("display", "")
+                $("#type_assign_time").css("display", "none")
                 $("#type_count").css("display", "none")
                 $("input[name='count']").val("0")
-                $(".child").css("height", height-number+"px")
+            } else if (value == "assign_time") {
+                $("#type_assign_time").css("display", "")
+                $("#type_time").css("display", "none")
+                $("#type_count").css("display", "none")
+                $("input[name='count']").val("0")
             } else {
                 $("#type_time").css("display", "none")
+                $("#type_assign_time").css("display", "none")
                 $("#type_count").css("display", "")
                 $("input[name='time']").val("")
-                $(".child").css("height", height+number+"px")
             }
             form.render();
         });
@@ -407,6 +415,16 @@
             type: 'datetime',
             btns: ['confirm'],
             theme: '#FFB6C1',
+            min: -90,
+            max: 0
+        });
+
+        laydate.render({
+            elem: '#assign_time',
+            type: 'datetime',
+            btns: ['confirm'],
+            theme: '#FFB6C1',
+            range: true,
             min: -90,
             max: 0
         });
@@ -470,12 +488,22 @@
             if (data.field.time != "") {
                 datetime = new Date(data.field.time).getTime()/1000;
             }
+            let time_limit = 0;
+            let endTime = 0;
+            let downloadType = $('input[name="download_type"]:checked').val();
+            if (downloadType == "assign_time") {
+                time_limit = 1
+                let assignTime = $("#assign_time").val()
+                let assign = assignTime.split(" - ")
+                datetime = new Date(assign[0]).getTime()/1000;
+                endTime = new Date(assign[1]).getTime()/1000;
+            }
             let urls = data.field.url
             urls = urls.replace(/[\\]/g, '\\\\').replace(/[\"]/g, '\\"').replace(/[\/]/g, '\\/').replace(/[\b]/g, '\\b').replace(/[\f]/g, '\\f').replace(/[\n]/g, '\\n').replace(/[\r]/g, '\\r').replace(/[\t]/g, '\\t').replace(/[']/g, '\\\'');
             let param = '{"server":"'+data.field.server+'","account":"'+data.field.account+'","password":"'+data.field.password+'",' +
                 '"time":'+datetime+',"count":'+count+',"url":"'+urls+'","classify":"'+data.field.classify+'",' +
                 '"type":"'+data.field.type+'","inform":"'+data.field.inform+'","inform_account":"'+data.field.inform_account+'",' +
-                '"box":'+box+'}'
+                '"box":'+box+',"time_limit":'+time_limit+',"end_time":'+endTime+'}'
             show_loading()
             $.ajax({
                 url: '/mail/download',
@@ -553,7 +581,7 @@
                         $("#mail-box-data").html(str).show()
                         form.render(); // 重新渲染复选框
                         $("#body-param").css("display", "")
-                        $(".child").css("height", (1400+$("#mail-box-data").height())+"px")
+                        $(".child").css("height", (1500+$("#mail-box-data").height())+"px")
                         $("#mail-box-button").html('<i class="layui-icon layui-icon-refresh-3"></i>刷新收件箱')
                         form.render();
                     }

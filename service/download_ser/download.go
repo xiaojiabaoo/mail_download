@@ -144,6 +144,15 @@ func CheckParam(param *request_model.DownloadParam) error {
 	if param.Count == 0 && param.Time == 0 {
 		return customErr.New(customErr.TIME_COUNT_ERROR, "")
 	}
+	if param.TimeLimit == 1 {
+		if param.Time <= 0 && param.EndTime <= 0 {
+			return customErr.New(customErr.MAIL_TIME_LIMIT_ERROR, "")
+		}
+		endTime := time.Unix(param.EndTime, 0)
+		if now.Day() == endTime.Day() {
+			return customErr.New(customErr.MAIL_TIME_LIMIT_ENDTIME_ERROR, "")
+		}
+	}
 	if param.Time > 0 && (now.Unix()-param.Time > 86400*90 || param.Time > now.Unix()) {
 		return customErr.New(customErr.DOWNLOAD_TIME_ERROR, "")
 	}
@@ -328,14 +337,17 @@ func GetMailForDate(clients *client.Client, param request_model.DownloadParam, t
 			if k == 0 && param.Time > times.Unix() {
 				start = 1
 			}
+			if param.TimeLimit == 1 && param.EndTime < times.Unix() {
+				continue // 这一步判断仅为指定时间范围时使用
+			}
+			if param.Time > times.Unix() {
+				continue
+			}
 			if !strings.Contains(v.Envelope.Subject, "INVOICE") || strings.Contains(v.Envelope.Subject, "回复") ||
 				strings.Contains(v.Envelope.Subject, "RE:") || strings.Contains(v.Envelope.Subject, "Re: ") {
 				continue
 			}
 			if !strings.Contains(v.Envelope.Subject, "#") && !strings.Contains(v.Envelope.Subject, "/") {
-				continue
-			}
-			if param.Time > times.Unix() {
 				continue
 			}
 			//tools.Logger(param.Serial, fmt.Sprintf(`筛选到邮件 时间：%s，主题：%s`, times.Format("2006-01-02 15:04:05"), v.Envelope.Subject), "", "")
