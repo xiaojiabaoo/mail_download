@@ -53,7 +53,8 @@ func ReadPdfGroup(path string) (map[string]response_model.ReadPdf, error) {
 					master := regexp.MustCompile(`^[A-Z]{4,}.*\d.*$`).MatchString(word.S)
 					mawb := regexp.MustCompile(`^[0-9]{3}-[0-9]+$`).MatchString(word.S)
 					invoice := regexp.MustCompile(`^CCL-AR\d+$`).MatchString(word.S)
-					amount := regexp.MustCompile(`^\d+\.\d{2}$`).MatchString(word.S)
+					amount := regexp.MustCompile(`^\d{1,3}(,\d{3})*(\.\d{2})?$`).MatchString(word.S)
+					//fmt.Println(word.S)
 					if master && !containsInvalidChars(word.S, " /abcdefghijklmnopqrstuvwxyz") {
 						masterMawbNo[word.S] = struct{}{}
 					}
