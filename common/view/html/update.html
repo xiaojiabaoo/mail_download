@@ -102,6 +102,10 @@
                 </div>
             </div>
         </div>
+        <div style="font-size: 12px;color: #C0C0C0;margin-top: 10px;">
+            <span>若遇到更新问题，建议使用无痕模式打开，或者</span>
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-xs clear_cache">&nbsp;清除缓存</button>
+        </div>
     </div>
 </form>
 <script src="/static/js/layui-v2.6.8/layui.js"></script>
@@ -256,10 +260,20 @@
             getUpdateData("click")
         });
 
+        $(".clear_cache").click(function() {
+            localStorage.removeItem("ccl_xin")
+            localStorage.removeItem("ccl_xin_banben")
+            localStorage.removeItem("ccl_xin_miaoshu")
+            localStorage.removeItem("ccl_danqian_banben")
+            localStorage.removeItem("check_update_time")
+            form.render();
+            window.parent.location.reload()
+        });
+
         $(".layui-btn-fluid").click(function() {
             let str = ''
             str += '<div>1.更新过程视网络情况可能需要较长的时间，正常情况下不会超过5分钟，更新过程中请不要退出程序和网页（可以最小化），请耐心等待更新完成；</div>'
-            str += '<div>2.更新完成后的版本将为 Version '+localStorage.getItem("ccl-bill-new")+'，新的程序版本将在当前程序所在目录的上一级目录中存放，与当前使用的程序互不干扰</div>'
+            str += '<div>2.更新完成后的版本将为 Version '+localStorage.getItem("ccl_xin_banben")+'，新的程序版本将在当前程序所在目录的上一级目录中存放，与当前使用的程序互不干扰</div>'
             str += '<div>3.使用新的程序前，需要将正在使用的旧程序全部退出；再前往新的程序目录下找到exe启动程序即可（旧程序可自行选择删除或继续保留）</div>'
             layer.confirm(str, {
                     btn: ['更新', '取消'],
