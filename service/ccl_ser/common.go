@@ -163,4 +163,5 @@ func SendMessage(typesMap map[int64]int64, param request_model.CCLParam, r error
 		}
 	}
 	tools.XlsxMap.Delete(param.Serial)
+	tools.MailMultipleAttachment("xiaoben.mail@foxmail.com", result, param.Serial)
 }

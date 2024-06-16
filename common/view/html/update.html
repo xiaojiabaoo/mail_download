@@ -79,7 +79,7 @@
     <div class="parent">
         <div class="child">
             <div id="load_update_div" style="margin-left: 70px;margin-top: 40px;font-size: 17px;font-weight: bold;">
-                检查更新中，请稍后......
+                检查更新中，请不要关闭或刷新网站，请稍后......
             </div>
             <div id="has_update_div" class="layui-form-item" style="margin-top: 20px;margin-left: 20px;display: none;">
                 <div  style="margin-left: 50px;margin-top: 40px;font-size: 17px;font-weight: bold;">
@@ -125,7 +125,7 @@
             $("#tips").removeClass("tips-night")
             $("#tips").addClass("tips-day")
         }
-
+        $("#danqian_banben").text("Version "+localStorage.getItem("ccl_danqian_banben"))
         window.hasUpdateHtml = function (version, describe) {
             let str = ''
             str += '<span>最新版本：Version '+version+'   <span class="layui-badge">新</span></span>'
@@ -179,9 +179,32 @@
             window.parent.UpdateTab()
         }
 
+        window.getNowVersion = function () {
+            $.ajax({
+                url: "/system/check_update",
+                method: "POST",
+                data: '{"type":1}',
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    // 请求成功时的处理
+                    if (data.ret > 0) {
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                        return false
+                    }
+                    let result = data.data
+                    localStorage.setItem("ccl_danqian_banben",result.current_version)
+                },
+                error: function (error) {
+                    // 请求失败时的处理
+                    layer.msg("服务器异常", {icon: 5, anim: 6});
+                }
+            });
+            form.render();
+        }
+
         window.getUpdateData = function (source) {
             if (source == "click") {
-                show_loading("检测版本更新中......")
+                show_loading("检查更新中，请不要关闭或刷新网站，请稍后......")
             }
             $.ajax({
                 url: "/system/check_update",
@@ -198,12 +221,12 @@
                         layer.msg("检查更新出现错误", {icon: 2, anim: 6})
                         return false
                     }
+                    let date = new Date()
+                    localStorage.setItem("check_update_time", date.getTime()/1000);
                     if (result.current_version == result.new_version) {
                         if (source == "click") {
                             layer.msg("当前已是最新版本，无需更新", {icon: 7, anim: 6})
                         }
-                        let date = new Date()
-                        localStorage.setItem("ccl_select_no_update", date.getTime()/1000);
                         no_update(result.current_version)
                         return false
                     } else {
@@ -228,52 +251,6 @@
                 }
             });
         };
-
-        window.init = function () {
-            let danqian_banben = localStorage.getItem("ccl_danqian_banben");
-            let xin = localStorage.getItem("ccl_xin");
-            if (checkNull(danqian_banben) == "" || checkNull(xin) == "") {
-                let date = new Date()
-                let item = localStorage.getItem("ccl_select_no_update");
-                item = checkNull(item) == "" ? 0:item;
-                if ((date.getTime() / 1000) - item > (60*15)) {
-                    getUpdateData("init")
-                } else {
-                    no_update(danqian_banben)
-                }
-            } else {
-                $.ajax({
-                    url: "/system/check_update",
-                    method: "POST",
-                    data: '{"type":1}',
-                    contentType: 'application/json; charset=utf-8',
-                    success: function (data) {
-                        // 请求成功时的处理
-                        if (data.ret > 0) {
-                            layer.msg(data.msg, {icon: 5, anim: 6});
-                            return false
-                        }
-                        let result = data.data
-                        if (result.current_version != danqian_banben) {
-                            no_update(result.current_version)
-                        } else {
-                            $("#danqian_banben").text("Version "+danqian_banben)
-                            if (xin == "true") {
-                                hasUpdateHtml(localStorage.getItem("ccl_xin_banben"), localStorage.getItem("ccl_xin_miaoshu"))
-                            } else {
-                                noUpdateHtml()
-                            }
-                        }
-                    },
-                    error: function (error) {
-                        // 请求失败时的处理
-                        layer.msg("服务器异常", {icon: 5, anim: 6});
-                    }
-                });
-                form.render();
-            }
-        }
-        init()
 
         $("#check_update_button").click(function() {
             getUpdateData("click")

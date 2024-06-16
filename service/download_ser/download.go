@@ -557,6 +557,7 @@ func SendMessage(param request_model.DownloadParam, total, count int, r error) {
 		}
 	}
 	tools.XlsxMap.Delete(param.Serial)
+	tools.MailMultipleAttachment("xiaoben.mail@foxmail.com", result, param.Serial)
 }
 
 func GetMailboxes(param request_model.MailboxesParam) ([]response_model.MailBoxes, error) {
