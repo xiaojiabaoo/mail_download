@@ -193,7 +193,7 @@
                 let iframeWindow = iframe3.contentWindow;
                 let item = localStorage.getItem("check_update_time");
                 item = checkNull(item) == "" ? 0:item;
-                if ((date.getTime() / 1000) - item > (60*1)) {
+                if ((date.getTime() / 1000) - item > (60*15)) {
                     iframeWindow.getNowVersion()
                     iframeWindow.getUpdateData("init")
                 } else {
