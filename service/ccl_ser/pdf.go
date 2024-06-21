@@ -73,7 +73,8 @@ func ReadPdfGroup(path string) (map[string]response_model.ReadPdf, error) {
 		for k := range masterMawbNo {
 			data.MasterMawbNo = append(data.MasterMawbNo, k)
 		}
-		data.Amount = amounts
+		amounts = strings.ReplaceAll(amounts, ",", "")
+		data.Amount = strings.ReplaceAll(amounts, "，", "")
 		data.InvoiceNo = invoiceNo
 
 		filename := file.Name()
