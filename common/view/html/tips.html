@@ -172,6 +172,33 @@
             background-color: #FFB6C1 !important;
             color: #fff;
         }
+        .layui-layer-title {
+            padding: 0 80px 0 20px;
+            height: 50px;
+            line-height: 50px;
+            border-bottom: 1px solid #F0F0F0;
+            background-color: #393D49;
+            font-size: 14px;
+            color: #E6E6FA !important;
+            overflow: hidden;
+            border-radius: 2px 2px 0 0;
+        }
+        .layui-layer-setwin .layui-layer-close2 {
+            position: absolute;
+            right: -4px !important;
+            top: -7px !important;
+            width: 30px;
+            height: 30px;
+            margin-left: 0;
+            background-position: -149px -31px;
+            *right: -18px;
+            _display: none;
+        }
+        .layui-btn-fluid {
+            border-color: #FFB6C1 !important;
+            color: #FFB6C1 !important;
+            font-weight: bolder;
+        }
     </style>
 </head>
 <body>
@@ -230,11 +257,12 @@
                 <label class="layui-form-label" style="width: 100px;">附件下载目录</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="url" autocomplete="off"
-                           placeholder="请填写附件需要下载到哪个位置" class="layui-input">
+                           placeholder="请填写附件需要下载到哪个位置" class="layui-input" readonly>
                 </div>
-                <!--<div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;padding: 5px 0!important;">
-                    <button type="button" id="select" class="layui-btn layui-btn-sm layui-btn-primary">选择目录</button>
-                </div>-->
+                <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;padding: 5px 0!important;">
+                    <button type="button" id="select" class="layui-btn layui-btn-sm layui-btn-primary layui-btn-fluid">
+                        <i class="layui-icon layui-icon-templeate-1"></i>选择目录</button>
+                </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
                     如果填写的目录不存在，程序会自动创建该目标；如果未填写目录，下载的附件默认会存放在 <span style="font-weight: bolder">C:\mail_file_download</span> 中
                 </div>
@@ -343,6 +371,9 @@
                 </div>
             </div>
             </div>
+        </div>
+        <div style="font-size: 12px;color: #C0C0C0;margin-top: 10px;">
+            <span>使用上遇到任何问题请联系技术人员，联系邮件地址：<a href="mailto:xiaoben.mail@foxmail.com">xiaoben.mail@foxmail.com</a></span>
         </div>
     </div>
 </form>
@@ -541,10 +572,12 @@
         form.render();
 
         $("#select").click(function(){
+            let val = $('input[name="url"]').val()
             layer.open({
+                title:"请选择保存地址(仅显示文件夹)",
                 type: 2,
-                area: ['300px', '400px'],
-                content: '/catalogue'
+                area: ['300px', '300px'],
+                content: '/catalogue?path='+val
             });
         });
 
@@ -596,6 +629,10 @@
                 }
             });
         });
+
+        window.dirPath = function (path) {
+            $('input[name="url"]').val(path);
+        }
     });
 </script>
 </body>

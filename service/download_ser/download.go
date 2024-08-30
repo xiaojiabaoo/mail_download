@@ -49,14 +49,14 @@ func Download(param request_model.DownloadParam) error {
 
 func Body(clients *client.Client, param request_model.DownloadParam) error {
 	var (
-		count   int
-		err     error
-		message = make([]*imap.Message, 0)
+		success, operands int
+		err               error
+		message           = make([]*imap.Message, 0)
 	)
 	defer func() {
 		if r := recover(); r != nil {
 			tools.ProcessMap.Delete(param.Account)
-			SendMessage(param, -1, 0, r.(error))
+			SendMessage(param, -1, 0, 0, r.(error))
 		}
 	}()
 	defer clients.Logout()
@@ -68,7 +68,7 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 		mbox, err = clients.Select(box, false)
 		if err != nil {
 			tools.ProcessMap.Delete(param.Account)
-			SendMessage(param, -1, 0, err)
+			SendMessage(param, -1, 0, 0, err)
 			return errors.Wrap(err, "获取邮箱："+box+" 错误")
 		}
 		tools.Excel(param.Serial, model.XlsxData{})
@@ -83,15 +83,16 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 		}
 		if err != nil {
 			tools.ProcessMap.Delete(param.Account)
-			SendMessage(param, -1, 0, err)
+			SendMessage(param, -1, 0, 0, err)
 			return err
 		}
 		message = append(message, messages...)
-		tools.Logger(param.Serial, fmt.Sprintf(`收件箱：%s 中的邮件已收取完成，共筛选到：%d封邮件`, box, len(messages)), "", "")
+		tools.Logger(param.Serial, fmt.Sprintf(`收件箱：%s 中的邮件已收取完成，
+			初步共筛选到：%d封邮件（符合日期或数量、不含回收的邮件，最后请以实际下载为准）`, box, len(messages)), "", "")
 	}
 	if len(message) == 0 {
 		tools.ProcessMap.Delete(param.Account)
-		SendMessage(param, 0, 0, nil)
+		SendMessage(param, 0, 0, 0, nil)
 		return nil
 	}
 	// 按日期排序邮件
@@ -100,17 +101,22 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 	})
 	tools.Logger(param.Serial, fmt.Sprintf(`收件箱中的邮件已全部筛选完成，开始下载每个邮件中的附件`), "", "")
 	for index, msg := range message {
+		var (
+			mailBody bool
+			operand  int
+		)
 		index++
 		date := time.Unix(msg.Envelope.Date.Unix(), 0)
 		tools.Excel(param.Serial, model.XlsxData{})
-		tools.Logger(param.Serial, fmt.Sprintf(`--------开始操作第%d封邮件（共%d封邮件），时间：%s，邮件主题：%s`, index, len(message), date.Format("2006-01-02 15:04:05"), msg.Envelope.Subject), "", "")
-		mailBody := GetMailBody(msg, param)
+		tools.Logger(param.Serial, fmt.Sprintf(`--------开始操作第%d封邮件，时间：%s，邮件主题：%s`, index, date.Format("2006-01-02 15:04:05"), msg.Envelope.Subject), "", "")
+		mailBody, operand = GetMailBody(msg, param)
 		if mailBody {
-			count++
+			success++
 		}
+		operands = operands + operand
 	}
 	//邮件通知
-	SendMessage(param, len(message), count, nil)
+	SendMessage(param, len(message), success, operands, nil)
 	tools.ProcessMap.Delete(param.Account)
 	return nil
 }
@@ -224,13 +230,17 @@ func GetMailForCount(clients *client.Client, param request_model.DownloadParam, 
 			if param.Count <= uint32(len(message)) {
 				return message, nil
 			}
-			if !strings.Contains(v.Envelope.Subject, "INVOICE") || strings.Contains(v.Envelope.Subject, "回复") ||
-				strings.Contains(v.Envelope.Subject, "RE:") || strings.Contains(v.Envelope.Subject, "Re: ") {
+			if strings.Contains(v.Envelope.Subject, "回复") || strings.Contains(v.Envelope.Subject, "RE:") ||
+				strings.Contains(v.Envelope.Subject, "Re: ") {
 				continue
 			}
-			if !strings.Contains(v.Envelope.Subject, "#") && !strings.Contains(v.Envelope.Subject, "/") {
-				continue
+			/*if strings.Contains(v.Envelope.Subject, "INVOICE") &&
+				(strings.Contains(v.Envelope.Subject, "#") || strings.Contains(v.Envelope.Subject, "/")) {
+				message = append(message, v)
 			}
+			if GetMailFile(v, param) {
+				message = append(message, v)
+			}*/
 			//times := time.Unix(v.Envelope.Date.Unix(), 0)
 			//tools.Logger(param.Serial, fmt.Sprintf(`筛选到邮件 时间：%s，主题：%s`, times.Format("2006-01-02 15:04:05"), v.Envelope.Subject), "", "")
 			message = append(message, v)
@@ -343,13 +353,17 @@ func GetMailForDate(clients *client.Client, param request_model.DownloadParam, t
 			if param.Time > times.Unix() {
 				continue
 			}
-			if !strings.Contains(v.Envelope.Subject, "INVOICE") || strings.Contains(v.Envelope.Subject, "回复") ||
-				strings.Contains(v.Envelope.Subject, "RE:") || strings.Contains(v.Envelope.Subject, "Re: ") {
+			if strings.Contains(v.Envelope.Subject, "回复") || strings.Contains(v.Envelope.Subject, "RE:") ||
+				strings.Contains(v.Envelope.Subject, "Re: ") {
 				continue
 			}
-			if !strings.Contains(v.Envelope.Subject, "#") && !strings.Contains(v.Envelope.Subject, "/") {
-				continue
+			/*if strings.Contains(v.Envelope.Subject, "INVOICE") &&
+				(strings.Contains(v.Envelope.Subject, "#") || strings.Contains(v.Envelope.Subject, "/")) {
+				message = append(message, v)
 			}
+			if GetMailFile(v, param) {
+				message = append(message, v)
+			}*/
 			//tools.Logger(param.Serial, fmt.Sprintf(`筛选到邮件 时间：%s，主题：%s`, times.Format("2006-01-02 15:04:05"), v.Envelope.Subject), "", "")
 			message = append(message, v)
 		}
@@ -388,7 +402,7 @@ func PaginationSearch(c *client.Client, start, end uint32) ([]*imap.Message, err
 	return msage, nil
 }
 
-func GetMailBody(msg *imap.Message, param request_model.DownloadParam) bool {
+func GetMailBody(msg *imap.Message, param request_model.DownloadParam) (bool, int) {
 	var (
 		err      error
 		text     = msg.GetBody(&imap.BodySectionName{})
@@ -396,16 +410,17 @@ func GetMailBody(msg *imap.Message, param request_model.DownloadParam) bool {
 		fileNum  uint
 		date     = time.Unix(msg.Envelope.Date.Unix(), 0)
 		result   bool
+		operands int
 		filename string
 	)
 	if text == nil {
 		tools.Logger(param.Serial, "获取邮件正文为空", "", tools.LOG_LEVEL_SYSTEM_ERROR)
-		return result
+		return result, operands
 	}
 	reader, err = mail.CreateReader(text)
 	if err != nil {
 		tools.Logger(param.Serial, "创建当前邮件Reader对象出现错误", fmt.Sprintf(`错误信息：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
-		return result
+		return result, operands
 	}
 	for {
 		var (
@@ -441,13 +456,24 @@ func GetMailBody(msg *imap.Message, param request_model.DownloadParam) bool {
 				err = errors.New(fmt.Sprintf(`读取当前邮件中的附件出现错误，附件名称：%s，错误信息：%s`, filename, err.Error()))
 				continue
 			}
-			if strings.Contains(msg.Envelope.Subject, "#") {
-				i := strings.Index(msg.Envelope.Subject, "#")
-				filename = strings.ReplaceAll(msg.Envelope.Subject[i+1:], "/", "和")
-			} else if strings.Contains(msg.Envelope.Subject, "/") {
-				i := strings.Index(msg.Envelope.Subject, "/")
-				filename = strings.ReplaceAll(msg.Envelope.Subject[i+1:], "/", "和")
+			if strings.Contains(msg.Envelope.Subject, "INVOICE") &&
+				(strings.Contains(msg.Envelope.Subject, "#") || strings.Contains(msg.Envelope.Subject, "/")) {
+				switch {
+				case strings.Contains(msg.Envelope.Subject, "#"):
+					i := strings.Index(msg.Envelope.Subject, "#")
+					filename = strings.ReplaceAll(msg.Envelope.Subject[i+1:], "/", "和")
+				case strings.Contains(msg.Envelope.Subject, "/"):
+					i := strings.Index(msg.Envelope.Subject, "/")
+					filename = strings.ReplaceAll(msg.Envelope.Subject[i+1:], "/", "和")
+				}
+			} else if strings.Contains(filename, "INVOICE") {
+				//filename = msg.Envelope.Subject
+				filename = strings.ReplaceAll(msg.Envelope.Subject, ":", "-")
+			} else {
+				err = errors.New("邮件名称或附件名称不符合规则")
+				continue
 			}
+			operands++
 			filename = strings.TrimSpace(filename)
 			if filename == "" {
 				filename = tools.CreateUuid()
@@ -465,7 +491,7 @@ func GetMailBody(msg *imap.Message, param request_model.DownloadParam) bool {
 	} else {
 		tools.Logger(param.Serial, fmt.Sprintf(`邮件附件下载失败！附件名称：%s`, filename), fmt.Sprintf(`失败原因：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
 	}
-	return result
+	return result, operands
 }
 
 func WriteFile(filename string, param request_model.DownloadParam, content []byte, date time.Time) error {
@@ -498,7 +524,7 @@ func WriteFile(filename string, param request_model.DownloadParam, content []byt
 		if param.Type == "jump" {
 			return nil
 		} else if param.Type == "all_reserved" {
-			files = fmt.Sprintf(`%s_%d.pdf`, param.Url+"\\"+filename+"-副本", now.Unix())
+			files = fmt.Sprintf(`%s_%d.pdf`, param.Url+"\\"+filename+"-副本", now.UnixNano())
 		}
 	}
 	file, err = os.Create(files)
@@ -512,7 +538,7 @@ func WriteFile(filename string, param request_model.DownloadParam, content []byt
 	return nil
 }
 
-func SendMessage(param request_model.DownloadParam, total, count int, r error) {
+func SendMessage(param request_model.DownloadParam, total, success, operands int, r error) {
 	var (
 		account = param.Account
 		result  string
@@ -524,14 +550,10 @@ func SendMessage(param request_model.DownloadParam, total, count int, r error) {
 		result = "邮件附件下载因服务器或第三方邮件系统原因导致中断，请联系相关技术人员处理（若有已下载完成的邮件附件不受影响）；" + text
 	case total == 0:
 		result = "邮箱中未筛选出符合条件的邮件，请重新尝试并更改筛选条件；"
-	case total == count:
-		result = "邮件附件下载已全部下载成功；" + text
-	case total > 0 && count == 0:
-		result = "邮箱中符合条件的邮件全部下载失败，下载附件中的操作记录查看详细信息；" + text
-	case total/2 >= count:
-		result = fmt.Sprintf(`邮件附件下载已完成；本次操作中仅有部分邮件下载成功，可打开记录文件查看详细信息，%s`, text)
-	case total/2 < count:
-		result = fmt.Sprintf(`邮件附件下载已完成；本次操作中有部分下载失败的邮件，可打开记录文件查看详细信息，%s`, text)
+	default:
+		result = fmt.Sprintf(`本次操作初步筛选出%d封邮件，其中符合条件的邮件下载总数为%d封（不含重复邮件/附件），
+			下载成功%d封（不含重复邮件/附件）；下载失败%d封（不含重复邮件/附件），可打开记录文件查看详细信息`,
+			total, operands, success, operands-success)
 	}
 	tools.Logger(param.Serial, result, "", "")
 	if r != nil {

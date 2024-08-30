@@ -14,3 +14,11 @@ var (
 	ProcessMap = sync.Map{}
 	XlsxMap    = sync.Map{}
 )
+
+var DirMap = map[string]string{
+	"$Recycle.Bin":              "",
+	"$RECYCLE.BIN":              "",
+	"$WINDOWS.~BT":              "",
+	"$Windows.~WS":              "",
+	"System Volume Information": "",
+}

@@ -87,6 +87,11 @@
             background-color: #FFB6C1 !important;
             color: #fff;
         }
+        .layui-btn-fluid {
+            border-color: #FFB6C1 !important;
+            color: #FFB6C1 !important;
+            font-weight: bolder;
+        }
     </style>
 </head>
 <body>
@@ -125,7 +130,11 @@
                 <label class="layui-form-label" style="width: 100px;">文件目录</label>
                 <div class="layui-input-inline">
                     <input style="width: 300px" type="text" name="url" autocomplete="off"
-                           placeholder="请选择操作文件的目录（必填）" class="layui-input">
+                           placeholder="请选择操作文件的目录（必填）" class="layui-input" readonly>
+                </div>
+                <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;padding: 5px 0!important;">
+                    <button type="button" id="select" class="layui-btn layui-btn-sm layui-btn-primary layui-btn-fluid">
+                        <i class="layui-icon layui-icon-templeate-1"></i>选择目录</button>
                 </div>
                 <div class="layui-form-mid layui-word-aux" style="color:#C0C0C0 !important;margin-left: 120px;"> 
                     选择操作文件的目录所在地址；注意：必须是目录而不是文件，且该目录下必须只有pdf文件，否则该操作会被终止
@@ -150,6 +159,9 @@
                     <!--<button type="reset" class="layui-btn layui-btn-primary layui-border-black">重置<i class="layui-icon layui-icon-fonts-clear"></i></button>-->
                 </div>
             </div>
+        </div>
+        <div style="font-size: 12px;color: #C0C0C0;margin-top: 10px;">
+            <span>使用上遇到任何问题请联系技术人员，联系邮件地址：<a href="mailto:xiaoben.mail@foxmail.com">xiaoben.mail@foxmail.com</a></span>
         </div>
     </div>
 </form>
@@ -252,6 +264,20 @@
             return false;
         });
         form.render();
+
+        $("#select").click(function(){
+            let val = $('input[name="url"]').val()
+            layer.open({
+                title:"请选择文件地址(仅显示文件夹)",
+                type: 2,
+                area: ['300px', '300px'],
+                content: '/catalogue?path='+val
+            });
+        });
+
+        window.dirPath = function (path) {
+            $('input[name="url"]').val(path);
+        }
     });
 </script>
 </body>
