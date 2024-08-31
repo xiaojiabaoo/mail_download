@@ -76,6 +76,7 @@ func Run(addr string) {
 	router.GET("/catalogue", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "catalogue.html", gin.H{})
 	})
+
 	if err := router.Run(addr); err != nil {
 		panic(err)
 	}
