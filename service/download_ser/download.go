@@ -87,8 +87,8 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 			return err
 		}
 		message = append(message, messages...)
-		tools.Logger(param.Serial, fmt.Sprintf(`收件箱：%s 中的邮件已收取完成，
-			初步共筛选到：%d封邮件（符合日期或数量、不含回收的邮件，最后请以实际下载为准）`, box, len(messages)), "", "")
+		tools.Logger(param.Serial, fmt.Sprintf(`收件箱：%s 中的邮件已收取完成，初步共筛选到：%d封邮件（符合日期或数量、不含回收的邮件，最后请以实际下载为准）`,
+			box, len(messages)), "", "")
 	}
 	if len(message) == 0 {
 		tools.ProcessMap.Delete(param.Account)
@@ -112,6 +112,14 @@ func Body(clients *client.Client, param request_model.DownloadParam) error {
 		mailBody, operand = GetMailBody(msg, param)
 		if mailBody {
 			success++
+			// 添加标签
+			seqSets := new(imap.SeqSet)
+			seqSets.AddNum(msg.Uid)
+			err = clients.UidMove(seqSets, "已下载")
+			if err != nil {
+				tools.Logger(param.Serial, "复制到“已下载”文件夹失败", fmt.Sprintf(`失败原因：%s`, err.Error()), tools.LOG_LEVEL_SYSTEM_ERROR)
+				continue
+			}
 		}
 		operands = operands + operand
 	}
