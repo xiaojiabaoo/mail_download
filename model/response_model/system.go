@@ -12,7 +12,5 @@ type SystemList struct {
 }
 
 type Version struct {
-	CurrentVersion float64 `json:"current_version"`
-	NewVersion     float64 `json:"new_version"`
-	Describe       string  `json:"describe"`
+	CurrentVersion string `json:"current_version"`
 }

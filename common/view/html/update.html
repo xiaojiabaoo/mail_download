@@ -14,7 +14,7 @@
             text-align: left;
             background-color: #FAFAFA;
             width: 1000px;
-            height: 2200px;
+            height: 1250px;
             border-radius: 5px;
         }
 
@@ -95,45 +95,39 @@
 <form class="layui-form" action="">
     <div class="parent">
         <div class="child">
-            <div id="load_update_div" style="margin-left: 30px;margin-top: 30px;font-size: 17px;font-weight: bold;">
+            <div style="margin-left: 30px;margin-top: 30px;font-size: 17px;font-weight: bold;">
+                <span>当前程序版本</span>：
+                <span id="version"></span>
+            </div>
+            <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
                 <span style="">获取程序包更新地址</span>：
-                <span style="color: #87CEEB;">https://gitee.com/xiaojiabaoo/mail_download/tree/main/</span>
+                <span style="color: #87CEEB;">https://github.com/xiaojiabaoo/mail_download</span>
                 <span>（访问前请先开启代理）</span>
             </div>
             <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
-                以下是更新包下载教程步骤（共六步），若不熟悉请按照教程进行操作
+                以下是更新包下载教程步骤（共四步），若不熟悉请按照教程进行操作
             </div>
             <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
                 第一步：复制上方的<span style="color:#FFA500;">程序包更新地址</span>后前往新窗口请求
             </div>
             <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
-                第二步：请求后请查看中间的程序包列表（如下图所示），可能会出现多个版本的程序包，请找到对应需要下载的版本并点击进入
+                第二步：请求后找到“master”选项，并点击右边的“倒三角”图标，弹窗中可能会包含多个版本，请找到最高的版本并点击进入。如下图所示：
+                <br>
+                <span style="color: #455A64;margin-left: 55px;">
+                    提示：此页面顶部展示了当前的系统版本，找到大于当前版本的最高版本即可，如果最高版本等于当前版本表示无更新
+                </span>
             </div>
             <div class="layui-form-item" style="margin-top: 20px;margin-left: 30px;">
-                <img class="tutorial-img" style="border-radius:7px;cursor: pointer;" src="/static/image/jiaocheng1.png" width="940px" height="440px">
+                <img class="tutorial-img" style="border-radius:7px;cursor: pointer;" src="/static/image/tutorial1.png" width="940px" height="440px">
             </div>
             <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
-                第三步：进入后请查看页面上方，点击页面中的绿色“Code”按钮（如下图所示）
+                第三步：请点击页面中的绿色“Code”按钮，再点击弹窗中的“Download ZIP”按钮进行下载。如下图所示：
             </div>
             <div class="layui-form-item" style="margin-top: 20px;margin-left: 30px;">
-                <img class="tutorial-img" style="border-radius:7px;cursor: pointer;" src="/static/image/jiaocheng1.png" width="940px" height="440px">
+                <img class="tutorial-img" style="border-radius:7px;cursor: pointer;" src="/static/image/tutorial2.png" width="940px" height="440px">
             </div>
             <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
-                第四步：点击按钮后页面将会出现一个弹窗，点击弹窗中的“Download ZIP”按钮下载（如下图所示）
-            </div>
-            <div class="layui-form-item" style="margin-top: 20px;margin-left: 30px;">
-                <img class="tutorial-img" style="border-radius:7px;cursor: pointer;" src="/static/image/jiaocheng1.png" width="940px" height="440px">
-            </div>
-            <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
-                第五步：下载后将程序包存放在合适位置后解压（也可以下载前选好保存位置）<br>
-                <span style="color: #DC143C;margin-left: 55px;">程序包内的任何文件不可移动或修改，否则将导致程序不可用！</span>
-                若发生程序不可用的情况，请按照以上步骤重新下载程序即可
-            </div>
-            <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
-                第六步：打开文件夹，找到“先点我启动程序.exe”点击即可启动服务（如下图所示），启动前请先关闭运行中的旧程序，否则会因冲突导致程序启动失败
-            </div>
-            <div class="layui-form-item" style="margin-top: 20px;margin-left: 30px;">
-                <img class="tutorial-img" style="border-radius:7px;cursor: pointer;" src="/static/image/jiaocheng1.png" width="940px" height="440px">
+                第四步：找到下载好的程序包后解压即可使用（打开里面的“Version xx”文件夹可随意移动，可将它存放在合适的位置）
             </div>
         </div>
         <div style="font-size: 12px;color: #C0C0C0;margin-top: 10px;">
@@ -189,65 +183,10 @@
             }
         }
 
-        /*$("#danqian_banben").text("Version "+localStorage.getItem("ccl_danqian_banben"))
-        window.hasUpdateHtml = function (version, describe) {
-            let str = ''
-            str += '<span>最新版本：Version '+version+'   <span class="layui-badge">新</span></span>'
-            str += '<div style="margin-top: 10px;line-height: 25px;width: 870px;">更新描述：'+ describe+'</div>'
-            $("#content").html(str)
-            $(".child").height((180+90)+"px")
-            $("#update_button").show()
-            $("#load_update_div").hide()
-            $("#has_update_div").show()
-            form.render();
-        }
-
-        window.noUpdateHtml = function () {
-            let str = ''
-            str += '<span>已是最新版本，无需更新</span>'
-            $("#content").html(str)
-            $(".child").height("180px")
-            $("#update_button").hide()
-            $("#load_update_div").hide()
-            $("#has_update_div").show()
-            form.render();
-        }
-
-        window.updated_status = function () {
-            localStorage.setItem("ccl_danqian_banben", localStorage.getItem("ccl_xin_banben"))
-            localStorage.removeItem("ccl_xin")
-            localStorage.removeItem("ccl_xin_banben")
-            localStorage.removeItem("ccl_xin_miaoshu")
-            window.parent.UpdateTab()
-            noUpdateHtml()
-            $("#danqian_banben").text("Version "+localStorage.getItem("ccl_danqian_banben"))
-        }
-
-        window.an_update = function (result) {
-            localStorage.setItem("ccl_xin", "true");
-            localStorage.setItem("ccl_xin_banben", result.new_version);
-            localStorage.setItem("ccl_danqian_banben", result.current_version);
-            localStorage.setItem("ccl_xin_miaoshu", result.describe);
-            hasUpdateHtml(result.new_version, result.describe)
-            $("#danqian_banben").text("Version "+result.current_version)
-            window.parent.UpdateTab()
-        }
-
-        window.no_update = function (version) {
-            $("#danqian_banben").text("Version "+version)
-            localStorage.setItem("ccl_danqian_banben", version);
-            localStorage.removeItem("ccl_xin")
-            localStorage.removeItem("ccl_xin_banben")
-            localStorage.removeItem("ccl_xin_miaoshu")
-            noUpdateHtml()
-            window.parent.UpdateTab()
-        }
-
-        window.getNowVersion = function () {
+        window.version = function () {
             $.ajax({
-                url: "/system/check_update",
-                method: "POST",
-                data: '{"type":1}',
+                url: "/system/version",
+                type: 'GET',
                 contentType: 'application/json; charset=utf-8',
                 success: function (data) {
                     // 请求成功时的处理
@@ -256,7 +195,7 @@
                         return false
                     }
                     let result = data.data
-                    localStorage.setItem("ccl_danqian_banben",result.current_version)
+                    $("#version").text(result.current_version)
                 },
                 error: function (error) {
                     // 请求失败时的处理
@@ -265,125 +204,8 @@
             });
             form.render();
         }
+        version()
 
-        window.getUpdateData = function (source) {
-            if (source == "click") {
-                show_loading("检查更新中，请不要关闭或刷新网站，请稍后......")
-            }
-            $.ajax({
-                url: "/system/check_update",
-                method: "POST",
-                dataType: "json",
-                success: function (data) {
-                    // 请求成功时的处理
-                    if (data.ret > 0) {
-                        layer.msg(data.msg, {icon: 5, anim: 6});
-                        return false
-                    }
-                    let result = data.data
-                    if (result.new_version == 0) {
-                        layer.msg("检查更新出现错误", {icon: 2, anim: 6})
-                        return false
-                    }
-                    let date = new Date()
-                    localStorage.setItem("check_update_time", date.getTime()/1000);
-                    if (result.current_version == result.new_version) {
-                        if (source == "click") {
-                            layer.msg("当前已是最新版本，无需更新", {icon: 7, anim: 6})
-                        }
-                        no_update(result.current_version)
-                        return false
-                    } else {
-                        if (source == "click") {
-                            layer.msg("检测到新版本：Version "+result.new_version, {icon: 1, anim: 1})
-                        }
-                        an_update(result)
-                    }
-                    if (source == "init") {
-                        $("#ccl_danqian_banben").text("Version "+result.current_version)
-                    }
-                },
-                error: function (error) {
-                    // 请求失败时的处理
-                    layer.msg("服务器异常", {icon: 5, anim: 6});
-                },
-                complete: function() {
-                    // 请求完成后隐藏加载中动画
-                    if (source == "click") {
-                        hide_loading()
-                    }
-                }
-            });
-        };
-
-        $("#check_update_button").click(function() {
-            getUpdateData("click")
-        });
-
-        $(".clear_cache").click(function() {
-            localStorage.removeItem("ccl_xin")
-            localStorage.removeItem("ccl_xin_banben")
-            localStorage.removeItem("ccl_xin_miaoshu")
-            localStorage.removeItem("ccl_danqian_banben")
-            localStorage.removeItem("check_update_time")
-            form.render();
-            window.parent.location.reload()
-        });
-
-        $(".layui-btn-fluid").click(function() {
-            let str = ''
-            str += '<div>1.更新过程视网络情况可能需要较长的时间，正常情况下不会超过5分钟，更新过程中请不要退出程序和网页（可以最小化），请耐心等待更新完成；</div>'
-            str += '<div>2.更新完成后的版本将为 Version '+localStorage.getItem("ccl_xin_banben")+'，新的程序版本将在当前程序所在目录的上一级目录中存放，与当前使用的程序互不干扰</div>'
-            str += '<div>3.使用新的程序前，需要将正在使用的旧程序全部退出；再前往新的程序目录下找到exe启动程序即可（旧程序可自行选择删除或继续保留）</div>'
-            layer.confirm(str, {
-                    btn: ['更新', '取消'],
-                    title: "更新前请注意以下信息",
-                    area: ['550px', ''],
-                },
-                function(index, layero){
-                    show_loading("系统正在更新中，请不要退出......")
-                    $.ajax({
-                        url: "/system/update",
-                        method: "POST",
-                        dataType: "json",
-                        success: function (data) {
-                            // 请求成功时的处理
-                            if (data.ret > 0) {
-                                layer.msg("更新错误！"+data.msg, {
-                                    time: 0,
-                                    btn: ['好的'],
-                                    area: ['600px', ''],
-                                    btn2:function () {
-                                        layer.close()
-                                    }
-                                });
-                                return false
-                            }
-                            updated_status()
-                            layer.msg("更新成功！使用新版本请先将当前程序全部退出（程序控制台和网页），新版本程序文件保存在程序所在目录的上一级目录中，文件名为新的版本号",
-                                {
-                                    time: 0,
-                                    btn: ['好的'], //可以无限个按钮
-                                    area: ['600px', ''],
-                                    btn2:function () {
-                                        layer.close()
-                                    }
-                                });
-                        },
-                        error: function (error) {
-                            // 请求失败时的处理
-                            layer.confirm("服务器异常", {icon: 3, title:'更新错误'}, function(index){
-                                layer.close(index);
-                            });
-                        },
-                        complete: function() {
-                            // 请求完成后隐藏加载中动画
-                            hide_loading()
-                        }
-                    });
-                }
-            );
-        });*/
     });
 </script>
 </body>

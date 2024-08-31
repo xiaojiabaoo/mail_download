@@ -22,17 +22,9 @@ func List(ctx *gin.Context) {
 	response.ResponseData(ctx, err, "", list)
 }
 
-func Update(ctx *gin.Context) {
+func Version(ctx *gin.Context) {
 	var (
-		err error
-	)
-	err = system_ser.Update()
-	response.ResponseData(ctx, err, "", nil)
-}
-
-func CheckUpdate(ctx *gin.Context) {
-	var (
-		param  = request_model.CheckUpdateParam{}
+		param  = request_model.VersionParam{}
 		err    error
 		update response_model.Version
 	)
@@ -40,6 +32,6 @@ func CheckUpdate(ctx *gin.Context) {
 		response.ResponseData(ctx, customErr.New(customErr.PARAMETER_ILLEGAL_DELETION, err.Error()), "", nil)
 		return
 	}
-	update, err = system_ser.CheckUpdate(param)
-	response.ResponseData(ctx, err, "", update)
+	update = system_ser.Version(param)
+	response.ResponseData(ctx, nil, "", update)
 }
