@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" href="http://127.0.0.1:8023/static/image/img.png" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>GGT</title>
+    <link rel="stylesheet" href="/static/js/layui-v2.6.8/css/layui.css">
+    <link rel="stylesheet" href="/static/css/config.css">
+    <style>
+        .layui-tab-content {
+            padding: 0px 0 !important;
+        }
+        .layui-badge-rim, .layui-border, .layui-colla-content, .layui-colla-item, .layui-collapse, .layui-elem-field, .layui-form-pane .layui-form-item[pane], .layui-form-pane .layui-form-label, .layui-input, .layui-layedit, .layui-layedit-tool, .layui-panel, .layui-quote-nm, .layui-select, .layui-tab-bar, .layui-tab-card, .layui-tab-title, .layui-tab-title .layui-this:after, .layui-textarea {
+            border-color: #FFB6C1 !important;
+        }
+        .layui-layer-title {
+            padding: 0 80px 0 20px;
+            height: 50px;
+            line-height: 50px;
+            border-bottom: 1px solid #F0F0F0;
+            background-color: #393D49;
+            font-size: 14px;
+            color: #E6E6FA !important;
+            overflow: hidden;
+            border-radius: 2px 2px 0 0;
+        }
+
+        .layui-layer-setwin .layui-layer-close2 {
+            position: absolute;
+            right: -4px !important;
+            top: -7px !important;
+            width: 30px;
+            height: 30px;
+            margin-left: 0;
+            background-position: -149px -31px;
+            *right: -18px;
+            _display: none;
+        }
+        .layui-tab-brief>.layui-tab-title .layui-this {
+            color: #FFB6C1 !important;
+        }
+        .layui-form-checkbox[lay-skin=primary] span {
+            padding-left: 0;
+            padding-right: 15px;
+            line-height: 18px;
+            font-size: 10px;
+            background: 0 0;
+            color: #FFB6C1;
+        }
+        .layui-form-checkbox[lay-skin=primary]:hover i {
+            border-color: #FFB6C1;
+            color: #fff;
+        }
+        .layui-form-checked[lay-skin=primary] i {
+            border-color: #FFB6C1!important;
+            background-color: #FFB6C1;
+            color: #fff;
+        }
+        #LAY_layuipro {
+            background-color: #393D49 !important;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+    <ul class="layui-tab-title" style="width: 1000px;margin: 0 auto;">
+        <li class="layui-this"><i class="layui-icon layui-icon-email"></i> CCL发票下载</li>
+        <li><i class="layui-icon layui-icon-form"></i> EFC操作流程</li>
+        <li><i class="layui-icon layui-icon-util"></i> <span id="system_update">版本更新</span></li>
+    </ul>
+    <div class="layui-tab-content" style="height: 100px;">
+        <div class="layui-tab-item layui-show">
+            <iframe id="iframe1" src="http://127.0.0.1:8023/download" width="100%" style="border: none;"></iframe>
+        </div>
+        <div class="layui-tab-item">
+            <iframe id="iframe2" src="http://127.0.0.1:8023/cll" width="100%" style="border: none;"></iframe>
+        </div>
+        <div class="layui-tab-item">
+            <iframe id="iframe3" src="http://127.0.0.1:8023/update" width="100%" style="border: none;"></iframe>
+        </div>
+    </div>
+</div>
+<script src="/static/js/layui-v2.6.8/layui.js"></script>
+<script type="text/javascript" src="/static/js/jquery-2.1.3.js"></script>
+<script src="/static/js/config.js" charset="utf-8"></script>
+<script>
+    // 获取iframe元素
+    let myIframe1 = document.getElementById("iframe1");
+    // 设置iframe的高度为浏览器窗口的高度
+    myIframe1.style.height = (window.innerHeight - 55) + "px";
+
+    let myIframe2 = document.getElementById("iframe2");
+    // 设置iframe的高度为浏览器窗口的高度
+    myIframe2.style.height = (window.innerHeight - 55) + "px";
+
+    let myIframe3 = document.getElementById("iframe3");
+    // 设置iframe的高度为浏览器窗口的高度
+    myIframe3.style.height = (window.innerHeight - 55) + "px";
+
+    layui.use(['layer', 'laydate'], function () {
+        let form = layui.form;
+        let layer = layui.layer;
+        let date = new Date();
+        let times = 21
+        let read = false
+        let readcount = 5
+        if (date.getHours() >= 18 || date.getHours() <= 6) {
+            $("body").css("background-color", "#333").css("color", "#fff")
+            $(".layui-tab").css("background-color", "#333")
+            form.render();
+        }
+
+        form.on('checkbox(read)', function (data) {
+            read = data.elem.checked
+        });
+
+        let interval = setInterval(function () {
+            if (times > 0) {
+                times--;
+                $("#tip-time").text(times)
+            } else {
+                $("#tip-last-time").text("")
+                clearInterval(interval);
+            }
+        }, 1000);
+        for (let i = 1; i <= readcount; i++) {
+            localStorage.removeItem("mail-download-read"+i)
+        }
+        let item = localStorage.getItem("mail-download-read"+(readcount+1));
+        if (item == "" || item == null || item == undefined) {
+            let open = layer.open({
+                type: 1,
+                title: '<h2>首次使用说明<span style="color: #DC143C;">（首次使用前请认真阅读）</span></h2>',
+                area: ['550px', '610px'],
+                shade: 0.5,
+                id: 'LAY_layuipro', //设定一个id，防止重复弹出
+                btnAlign: 'c',
+                moveType: 1, //拖拽模式，0或者1
+                content: '<div style="padding: 50px; color: #E6E6FA;line-height: 25px;">' +
+                    /*'<h2>使用前请先仔细阅读以下介绍</h2><br>' +*/
+                    '<p><span style="font-weight: bold;color:#FFB6C1;">一. 介绍</span></p>' +
+                    '<p>1.&nbsp;&nbsp;本程序分为：“CCL发票下载” 和 “EFC 海运、空运 操作流程” 两个功能模块；可支持后台运行。</p>' +
+                    '<p><span style="font-weight: bold;color:#FFB6C1;">二. 使用</span></p>' +
+                    '<p>2.&nbsp;&nbsp;流水号：每次操作都会生成一个流水号并会在操作发起后进进行提示；用于查询记录文件；</p>' +
+                    '<p>3.&nbsp;&nbsp;记录文件：每次操作都会在与流水号同名的目录下生成两个记录文件（excel文件和txt文件），文件名以 “MAIL” 或 “CCL” 开头，后缀即对应本次操作的流水号，保存在程序所在目录下名为 “logs” 的目录中，记录了本次操作的所有操作信息，该目录文件主要用于后续存在异常时排查问题使用。</p>' +
+                    '<p>4.&nbsp;&nbsp;若操作的是 “CCL发票下载” 功能，记录文件的名称均以 “MAIL” 开头；</p>' +
+                    '<p>5.&nbsp;&nbsp;若操作的是 “EFC海运、空运的操作流程” 功能，记录文件的名称均以 “CCL” 开头；</p>' +
+                    '<p>6.&nbsp;&nbsp;因数量可能过大，系统是采用分批（分页）的下载方式，记录文件中会显示每一页操作的邮件信息；查看记录先后顺序方式：当前页的第一封邮件的上一封是下一页的最后一封、当前页的最后一封邮件的下一封是上一页的第一封；</p>' +
+                    '<p>7.&nbsp;&nbsp;在操作过程中，若需要实时查看操作进度和结果；可打开记录文件查看（文件保存位置和如何查找对应的文件：参考第3、4、5条）；</p>' +
+                    '<p>8.&nbsp;&nbsp;如果程序执行结果为 “服务器或第三方邮件系统原因导致中断” 时，请打开记录文件查看最后几行的记录，如果有 “imap: connection closed” 该错误表示因数据量过大导致连接被强制关闭引起（这个情况很少出现）；该错误需要再次执行一次该程序即可。</p>' +
+                    '<p>9.&nbsp;&nbsp;本系统所有功能支持后台运行；发起操作时可以选择需要通知并填写邮箱地址，系统会在本次操作结束后将结果推送到该邮箱中。如果不需要邮箱通知，请随时留意记录文件查看下载结果。</p>' +
+                    '<p>10.&nbsp;&nbsp;程序发起操作请求后的执行时间可能较长，具体视网络情况和数量而定</p>' +
+                    '<p><span style="font-weight: bold;color:#FFB6C1;">三. 升级</span></p>' +
+                    '<p>11.&nbsp;&nbsp;系统为exe应用程序，更新需要前往 “版本更新” 页面中操作；若系统未提示有新版本，也可以手动点击 “版本更新” 页面中的 “检查更新” 按钮查看是否有新版本可以使用</p>' +
+                    '<p>12.&nbsp;&nbsp;更新过程视网络情况可能需要较长的时间，一般情况下在2分钟左右；更新过程中请不要退出程序（启动的那个黑板板）和关闭网页（可以最小化），否则可能导致页面显示异常</p>' +
+                    '<p>13.&nbsp;&nbsp;更新好的新版本的程序将在当前程序所在目录的上一级目录中存放，目录名称即 Version + 新的版本号，与当前使用中的程序互不干扰</p>' +
+                    '<p>14.&nbsp;&nbsp;使用新版本的程序前，需要将正在使用的旧程序全部退出（包括启动程序和网页）；再前往新版本的程序目录下启动程序即可，旧程序可自行选择删除或继续保留，建议不要马上删除，如果新本版出现功能问题，可以及时回到旧版本使用</p>' +
+                    '<p><span style="font-weight: bold;color:#FFB6C1;">四. 声明</span></p>' +
+                    '<p>15.&nbsp;&nbsp;本系统作为辅助工作程序，不绝对保证每次操作的 “EFC海运、空运的操作流程” 或 “CCL发票下载” 都精准无误；若发现部分下载的附件缺失或是EFC操作的数据有误，还请根据操作流水号查询记录排查问题原因</p>' +
+                    '<p></p><br>' +
+                    '<p>更多操作上的提示请留意操作页的提示信息</p>' +
+                    '<form class="layui-form">' +
+                    '<input type="checkbox" name="read" value="1" lay-skin="primary" lay-filter="read" title="我已仔细阅读并知晓以上提示，新版本更新前不再提醒我">' +
+                    '<span id="tip-last-time" style="font-size: 12px;">浏览剩余时间：<span id="tip-time">21</span>秒</span>' +
+                    '</form>' +
+                    '</div>',
+                cancel: function () {
+                    if (times > 0) {
+                        layer.msg('<span style="color: #FFB6C1;">以上信息提示还需要' + times + '秒的阅读时间，请先阅读完成</span>', {
+                            time: 3000
+                        });
+                        return false
+                    } else {
+                        if (!read) {
+                            layer.msg('<span style="color: #FFB6C1;">请勾选 “我已仔细阅读并知晓以上提示” ！</span>', {
+                                time: 3000
+                            });
+                            return false
+                        } else {
+                            localStorage.setItem("mail-download-read"+(readcount+1), "true");
+                        }
+                    }
+                }
+            });
+            form.render();
+        }
+
+        window.UpdateTab = function () {
+            if (localStorage.getItem("ccl_xin") == "true") {
+                $("#system_update").html('版本更新<span class="layui-badge">有更新</span>')
+            } else {
+                $("#system_update").html('版本更新')
+            }
+        }
+        UpdateTab()
+    });
+</script>
+</body>
+</html>
