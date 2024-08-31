@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="utf-8">
+    <link rel="icon" href="http://127.0.0.1:8023/static/image/img.png" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>CLL</title>
+    <link rel="stylesheet" href="/static/js/layui-v2.6.8/css/layui.css">
+    <link rel="stylesheet" href="/static/css/config.css">
+    <style>
+        .child {
+            display: inline-block;
+            /*子元素文字会继承居中，因此要在上面写上向左边居中*/
+            text-align: left;
+            background-color: #FAFAFA;
+            width: 1000px;
+            height: 1250px;
+            border-radius: 5px;
+        }
+
+        .parent {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 30px;
+        }
+
+        .tips-night {
+            color: #EAECEE;
+            -webkit-background-clip: text;
+            font-weight: bold;
+        }
+
+        .tips-day {
+            color: #1B2631;
+            -webkit-background-clip: text;
+            font-weight: bold;
+        }
+
+        /* 模态框（背景） */
+        .modal {
+            display: none; /* 默认隐藏 */
+            position: fixed; /* 固定定位 */
+            z-index: 1; /* 置于顶层 */
+            padding-top: 70px; /* 距离顶部 */
+            left: 0;
+            top: 0;
+            width: 100%; /* 宽度 */
+            height: 100%; /* 高度 */
+            overflow: auto; /* 超出部分滚动 */
+            background-color: rgb(0,0,0); /* 背景色 */
+            background-color: rgba(0,0,0,0.6); /* 背景色，半透明 */
+        }
+
+        /* 模态框内容（图片） */
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 85%;
+            max-width: 100%;
+            border-radius: 7px;
+        }
+
+        /* 关闭按钮 */
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* 添加一些额外的动画效果（可选） */
+        @keyframes zoom {
+            from {transform: scale(0)}
+            to {transform: scale(1)}
+        }
+
+        .modal-content {
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+    </style>
+</head>
+<body>
+<form class="layui-form" action="">
+    <div class="parent">
+        <div class="child">
+            <div style="margin-left: 30px;margin-top: 30px;font-size: 17px;font-weight: bold;">
+                <span>当前程序版本</span>：
+                <span id="version"></span>
+            </div>
+            <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
+                <span style="">获取程序包更新地址</span>：
+                <span style="color: #87CEEB;">https://github.com/xiaojiabaoo/mail_download</span>
+                <span>（访问前请先开启代理）</span>
+            </div>
+            <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
+                以下是更新包下载教程步骤（共四步），若不熟悉请按照教程进行操作
+            </div>
+            <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
+                第一步：复制上方的<span style="color:#FFA500;">程序包更新地址</span>后前往新窗口请求
+            </div>
+            <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
+                第二步：请求后找到“master”选项，并点击右边的“倒三角”图标，弹窗中可能会包含多个版本，请找到最高的版本并点击进入。如下图所示：
+                <br>
+                <span style="color: #455A64;margin-left: 55px;">
+                    提示：此页面顶部展示了当前的系统版本，找到大于当前版本的最高版本即可，如果最高版本等于当前版本表示无更新
+                </span>
+            </div>
+            <div class="layui-form-item" style="margin-top: 20px;margin-left: 30px;">
+                <img class="tutorial-img" style="border-radius:7px;cursor: pointer;" src="/static/image/tutorial1.png" width="940px" height="440px">
+            </div>
+            <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
+                第三步：请点击页面中的绿色“Code”按钮，再点击弹窗中的“Download ZIP”按钮进行下载。如下图所示：
+            </div>
+            <div class="layui-form-item" style="margin-top: 20px;margin-left: 30px;">
+                <img class="tutorial-img" style="border-radius:7px;cursor: pointer;" src="/static/image/tutorial2.png" width="940px" height="440px">
+            </div>
+            <div style="margin-left: 30px;margin-top: 20px;font-size: 14px;font-weight: bold;">
+                第四步：找到下载好的程序包后解压即可使用（打开里面的“Version xx”文件夹可随意移动，可将它存放在合适的位置）
+            </div>
+        </div>
+        <div style="font-size: 12px;color: #C0C0C0;margin-top: 10px;">
+            <span>使用上遇到任何问题请联系技术人员，联系邮件地址：<a href="mailto:xiaoben.mail@foxmail.com">xiaoben.mail@foxmail.com</a></span>
+        </div>
+    </div>
+</form>
+<div id="enlarge" class="modal">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="enlarge_img">
+    <div id="caption"></div>
+</div>
+<script src="/static/js/layui-v2.6.8/layui.js"></script>
+<script type="text/javascript" src="/static/js/jquery-2.1.3.js"></script>
+<script src="/static/js/config.js" charset="utf-8"></script>
+<script>
+    layui.use(['layer', 'laydate'], function () {
+        let form = layui.form;
+        let layer = layui.layer;
+        let date = new Date();
+        if (date.getHours() >= 18 || date.getHours() <= 6) {
+            $("body").css("background-color", "#111")
+            $(".child").css("background-color", "#222").css("color", "#f2f2f2")
+            $("input").css("background-color", "#333")
+            $("input").css("border", "none")
+            $("input").css("color", "#f2f2f2")
+            $("#tips").removeClass("tips-day")
+            $("#tips").addClass("tips-night")
+            form.render();
+        } else {
+            $("#tips").removeClass("tips-night")
+            $("#tips").addClass("tips-day")
+        }
+
+        // 获取模态框
+        let enlarge = document.getElementById("enlarge");
+        let enlargeImg = document.getElementById("enlarge_img");
+        // 获取图片和模态框中的图片标签
+        $(".tutorial-img").click(function(){
+            enlarge.style.display = "block";
+            enlargeImg.src = this.src; // 设置模态框中图片的源为点击的图片源
+        });
+        // 获取关闭按钮
+        let span = document.getElementsByClassName("close")[0];
+        // 点击关闭按钮时隐藏模态框
+        span.onclick = function() {
+            enlarge.style.display = "none";
+        }
+        // 点击模态框外部区域时也可以关闭（可选）
+        window.onclick = function(event) {
+            if (event.target == enlarge) {
+                enlarge.style.display = "none";
+            }
+        }
+
+        window.version = function () {
+            $.ajax({
+                url: "/system/version",
+                type: 'GET',
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    // 请求成功时的处理
+                    if (data.ret > 0) {
+                        layer.msg(data.msg, {icon: 5, anim: 6});
+                        return false
+                    }
+                    let result = data.data
+                    $("#version").text(result.current_version)
+                },
+                error: function (error) {
+                    // 请求失败时的处理
+                    layer.msg("服务器异常", {icon: 5, anim: 6});
+                }
+            });
+            form.render();
+        }
+        version()
+
+    });
+</script>
+</body>
+</html>
