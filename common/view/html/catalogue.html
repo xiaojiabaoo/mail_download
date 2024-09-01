@@ -14,7 +14,7 @@
             border: 0px solid #000; /* 边框用于显示div的边界 */
         }
         .directory {
-            width: 270px;
+            width: 280px;
             word-wrap: break-word;
             border-top: 1px solid #fafafa; /* 上边框 */
             border-bottom: 1px solid #fafafa; /* 下边框 */
@@ -71,7 +71,8 @@
                         $('#parent_path').text(response.data.parent_path);
                         let currentPath = response.data.current_path;
                         if (currentPath != "") {
-                            $('.current-dir').html('<span style="font-weight: bold;color: #FFB6C1;">当前选择目录：</span><br/><div class="current_path">'+response.data.current_path+'</div>');
+                            $('.current-dir').html('<span style="font-weight: bold;color: #FFB6C1;">当前选择目录：</span><br/>' +
+                                '<div style="margin-top: 5px;font-weight: bold;" class="current_path">'+response.data.current_path+'</div>');
                             $('#return-dir').show();
                         } else {
                             $('.current-dir').html('');
@@ -81,18 +82,22 @@
                         if (data.length > 0) {
                             for (let i = 0; i <data.length; i++) {
                                 str += '<div class="directory" data-path="' + data[i].path+'">'
-                                str += '&nbsp;&nbsp;<img src="/static/image/file.png" width="17px" height="17px"> '
-                                str += '<span>'+data[i].name+'</span>'
+                                //str += '&nbsp;&nbsp;<img src="/static/image/file.png" width="17px" height="17px"> '
+                                str += '<span>&nbsp;&nbsp;📂&nbsp;'+data[i].name+'</span>'
                                 str += '</div>'
                             }
                         } else {
                             str += '<div class="empty">'
-                            str += '&nbsp;&nbsp;<img src="/static/image/null.png" width="17px" height="17px"> '
-                            str += '<span>这个目录很干净</span>'
+                            //str += '&nbsp;&nbsp;<img src="/static/image/null.png" width="17px" height="17px"> '
+                            str += '<span>&nbsp;&nbsp;⏳&nbsp;这个目录很干净</span>'
                             str += '</div>'
                         }
-
                         $('#directory-list').append(str);
+                        if (data.length >= 5) {
+                            $(".directory").css("width","265px")
+                        } else {
+                            $(".directory").css("width","280px")
+                        }
                     } else {
 
                     }
