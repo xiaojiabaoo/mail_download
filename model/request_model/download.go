@@ -15,6 +15,7 @@ type DownloadParam struct {
 	Inform        string   `json:"inform"`         // 是否需要通知：on.通知；off.不通知
 	InformAccount string   `json:"inform_account"` // 通知账号，如果为空默认使用登录的邮箱来通知
 	Serial        string   `json:"-"`              // 操作流水号，后台使用
+	Downloaded    string   `json:"downloaded"`     // 是否需要将邮件添加到 “已下载” 文件夹中：on.添加；off.不添加
 }
 
 type MailboxesParam struct {
